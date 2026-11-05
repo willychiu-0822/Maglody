@@ -11,7 +11,11 @@ export function createOpenAI(): LlmProvider {
 
   async function post(path: string, body: unknown) {
     const res = await fetch(`${base}${path}`, { method: 'POST', headers, body: JSON.stringify(body) })
-    if (!res.ok) throw new ProviderError(`OpenAI ${res.status}: ${(await res.text()).slice(0, 300)}`, res.status === 429 ? 429 : 502)
+    if (!res.ok) {
+      const body = (await res.text()).slice(0, 300)
+      const hint = res.status === 401 ? 'OPENAI_API_KEY 無效或已撤銷' : res.status === 403 ? '這把金鑰沒有權限（檢查專案／組織設定）' : res.status === 404 ? `找不到模型「${model}」，請檢查 LLM_MODEL` : res.status === 429 ? '額度用完或請求太頻繁（檢查 Billing／Limits）' : '服務暫時錯誤'
+      throw new ProviderError(`OpenAI ${res.status}：${hint}。原始訊息：${body}`, res.status === 429 ? 429 : 502)
+    }
     return res.json() as Promise<any> // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 

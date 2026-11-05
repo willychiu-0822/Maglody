@@ -42,7 +42,11 @@ function body(req: LlmRequest) {
 
 async function call(url: string, headers: Record<string, string>, req: LlmRequest) {
   const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body(req)) })
-  if (!res.ok) throw new ProviderError(`Gemini ${res.status}: ${(await res.text()).slice(0, 300)}`, res.status === 429 ? 429 : 502)
+  if (!res.ok) {
+    const body = (await res.text()).slice(0, 300)
+    const hint = res.status === 400 ? '請求被拒（常見原因：GEMINI_API_KEY 無效、模型名稱錯誤）' : res.status === 401 || res.status === 403 ? '沒有權限（Vertex：確認已啟用 Vertex AI API，帳號或服務帳戶有「Vertex AI 使用者」角色；Gemini：確認金鑰正確）' : res.status === 404 ? '找不到模型或區域，請檢查 LLM_MODEL 與 GCP_LOCATION' : res.status === 429 ? '額度用完或請求太頻繁' : '服務暫時錯誤'
+    throw new ProviderError(`Gemini ${res.status}：${hint}。原始訊息：${body}`, res.status === 429 ? 429 : 502)
+  }
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
   return (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('')
 }

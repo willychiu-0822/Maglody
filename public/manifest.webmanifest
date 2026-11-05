@@ -1,7 +1,7 @@
 {
   "name": "Maglody 新手音樂工作室",
   "short_name": "Maglody",
-  "description": "跟著大師，從一段哼唱完成你的第一首歌",
+  "description": "放在手機裡的創作工作室：把靈感、哼唱、詞句拼成你自己的歌",
   "lang": "zh-Hant-TW",
   "start_url": "./",
   "scope": "./",
