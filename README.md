@@ -15,7 +15,7 @@ Repo：<https://github.com/willychiu-0822/Maglody>
 
 ## ⚠ 目前狀態（誠實版）
 
-- ✅ 已驗證：`npm run build` 通過；模擬 iPhone 13 的斷言式自測 `npm run selftest` 50/50 通過；LLM 後端用本機假端點驗過 OpenAI Chat／Responses、Gemini、Vertex 的請求格式。
+- ✅ 已驗證（以 `feature/music-lab` 的 `f4c7153` 為基準）：`npm run build` 通過，`sw.js`、`manifest.webmanifest`、圖示都會進到 `dist/`；模擬 iPhone 13 的斷言式自測 `npm run selftest` 本地 50/50 通過（使用者本人在本地確認）；LLM 後端用本機假端點驗過 OpenAI Chat／Responses、Gemini、Vertex 的請求格式與錯誤訊息。
 - ❌ **尚未驗證：實體手機**（iOS Safari／Android Chrome 的麥克風權限、靜音鍵、語音聽寫、觸控、PWA 安裝與離線）。
 - ❌ **尚未驗證：真 API key**（OpenAI、Gemini、Vertex 都還沒用真金鑰打過；Cloud Run 取得 Vertex 憑證那段沒執行過）。
 - ⚠ 離線模式的五位角色回答是規則式的，語氣差異很小；構想、和聲、歌詞首屏沒有大按鈕，要實機觀察新手是否看得懂；後端沒有每人次數限制。
