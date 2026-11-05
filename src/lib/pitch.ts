@@ -159,15 +159,17 @@ function hintChords(notes: HumNote[], root: number, mode: Mode, duration: number
 
 export function analyzeBuffer(data: Float32Array, sampleRate: number): HumAnalysis {
   const frames = trackPitch(data, sampleRate)
-  const notes = segmentNotes(frames)
-  const duration = data.length / sampleRate
+  return { frames, ...summarizeNotes(segmentNotes(frames), data.length / sampleRate) }
+}
+
+/** 只用音符（不需要原始音訊）重算調性與和弦建議：靈感庫的哼唱拉回創作時使用 */
+export function summarizeNotes(notes: HumNote[], duration: number): Omit<HumAnalysis, 'frames'> {
   const hist = new Array(12).fill(0)
   notes.forEach((n) => (hist[pc(n.midi)] += n.dur))
   const keys = estimateKey(hist)
   const top = keys[0]
   const mids = notes.map((n) => n.midi)
   return {
-    frames,
     notes,
     duration,
     hist,

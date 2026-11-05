@@ -18,6 +18,8 @@ import { recordingStep } from './steps/Recording'
 import { mixStep } from './steps/Mix'
 import { reviewStep } from './steps/Review'
 import { RESULTS } from './steps/results'
+import { InspirationHub } from './inspire/InspirationHub'
+import { useInspirations } from './inspire/store'
 import type { StepDef } from './steps/types'
 
 // 一條龍：哼唱 → 構想 → 和弦 → 旋律 → 詞 → 編曲 → 錄音 → 混音 → 檢討
@@ -33,6 +35,7 @@ export default function App() {
   pRef.current = p
   const getProject = useCallback(() => pRef.current, [])
   const master = useMaster(getProject)
+  const inspo = useInspirations()
   const step = STEPS[cur]
   const reqs = step.requirements(p)
   const ready = reqs.every((r) => r.ok)
@@ -179,6 +182,9 @@ export default function App() {
         {sheetOpen && <div className="scrim" onClick={() => setSheetOpen(false)} />}
       </div>
 
+      <InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
+        onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0) go(i) }}
+        onEvent={(kind, detail) => master.notify(step.key, kind, detail)} />
       <MasterPanel step={step.key} messages={master.messages} busy={master.busy} onAsk={(q) => master.ask(step.key, q)} onAction={onAction}
         onPlayResult={result?.available(p) ? () => { stopAll(); result.play(p) } : undefined} />
     </div>

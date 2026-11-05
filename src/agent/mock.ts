@@ -131,6 +131,22 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
       return { text: '剛剛那個「突然變糊」的瞬間，就是沒有分工的聲音。', learned: 'A/B 比較是混音師校準耳朵的方法，因為耳朵很快就會習慣。' }
     case 'review.play':
       return { text: `你剛從頭聽完了《${p.idea.title || '你的歌'}》。它是從一段 ${p.hum?.notes.length ?? 0} 個音的哼唱長出來的。`, next: '先別看規則，問自己：哪一句你最想再聽一次？那就是這首歌的心臟。' }
+    case 'inspiration.saved':
+    case 'inspiration.used':
+    case 'inspiration.start': {
+      const t = detail.trim()
+      const heavy = /罪|痛|淚|夜|失|傷|孤|冷|黑|碎|離|負|沉|灰/.test(t)
+      const bright = /光|笑|陽|晴|飛|甜|暖|春|跳|愛/.test(t)
+      const feel = heavy ? '有重量，像壓著東西往前走——這種張力很適合小調、中慢速（約 70–85 BPM），讓每一步都踩得到' : bright ? '很明亮，適合大調、中快速，讓它往上飄' : '情緒還很開放，等你在構想裡選一個方向'
+      if (kind === 'inspiration.saved') return { text: `記下了${t ? `「${t}」` : ''}。不急著用它，先回到你剛剛在做的事。`, learned: '靈感先存、不打斷流程：創作者常用「靈感本」累積素材，再挑選。', next: t ? `這幾個字${feel}。` : undefined }
+      if (kind === 'inspiration.start') return {
+        text: `用「${t}」開一首歌。${t ? `這幾個字${feel}。` : ''}我已經把它放進歌名／Vibe 板。`,
+        learned: '從一個核心意象出發，後面每個選擇都能問自己：「這像不像它？」',
+        next: heavy ? '在情緒裡試試「憂傷失落」或「熱血衝刺」，兩種都聽，選一個更像它的；接著去哼唱，心裡默念這幾個字。' : '先選一個情緒，再去哼唱或排和弦。',
+        suggestions: [{ label: '去哼唱', action: { type: 'goStep', step: 'hum' } }, { label: '去排和弦', action: { type: 'goStep', step: 'harmony' } }],
+      }
+      return { text: `把「${t || '這則靈感'}」放進來了。它是你的素材，可以改、可以拆。`, next: '唸一遍或哼一遍，聽它和這一章的其他東西搭不搭。' }
+    }
     case 'step.complete': {
       const i = STEP_ORDER.indexOf(step)
       const nxt = STEP_ORDER[i + 1]

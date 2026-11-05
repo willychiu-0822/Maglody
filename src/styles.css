@@ -392,3 +392,33 @@ input, textarea, select { font-size: 16px; } /* iOS：小於 16px 會在聚焦�
   .mixer { grid-template-columns: 1fr; }
   .tpl { flex-direction: column; align-items: flex-start; }
 }
+
+/* ---------- inspiration hub ---------- */
+.inspo-fab { position: fixed; right: 14px; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 36; min-height: 52px; padding: 0 18px; border-radius: 999px; border: 0; background: var(--ink); color: var(--paper); font-weight: 800; font-size: 1rem; box-shadow: 0 8px 24px rgba(31, 42, 68, .3); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+@media (prefers-color-scheme: dark) { .inspo-fab { background: var(--accent); color: #fff; } }
+.inspo-fab.rec { background: var(--bad); animation: pulse 1.2s infinite; }
+.inspo-fab-plus { font-size: 1.3rem; line-height: 1; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(210, 68, 58, .2); } }
+.inspo-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, .4); display: flex; align-items: flex-end; justify-content: center; }
+.inspo-sheet { width: 100%; max-width: 680px; max-height: 92vh; overflow-y: auto; background: var(--paper); border-radius: 20px 20px 0 0; padding: 14px 14px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; animation: rise .22s ease-out; }
+@media (min-width: 700px) { .inspo-overlay { align-items: center; } .inspo-sheet { border-radius: 20px; } }
+@keyframes rise { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.inspo-capture { display: flex; flex-direction: column; gap: 10px; }
+.inspo-capture textarea { font-size: 1.1rem; }
+.inspo-live { background: var(--chip); border-radius: 10px; padding: 8px 10px; font-size: .92rem; }
+.inspo-bigs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.inspo-big { min-height: 96px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-weight: 700; cursor: pointer; padding: 8px 4px; }
+.inspo-big-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-weight: 800; }
+.inspo-big.rec { border-color: var(--bad); background: var(--bad-bg); }
+.inspo-big.rec .inspo-big-icon { background: var(--bad); color: #fff; animation: pulse 1.2s infinite; }
+.inspo-attached { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.inspo-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+.inspo-thumb.ph { display: inline-block; background: var(--chip); }
+.inspo-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.inspo-save { width: 100%; }
+.inspo-list { display: flex; flex-direction: column; gap: 10px; }
+.inspo-card { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+.inspo-card-head { display: flex; flex-direction: column; gap: 2px; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; }
+.inspo-text { font-size: 1.15rem; }
+.inspo-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(150px + env(safe-area-inset-bottom)); z-index: 60; background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 12px; font-size: .92rem; box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: calc(100% - 32px); animation: pop .2s; }
