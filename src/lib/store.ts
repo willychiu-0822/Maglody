@@ -56,7 +56,7 @@ export const defaultProject = (): Project => ({
     tracks: {
       melody: { vol: 0.5, pan: 0, hp: false, mute: false },
       chords: { vol: 0.9, pan: 0, hp: false, mute: false },
-      bass: { vol: 0.9, pan: 0.6, hp: false, mute: false },
+      bass: { vol: 0.9, pan: 0, hp: false, mute: false },
       drums: { vol: 0.9, pan: 0, hp: false, mute: false },
     },
     listened: false,

@@ -75,6 +75,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const [expanded, setExpanded] = useState<string | null>(null)
   const [picked, setPicked] = useState<string[]>([])
   const [collage, setCollage] = useState(false)
+  const [moreOpen, setMoreOpen] = useState<string | null>(null)
   const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((i) => i !== id) : [...x, id]))
   const rec = useRecorder()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -240,18 +241,24 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                         <span className="small muted">{new Date(x.createdAt).toLocaleDateString('zh-TW')} · {x.tags.map((t) => TAG_ZH[t]).join('、') || '未分類'}{x.used.length ? ` · 已用 ${x.used.length} 次` : ''}</span>
                         {x.note && <span className="small">{x.note}</span>}
                       </button>
-                      <div className="inspo-attached">
+                      {!isOpen && (x.voice || x.hum || x.images.length > 0) && (
+                        <div className="inspo-attached small muted">
+                          {[x.voice && '語音', x.hum && '哼唱', x.images.length && `${x.images.length} 張照片`].filter(Boolean).join('・')}
+                        </div>
+                      )}
+                      {isOpen && <div className="inspo-attached">
                         {x.voice && <button className="chip" onClick={() => void playAsset(x.voice!.assetId)}>▶ 語音</button>}
                         {x.hum && x.hum.notes.length > 0 && <button className="chip" onClick={() => playHumNotes(x.hum!)}>▶ 哼唱 {x.hum.notes.length} 音</button>}
                         {x.images.map((im) => <Thumb key={im.assetId} id={im.assetId} />)}
-                      </div>
+                      </div>}
                       {isOpen && !collage && (
                         <div className="inspo-actions">
-                          <DeskActions primary={{ label: start.label, onClick: () => pull(x, start) }} />
-                          <div className="inspo-more">
+                          <DeskActions primary={{ label: start.label, onClick: () => pull(x, start) }}
+                            secondary={moreOpen === x.id ? undefined : { label: '其他用法…', onClick: () => setMoreOpen(x.id) }} />
+                          {moreOpen === x.id && <div className="inspo-more">
                             {here.map((o) => <button key={o.how + o.label} className="link-btn" onClick={() => pull(x, o)}>{o.label}</button>)}
                             {x.id !== 'seed-fuzui-qianxing' && <button className="link-btn muted" onClick={() => { if (confirm('刪除這則靈感？')) api.remove(x.id) }}>刪除</button>}
-                          </div>
+                          </div>}
                         </div>
                       )}
                     </article>

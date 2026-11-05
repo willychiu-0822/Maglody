@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "server": "node server/index.ts",
-    "dev:mobile": "HTTPS=1 vite --host"
+    "dev:mobile": "HTTPS=1 vite --host",
+    "selftest": "node scripts/mobile-selftest.cjs"
   },
   "dependencies": {
     "react": "^19.1.0",
