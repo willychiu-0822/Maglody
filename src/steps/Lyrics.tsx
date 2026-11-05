@@ -82,7 +82,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
       )}
 
       {cur && (
-        <div className="lyric-wrap paper">
+        <div className={`lyric-wrap paper ${!cur.text.trim() ? 'nudge' : ''}`}>
           <textarea
             className="lyric-input"
             rows={Math.max(4, cur.text.split('\n').length + 1)}
