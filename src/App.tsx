@@ -36,6 +36,9 @@ export default function App() {
   const getProject = useCallback(() => pRef.current, [])
   const master = useMaster(getProject)
   const inspo = useInspirations()
+  const [inspoOpen, setInspoOpen] = useState<null | 'capture' | 'library'>(null)
+  const [inspoRec, setInspoRec] = useState(false)
+  const skipEnter = useRef(false)
   const step = STEPS[cur]
   const reqs = step.requirements(p)
   const ready = reqs.every((r) => r.ok)
@@ -47,7 +50,9 @@ export default function App() {
     stopAll()
     window.scrollTo({ top: 0, behavior: 'smooth' })
     document.querySelector('.node.cur')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
-    master.notify(step.key, 'step.enter')
+    // 從靈感跳過來時，保留大師對那則靈感的旁白，不用章節開場白蓋掉
+    if (skipEnter.current) skipEnter.current = false
+    else master.notify(step.key, 'step.enter')
   }, [cur]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const notify = useCallback((kind: string, detail: string) => master.notify(STEPS[cur].key, kind, detail), [master, cur])
@@ -183,10 +188,12 @@ export default function App() {
       </div>
 
       <InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
-        onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0) go(i) }}
-        onEvent={(kind, detail) => master.notify(step.key, kind, detail)} />
+        onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0 && i !== cur) { skipEnter.current = true; go(i) } }}
+        onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
+        open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
       <MasterPanel step={step.key} messages={master.messages} busy={master.busy} onAsk={(q) => master.ask(step.key, q)} onAction={onAction}
-        onPlayResult={result?.available(p) ? () => { stopAll(); result.play(p) } : undefined} />
+        onPlayResult={result?.available(p) ? () => { stopAll(); result.play(p) } : undefined}
+        onInspire={() => setInspoOpen('capture')} recordingIdea={inspoRec} />
     </div>
   )
 }

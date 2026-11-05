@@ -21,10 +21,12 @@ interface Props {
   onAsk: (q: string) => void
   onAction: (a: AgentAction, apply: boolean) => void
   onPlayResult?: () => void
+  onInspire?: () => void
+  recordingIdea?: boolean
 }
 
 /** 大師旁白條：收合時顯示最新一句旁白；展開後可以看完整對話並提問 */
-export function MasterPanel({ step, messages, busy, onAsk, onAction, onPlayResult }: Props) {
+export function MasterPanel({ step, messages, busy, onAsk, onAction, onPlayResult, onInspire, recordingIdea }: Props) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
@@ -92,6 +94,12 @@ export function MasterPanel({ step, messages, busy, onAsk, onAction, onPlayResul
           </span>
           <span className="master-bar-cta">對話</span>
         </button>
+        {onInspire && (
+          <button className={`inspo-fab ${recordingIdea ? 'rec' : ''}`} onClick={onInspire} aria-label="隨手記下靈感">
+            <span className="inspo-fab-plus">{recordingIdea ? '●' : '✎'}</span>
+            <span>{recordingIdea ? '錄音中' : '記一下'}</span>
+          </button>
+        )}
         </div>
       )}
     </div>

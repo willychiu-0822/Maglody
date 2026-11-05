@@ -171,8 +171,8 @@ function MelodyStep({ p, update, notify }: StepProps) {
 
   const fb = melodyFeedback(p, part)
   // 播放時頁面跟著播放頭走
-  const shownPage = narrow && col >= 0 ? Math.floor(col / 16) : page
-  const visible = Array.from({ length: narrow ? 16 : STEPS }, (_, k) => (narrow ? shownPage * 16 : 0) + k)
+  const shownPage = narrow && col >= 0 ? Math.floor(col / 8) : page
+  const visible = Array.from({ length: narrow ? 8 : STEPS }, (_, k) => (narrow ? shownPage * 8 : 0) + k)
   const missingChords = prog.some((d) => d == null)
 
   return (
@@ -200,15 +200,18 @@ function MelodyStep({ p, update, notify }: StepProps) {
         {missingChords && <p className="error small">請先回到「和聲」把{part === 'verse' ? '主歌' : '副歌'}的 4 個和弦排好。</p>}
 
         {narrow && (
-          <div className="seg roll-pager">
-            <button className={shownPage === 0 ? 'on' : ''} onClick={() => setPage(0)}>第 1–2 小節</button>
-            <button className={shownPage === 1 ? 'on' : ''} onClick={() => setPage(1)}>第 3–4 小節</button>
+          <div className="seg roll-pager" aria-label="選擇小節">
+            {[0, 1, 2, 3].map((b) => (
+              <button key={b} className={shownPage === b ? 'on' : ''} onClick={() => setPage(b)}>
+                第{b + 1}小節{prog[b] != null ? ` · ${chords[prog[b]!].name}` : ''}
+              </button>
+            ))}
           </div>
         )}
         <div className="roll-scroll">
-          <div className={`roll ${narrow ? 'narrow' : ''}`} style={{ gridTemplateColumns: `44px repeat(${visible.length}, minmax(${narrow ? 18 : 26}px, 1fr))` }}>
+          <div className={`roll ${narrow ? 'narrow' : ''}`} style={{ gridTemplateColumns: `44px repeat(${visible.length}, minmax(${narrow ? 34 : 26}px, 1fr))` }}>
             <div className="roll-corner" />
-            {(narrow ? [shownPage * 2, shownPage * 2 + 1] : [0, 1, 2, 3]).map((b) => (
+            {(narrow ? [shownPage] : [0, 1, 2, 3]).map((b) => (
               <div key={b} className="roll-chord" style={{ gridColumn: `span 8` }}>{prog[b] != null ? `${chords[prog[b]!].name}（${chords[prog[b]!].roman}）` : '—'}</div>
             ))}
             {rows.map((m) => {

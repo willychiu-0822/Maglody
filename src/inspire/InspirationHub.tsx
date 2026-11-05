@@ -58,27 +58,30 @@ interface Props {
   stepTitle: string
   onGo: (step: string) => void
   onEvent: (kind: string, detail: string) => void
+  open: null | 'capture' | 'library'
+  setOpen: (v: null | 'capture' | 'library') => void
+  onRecordingChange?: (rec: boolean) => void
 }
 
 /**
  * 靈感入口：任何一章都能打開，不會離開目前的位置。
  * 一則靈感可以同時有 文字 + 語音（自動聽寫）+ 哼唱（自動分析音高）+ 多張照片。
  */
-export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent }: Props) {
-  const [open, setOpen] = useState<null | 'capture' | 'library'>(null)
+export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent, open, setOpen, onRecordingChange }: Props) {
   const [draft, setDraft] = useState<Draft>(emptyDraft)
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const rec = useRecorder()
   const fileRef = useRef<HTMLInputElement>(null)
+  useEffect(() => { onRecordingChange?.(!!rec.recording) }, [rec.recording]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 快捷鍵：Alt + I 隨時記靈感（桌面）
   useEffect(() => {
     const f = (e: KeyboardEvent) => { if (e.altKey && (e.key === 'i' || e.key === 'I')) { e.preventDefault(); setOpen('capture') } }
     window.addEventListener('keydown', f)
     return () => window.removeEventListener('keydown', f)
-  }, [])
+  }, [setOpen])
 
   const flash = (t: string) => { setToast(t); window.setTimeout(() => setToast(null), 2600) }
   const toggleTag = (t: InspoTag) => setDraft((d) => ({ ...d, tags: d.tags.includes(t) ? d.tags.filter((x) => x !== t) : [...d.tags, t] }))
@@ -129,11 +132,16 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent 
     const item = api.add({ ...draft, text: draft.text.trim(), fromStep: step })
     setDraft(emptyDraft())
     setOpen(null)
-    flash(`已存進靈感庫。你還在「${stepTitle}」，接著做吧。`)
+    flash(`收好了。你還在「${stepTitle}」。`)
     onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
   }
 
   const pull = (x: Inspiration, opt: { label: string; how: string; apply: (p: Project, u: Update) => string | void }) => {
+    // 不默默覆蓋：目前的歌已有歌名或進度時，先問一聲
+    if (opt.how === 'start' && (p.idea.title || p.done.some(Boolean)) && p.idea.title !== x.text) {
+      const ok = confirm(`目前這首${p.idea.title ? `《${p.idea.title}》` : ''}已經有進度。\n\n確定：把「${x.text || '這則靈感'}」帶進這首（成為歌名與 vibe，其他內容都保留）。\n取消：先不要動。想開全新的一首，可以用頁面最下方「重新開始一首新歌」。`)
+      if (!ok) return
+    }
     const goto = opt.apply(p, update)
     api.markUsed(x.id, step, opt.how)
     setOpen(null)
@@ -152,11 +160,6 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent 
 
   return (
     <>
-      {!open && (
-        <button className={`inspo-fab ${rec.recording ? 'rec' : ''}`} onClick={() => setOpen('capture')} aria-label="記下靈感">
-          <span className="inspo-fab-plus">＋</span>靈感
-        </button>
-      )}
       {toast && <div className="toast" role="status">{toast}</div>}
 
       {open && (
@@ -164,16 +167,16 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent 
           <div className="inspo-sheet" role="dialog" aria-label="靈感">
             <div className="row between">
               <div className="seg">
-                <button className={open === 'capture' ? 'on' : ''} onClick={() => setOpen('capture')}>記下靈感</button>
-                <button className={open === 'library' ? 'on' : ''} onClick={() => setOpen('library')}>靈感庫（{api.list.length}）</button>
+                <button className={open === 'capture' ? 'on' : ''} onClick={() => setOpen('capture')}>隨手記</button>
+                <button className={open === 'library' ? 'on' : ''} onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
               </div>
               <button className="icon-btn" onClick={() => setOpen(null)} aria-label="關閉">✕</button>
             </div>
 
             {open === 'capture' && (
               <div className="inspo-capture">
-                <p className="muted small">想到什麼就丟進來，可以同時打字、說話、哼歌、拍照。記完會回到「{stepTitle}」，不會打斷你。</p>
-                <textarea autoFocus rows={3} value={draft.text} placeholder="一句詞、幾個字、一種感覺…（例如：負罪前行）" onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
+                <p className="muted small">想到什麼就寫下來，不用完整、不用好。也可以說、可以哼、可以拍——一起放進同一頁。記完回到「{stepTitle}」。</p>
+                <textarea autoFocus rows={3} value={draft.text} placeholder="幾個字就好……" onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
                 {rec.recording === 'voice' && rec.live && <div className="inspo-live">聽寫中：{rec.live}</div>}
                 <div className="inspo-bigs">
                   {recBtn('voice', '說話', canTranscribe() ? '錄音＋自動聽寫' : '錄一段語音')}
@@ -194,20 +197,20 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent 
                   </div>
                 )}
                 <div className="inspo-tags">
-                  <span className="small muted">它可能是：</span>
+                  <span className="small muted">它也許是（可不選）：</span>
                   {(Object.keys(TAG_ZH) as InspoTag[]).map((t) => (
                     <button key={t} className={`chip ${draft.tags.includes(t) ? 'on' : ''}`} onClick={() => toggleTag(t)}>{TAG_ZH[t]}</button>
                   ))}
                 </div>
                 <button className="btn btn-primary btn-lg inspo-save" disabled={!hasContent && !rec.recording} onClick={() => void save()}>
-                  {busy ? '處理中…' : '存進靈感庫，回去繼續'}
+                  {busy ? '收好中…' : '夾進本子，回去繼續'}
                 </button>
               </div>
             )}
 
             {open === 'library' && (
               <div className="inspo-list">
-                {api.list.length === 0 && <p className="muted">還沒有靈感。任何時候按右下角「＋靈感」就能記。</p>}
+                {api.list.length === 0 && <p className="muted">本子還是空的。任何時候按右下角那張小紙條就能記。</p>}
                 {api.list.map((x) => {
                   const { here, start } = pullOptions(x, step, p)
                   const isOpen = expanded === x.id
