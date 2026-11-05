@@ -315,3 +315,37 @@ textarea { resize: vertical; }
   .slot { min-height: 54px; }
   .btn-lg { width: 100%; }
 }
+
+/* ---------- master agent ---------- */
+.app { padding-bottom: 96px; }
+.master { position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; display: flex; justify-content: center; padding: 0 12px calc(10px + env(safe-area-inset-bottom)); pointer-events: none; }
+.master > * { pointer-events: auto; }
+.master-bar { width: 100%; max-width: 760px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--paper); box-shadow: 0 8px 30px rgba(31, 42, 68, .18); cursor: pointer; text-align: left; animation: pop .25s; }
+.master-bar-text { flex: 1; font-size: .92rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.master-bar-cta { flex: none; font-size: .8rem; font-weight: 700; color: var(--accent); }
+.msg-avatar { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-weight: 800; font-size: .9rem; }
+@media (prefers-color-scheme: dark) { .msg-avatar { background: var(--accent); color: #fff; } }
+.master-sheet { width: 100%; max-width: 760px; max-height: min(70vh, 620px); display: flex; flex-direction: column; gap: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, .25); }
+.master-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 2px; min-height: 120px; }
+.msg { display: flex; gap: 8px; align-items: flex-start; animation: pop .25s; }
+.msg-student { justify-content: flex-end; }
+.msg-body { background: var(--bg); border-radius: 4px 14px 14px 14px; padding: 8px 12px; max-width: 90%; font-size: .93rem; }
+.msg-student .msg-body { background: var(--ink); color: var(--paper); border-radius: 14px 4px 14px 14px; }
+.msg-learned { margin-top: 6px; padding: 6px 8px; border-radius: 8px; background: var(--good-bg); font-size: .88rem; }
+.msg-next { margin-top: 6px; font-size: .88rem; color: var(--muted); }
+.msg-sugs { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.sug { display: flex; flex-wrap: wrap; gap: 6px; }
+.typing { color: var(--muted); font-style: italic; }
+.master-quick { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.master-quick .chip { white-space: nowrap; }
+.master-input { display: flex; gap: 8px; }
+.master-input input { flex: 1; }
+
+/* ---------- journey / footer additions ---------- */
+.node.ahead .node-glyph { background: transparent; border-style: dashed; }
+.notice { background: var(--warn-bg); border-radius: 12px; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .92rem; }
+.result-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
+.learned-card { background: var(--good-bg); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; animation: pop .4s; }
+.why.locked { opacity: .75; }
+.why.locked .why-q { background: var(--grid-strong); color: var(--muted); }
+.why-listen { margin-bottom: 8px; }

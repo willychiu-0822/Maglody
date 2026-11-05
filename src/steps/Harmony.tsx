@@ -44,7 +44,7 @@ export function progressionFeedback(degs: (number | null)[], mode: Mode, label: 
   return fb
 }
 
-function HarmonyStep({ p, update }: StepProps) {
+function HarmonyStep({ p, update, notify }: StepProps) {
   const h = p.harmony
   const [target, setTarget] = useState<{ part: 'verse' | 'chorus'; i: number }>({ part: 'verse', i: 0 })
   const [player, setPlayer] = useState<Player | null>(null)
@@ -59,6 +59,7 @@ function HarmonyStep({ p, update }: StepProps) {
     const arr = [...h[target.part]]
     arr[target.i] = deg
     update('harmony', { ...h, [target.part]: arr })
+    if (!arr.includes(null)) notify('harmony.progression', target.part)
     const ni = target.i + 1
     if (ni < 4) setTarget({ ...target, i: ni })
     else if (target.part === 'verse') setTarget({ part: 'chorus', i: 0 })
@@ -84,6 +85,7 @@ function HarmonyStep({ p, update }: StepProps) {
     const ok = a === quiz.answer
     setQuizRes(ok ? 'right' : 'wrong')
     update('harmony', { ...h, quizRight: h.quizRight + (ok ? 1 : 0), quizTotal: h.quizTotal + 1 })
+    notify('harmony.quiz', ok ? 'right' : 'wrong')
   }
 
   const humHints = p.hum?.chordHints ?? []
@@ -156,7 +158,7 @@ function HarmonyStep({ p, update }: StepProps) {
               <div><strong>{t.name}</strong>：{t.degs.map((d) => chords[d].name).join(' → ')}<div className="muted small">{t.note}</div></div>
               <div className="row">
                 <button className="btn btn-ghost small" onClick={() => playLoop({ bpm: p.idea.bpm, bars: t.degs.map((d) => chordVoicing(chords[d])), layers: { drums: false, bass: true, keys: true, pad: false, melody: false } })}>▶</button>
-                <button className="btn btn-ghost small" onClick={() => update('harmony', { ...h, [target.part]: t.degs })}>放到{target.part === 'verse' ? '主歌' : '副歌'}</button>
+                <button className="btn btn-ghost small" onClick={() => { update('harmony', { ...h, [target.part]: t.degs }); notify('harmony.progression', target.part) }}>放到{target.part === 'verse' ? '主歌' : '副歌'}</button>
               </div>
             </div>
           ))}
@@ -192,14 +194,14 @@ function HarmonyStep({ p, update }: StepProps) {
         )}
       </Card>
 
-      <Why title="為什麼調內和弦「保證不會錯」？" apply="在 KTV 自彈自唱、即興伴奏、看吉他譜時，先找出調內的 7 個和弦就能應付大部分歌曲。">
+      <Why ready={h.verse.some((d) => d != null)} hint="先點幾個和弦、放進主歌格子。" title="為什麼調內和弦「保證不會錯」？" apply="在 KTV 自彈自唱、即興伴奏、看吉他譜時，先找出調內的 7 個和弦就能應付大部分歌曲。">
         <p>調內和弦都是從同一個音階的 7 個音堆出來的（每隔一個音取一個：1-3-5、2-4-6…），所以彼此「說同一種語言」，放在一起一定協調。</p>
         <p>大寫羅馬數字（I、IV、V）是大三和弦，小寫（ii、iii、vi）是小三和弦。用級數而不用音名，換調時進行不變。</p>
       </Why>
-      <Why title="為什麼 V 會「想回家」？" apply="電影配樂用 V 製造懸念；歌曲結尾用 V→I 給人完結感。">
+      <Why ready={!h.verse.includes(null) || !h.chorus.includes(null)} hint="排滿 4 格，聽聽結尾停在哪裡。" listen={{ label: '聽 V → I（想回家→到家）', play: () => { playChord(chordVoicing(chords[4]), 1); setTimeout(() => playChord(chordVoicing(chords[0]), 1.4), 1000) } }} title="為什麼 V 會「想回家」？" apply="電影配樂用 V 製造懸念；歌曲結尾用 V→I 給人完結感。">
         <p>V 和弦裡有一個音（第 7 級音，Si）距離主音只差半音，耳朵會強烈期待它往上「解決」到 Do。這種「緊張→解決」就是音樂推動力的來源。</p>
       </Why>
-      <Why title="和弦跟我的哼唱有什麼關係？" apply="幫現成旋律配和弦（例如幫朋友的歌配吉他）就是這個方法。">
+      <Why ready={!!p.hum} hint="先完成哼唱解析。" title="和弦跟我的哼唱有什麼關係？" apply="幫現成旋律配和弦（例如幫朋友的歌配吉他）就是這個方法。">
         <p>旋律在某一刻唱的音，如果剛好是當下和弦的組成音，就會很和諧。標著「哼唱建議」的和弦，是你哼唱裡出現最多的組成音所對應的和弦。</p>
         <p>你哼唱的主音是 {p.hum ? NOTE_NAMES[pc(p.hum.keyRoot)] : '—'}。</p>
       </Why>

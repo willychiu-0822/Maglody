@@ -60,11 +60,11 @@ export function arrangementFeedback(p: Project): Feedback[] {
   return fb
 }
 
-function ArrangementStep({ p, update }: StepProps) {
+function ArrangementStep({ p, update, notify }: StepProps) {
   const a = p.arrangement
   const [sel, setSel] = useState<string | null>(a[0]?.id ?? null)
   const [player, setPlayer] = useState<Player | null>(null)
-  const set = (id: string, patch: Partial<ArrSection>) => update('arrangement', a.map((s) => (s.id === id ? { ...s, ...patch } : s)))
+  const set = (id: string, patch: Partial<ArrSection>) => { update('arrangement', a.map((s) => (s.id === id ? { ...s, ...patch } : s))); notify('arrange.change', '') }
   const add = (kind: SectionKind) => {
     const s: ArrSection = { id: uid(), kind, bars: kind === 'intro' || kind === 'outro' || kind === 'inter' ? 4 : 8, layers: { ...DEFAULT_LAYERS[kind] } }
     update('arrangement', [...a, s])
@@ -81,6 +81,7 @@ function ArrangementStep({ p, update }: StepProps) {
     player?.stop()
     const { bars, melody } = sectionAudio(p, s.kind)
     setPlayer(playLoop({ bpm: p.idea.bpm, bars, melody, layers: s.layers, onStep: (x) => x < 0 && setPlayer(null) }))
+    notify('arrange.preview', s.kind)
   }
   const cur = a.find((s) => s.id === sel)
   const maxE = LAYERS.reduce((x, l) => x + l.w, 0)
@@ -147,13 +148,13 @@ function ArrangementStep({ p, update }: StepProps) {
         <FeedbackList items={fb} />
       </Card>
 
-      <Why title="為什麼要「減法編曲」？" apply="做簡報時，重點頁才放大圖大字；影片剪輯時，高潮前先安靜。">
+      <Why ready={a.length >= 3} hint="先排 3 段以上，並試聽兩段比較。" title="為什麼要「減法編曲」？" apply="做簡報時，重點頁才放大圖大字；影片剪輯時，高潮前先安靜。">
         <p>耳朵對「變化」最敏感，而不是對「多」。如果從頭到尾都很滿，副歌就沒有爆發感。主歌少一點，副歌才顯得大。</p>
       </Why>
-      <Why title="每種樂器的工作是什麼？" apply="聽歌時試著只聽貝斯、只聽鼓，你會開始聽見編曲。">
+      <Why ready={a.length >= 1} title="每種樂器的工作是什麼？" apply="聽歌時試著只聽貝斯、只聽鼓，你會開始聽見編曲。">
         <p>鼓＝時間與能量；貝斯＝連結鼓和和弦的低音地基；鋼琴/吉他＝和聲與律動；弦樂鋪底＝空間與情緒；主唱＝故事。每個樂器佔不同的音域和角色，才不會互相打架。</p>
       </Why>
-      <Why title="為什麼結構常是主歌–副歌–主歌–副歌–橋段–副歌？" apply="寫文章的起承轉合、電影的三幕劇，都是同一套張力設計。">
+      <Why ready={a.length >= 4} title="為什麼結構常是主歌–副歌–主歌–副歌–橋段–副歌？" apply="寫文章的起承轉合、電影的三幕劇，都是同一套張力設計。">
         <p>重複讓人記住，變化讓人不膩。橋段（Bridge）是唯一「新的東西」，讓最後一次副歌聽起來像回家。</p>
       </Why>
     </>

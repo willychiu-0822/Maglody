@@ -24,7 +24,7 @@ export interface Project {
     rangeHigh: number
     source: 'mic' | 'file' | 'demo'
   } | null
-  idea: { mood: string; theme: string; image: string; story: string; title: string; hook: string; bpm: number }
+  idea: { mood: string; vibe: string; theme: string; image: string; story: string; title: string; hook: string; bpm: number }
   lyrics: LyricSection[]
   harmony: { root: number; mode: Mode; verse: (number | null)[]; chorus: (number | null)[]; quizRight: number; quizTotal: number }
   melody: { verse: (number | null)[]; chorus: (number | null)[]; reflections: string }
@@ -43,7 +43,7 @@ export const defaultProject = (): Project => ({
   unlocked: 0,
   done: new Array(STEP_COUNT).fill(false),
   hum: null,
-  idea: { mood: '', theme: '', image: '', story: '', title: '', hook: '', bpm: 90 },
+  idea: { mood: '', vibe: '', theme: '', image: '', story: '', title: '', hook: '', bpm: 90 },
   lyrics: [
     { id: uid(), kind: 'verse', text: '' },
     { id: uid(), kind: 'chorus', text: '' },
@@ -64,7 +64,7 @@ export const defaultProject = (): Project => ({
   review: { ratings: {}, checks: {}, verdict: '' },
 })
 
-const KEY = 'music-lab-project-v1'
+const KEY = 'music-lab-project-v2'
 
 function load(): Project {
   try {

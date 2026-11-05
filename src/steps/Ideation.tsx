@@ -13,7 +13,7 @@ export const MOODS = [
   { id: 'dream', name: '夢幻漂浮', mode: 'major', bpm: [70, 90], why: '大調 + 長音鋪底，留白多，像飄在空中。' },
 ] as const
 
-function IdeationStep({ p, update }: StepProps) {
+function IdeationStep({ p, update, notify }: StepProps) {
   const idea = p.idea
   const set = (k: keyof typeof idea, v: string | number) => update('idea', { ...idea, [k]: v })
   const mood = MOODS.find((m) => m.id === idea.mood)
@@ -63,7 +63,13 @@ function IdeationStep({ p, update }: StepProps) {
             <button
               key={m.id}
               className={`mood ${idea.mood === m.id ? 'on' : ''}`}
-              onClick={() => update('idea', { ...idea, mood: m.id, bpm: Math.round((m.bpm[0] + m.bpm[1]) / 2) })}
+              onClick={() => {
+                update('idea', { ...idea, mood: m.id, bpm: Math.round((m.bpm[0] + m.bpm[1]) / 2) })
+                // 情緒影響調性：沒有哼唱時以情緒決定大小調；有哼唱則保留哼唱的調，由學生在和聲章節決定
+                if (!p.hum) update('harmony', (h) => ({ ...h, mode: m.mode }))
+                notify('idea.mood', m.id)
+                preview(p.hum?.keyMode ?? m.mode, Math.round((m.bpm[0] + m.bpm[1]) / 2))
+              }}
             >
               <strong>{m.name}</strong>
               <span className="small muted">{m.mode === 'major' ? '大調' : '小調'} · {m.bpm[0]}–{m.bpm[1]} BPM</span>
@@ -87,7 +93,15 @@ function IdeationStep({ p, update }: StepProps) {
         {p.hum && <p className="muted small">你的哼唱在 {keyName(p.hum.keyRoot, p.hum.keyMode)}。</p>}
       </Card>
 
-      <Card title="2. 一句話的故事">
+      <Card title="2. Vibe 板：這首歌「聽起來像」什麼？">
+        <label className="field">
+          <span>參考的歌、場景、聲音、顏色（隨意寫，像在跟朋友形容）</span>
+          <input value={idea.vibe} placeholder="例如：深夜騎車、街燈、像老 City Pop、帶點雨聲" onChange={(e) => set('vibe', e.target.value)} />
+        </label>
+        <p className="muted small">Vibe 不用專業術語。後面每一章，大師都會回來對照它：「這個和弦像不像你說的深夜？」</p>
+      </Card>
+
+      <Card title="3. 一句話的故事">
         <label className="field">
           <span>主題（關於什麼？）</span>
           <input value={idea.theme} placeholder="例如：搬離住了十年的家" onChange={(e) => set('theme', e.target.value)} />
@@ -102,7 +116,7 @@ function IdeationStep({ p, update }: StepProps) {
         </label>
       </Card>
 
-      <Card title="3. 歌名與記憶點（Hook）">
+      <Card title="4. 歌名與記憶點（Hook）">
         <label className="field">
           <span>暫定歌名</span>
           <input value={idea.title} onChange={(e) => set('title', e.target.value)} />
@@ -117,14 +131,14 @@ function IdeationStep({ p, update }: StepProps) {
         <FeedbackList items={fb} />
       </Card>
 
-      <Why title="為什麼要先決定情緒和速度？" apply="做簡報配樂、剪影片挑音樂、幫活動選歌，都是先定情緒再找速度。">
+      <Why ready={!!idea.mood} hint="先點一個情緒，聽聽它。" listen={{ label: '再聽一次你選的情緒', play: () => mood && preview(mood.mode, idea.bpm) }} title="為什麼要先決定情緒和速度？" apply="做簡報配樂、剪影片挑音樂、幫活動選歌，都是先定情緒再找速度。">
         <p>情緒決定了後面所有選擇：大調或小調、和弦怎麼走、編曲要熱鬧還是留白。先定方向，後面每一步都有判斷標準，不會越寫越歪。</p>
         <p>BPM 是速度。人走路約 100 BPM、休息心跳約 60–80。慢歌靠近心跳，快歌靠近跑步。</p>
       </Why>
-      <Why title="為什麼要具體，不要抽象？" apply="寫文案、說故事、寫履歷自傳都一樣：細節讓人相信。">
+      <Why ready={cleanLine(idea.story).length >= 8} hint="先寫幾句故事。" title="為什麼要具體，不要抽象？" apply="寫文案、說故事、寫履歷自傳都一樣：細節讓人相信。">
         <p>「我好寂寞」每個人都寫過；「便利商店的微波爐，只熱一個便當」才會讓人起雞皮疙瘩。具體畫面讓聽眾用自己的記憶填滿情緒，這叫 show, don't tell。</p>
       </Why>
-      <Why title="什麼是 Hook？" apply="廣告標語、品牌口號、演講金句都是 Hook 的概念。">
+      <Why ready={!!idea.hook} hint="先寫下你的記憶點。" title="什麼是 Hook？" apply="廣告標語、品牌口號、演講金句都是 Hook 的概念。">
         <p>Hook 是聽完一次就卡在腦中的那句話。流行歌通常把歌名放進 Hook，並在副歌重複 2–4 次。</p>
       </Why>
     </>

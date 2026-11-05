@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Card, Coach, FeedbackList, Why, type Feedback, type Level } from '../components/ui'
 import { playLoop, playNote, type Player } from '../lib/audio'
-import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, scaleNote, snapToScale, type Chord } from '../lib/theory'
+import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, scaleNote, snapToScale, SCALES, type Chord, type Mode } from '../lib/theory'
 import { cleanLine } from '../lib/rhyme'
 import type { Project } from '../lib/store'
 import { lyricLines } from './Lyrics'
@@ -19,6 +19,12 @@ export function melodyRows(p: Project): number[] {
   const rows: number[] = []
   for (let s = -3; s <= 10; s++) rows.push(scaleNote(root, mode, s, base))
   return rows.reverse()
+}
+
+/** 五聲音階要避開的音：大調的 4、7 級；小調的 2、6 級 */
+export const isAvoid = (m: number, root: number, mode: Mode) => {
+  const deg = SCALES[mode].indexOf(pc(m - root))
+  return mode === 'major' ? deg === 3 || deg === 6 : deg === 1 || deg === 5
 }
 
 /** 找出某格實際在響的音（延長格往前追） */
@@ -73,6 +79,13 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
     const vMax = Math.max(...(part === 'verse' ? ms : other)), cMax = Math.max(...(part === 'chorus' ? ms : other))
     fb.push(cMax > vMax ? { level: 'good', text: '副歌的最高音比主歌高，情緒有往上推。' } : { level: 'warn', text: '副歌沒有比主歌高。', tip: '最常見的副歌技巧：整體往上移 3–5 度，讓情緒爆發。' })
   }
+  // 動機：第 1 小節的節奏型是否在後面重複出現（重複＋變化）
+  const rhythm = (b: number) => cells.slice(b * 8, b * 8 + 8).map((c) => (c != null && c >= 0 ? 'x' : c === HOLD ? '-' : '.')).join('')
+  const r0 = rhythm(0)
+  if (r0.includes('x')) {
+    const rep = [1, 2, 3].filter((b) => rhythm(b) === r0).length
+    fb.push(rep >= 1 && rep <= 2 ? { level: 'good', text: `第 1 小節的節奏在後面重複了 ${rep} 次：這叫「動機」，重複讓人記住、變化讓人不膩。` } : rep === 3 ? { level: 'warn', text: '四個小節節奏完全一樣。', tip: '重複很好，但第 4 小節換個節奏（例如拉長最後一個音）當作句尾。' } : { level: 'warn', text: '每小節的節奏都不一樣，聽眾比較難記。', tip: '試試把第 1 小節的節奏照抄到第 2 小節，只改音高——這就是「動機重複」。' })
+  }
   // 歌詞對位
   const sec = p.lyrics.find((s) => s.kind === part)
   if (sec) {
@@ -84,12 +97,15 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   return fb
 }
 
-function MelodyStep({ p, update }: StepProps) {
+function MelodyStep({ p, update, notify }: StepProps) {
   const [part, setPart] = useState<Part>('chorus')
   const [hold, setHold] = useState(false)
+  const [penta, setPenta] = useState(() => ![...p.melody.verse, ...p.melody.chorus].some((m) => m != null && m >= 0 && isAvoid(m, p.harmony.root, p.harmony.mode)))
   const [col, setCol] = useState(-1)
   const [player, setPlayer] = useState<Player | null>(null)
-  const rows = useMemo(() => melodyRows(p), [p.harmony.root, p.harmony.mode, p.hum])
+  const allRows = useMemo(() => melodyRows(p), [p.harmony.root, p.harmony.mode, p.hum])
+  // 五聲音階安全區：拿掉 4、7 級（半音關係），新手怎麼排都和諧
+  const rows = penta ? allRows.filter((m) => !isAvoid(m, p.harmony.root, p.harmony.mode)) : allRows
   const chords = diatonicChords(p.harmony.root, p.harmony.mode)
   const prog = p.harmony[part]
   const cells = p.melody[part]
@@ -114,6 +130,7 @@ function MelodyStep({ p, update }: StepProps) {
     player?.stop()
     const bars = prog.map((d) => (d != null ? chordVoicing(chords[d]) : [0]))
     setPlayer(playLoop({ bpm: p.idea.bpm, bars, melody: cells, loop: true, layers: { drums: false, bass: true, keys: true, pad: false, melody: true }, onStep: setCol }))
+    notify('melody.play', part)
   }
   const stop = () => { player?.stop(); setPlayer(null) }
 
@@ -130,6 +147,7 @@ function MelodyStep({ p, update }: StepProps) {
       let m = snapToScale(note.midi, p.harmony.root, p.harmony.mode)
       while (m > hi) m -= 12
       while (m < lo) m += 12
+      if (penta && !rows.includes(m)) m = rows.reduce((b, r) => (Math.abs(r - m) < Math.abs(b - m) ? r : b), rows[0])
       if (n[s] == null || n[s] === HOLD) n[s] = m
       for (let k = 1; k < len && s + k < STEPS; k++) if (n[s + k] == null) n[s + k] = HOLD
     })
@@ -155,10 +173,12 @@ function MelodyStep({ p, update }: StepProps) {
             <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setPart('chorus') }}>副歌旋律</button>
           </div>
           <div className="row wrap">
+            <button className={`btn ${penta ? 'btn-primary' : ''}`} onClick={() => setPenta(!penta)} title="只顯示五聲音階">{penta ? '五聲安全區：開' : '完整音階'}</button>
             <button className={`btn ${hold ? 'btn-primary' : ''}`} onClick={() => setHold(!hold)}>{hold ? '延長模式：開' : '延長模式'}</button>
             {!player ? <button className="btn btn-primary" onClick={play} disabled={missingChords}>▶ 循環播放</button> : <button className="btn btn-danger" onClick={stop}>■ 停止</button>}
           </div>
         </div>
+        {penta && cells.some((m) => m != null && m >= 0 && !rows.includes(m)) && <p className="muted small">有些音（Fa 或 Si 等）不在五聲安全區裡，切到「完整音階」才看得到。</p>}
         {missingChords && <p className="error small">請先回到「和聲」把{part === 'verse' ? '主歌' : '副歌'}的 4 個和弦排好。</p>}
 
         <div className="roll-scroll">
@@ -213,13 +233,13 @@ function MelodyStep({ p, update }: StepProps) {
         <textarea rows={3} value={p.melody.reflections} placeholder="播放 3 次後寫下：哪一句最想一直唱？哪一個音聽起來怪怪的？" onChange={(e) => update('melody', { ...p.melody, reflections: e.target.value })} />
       </Card>
 
-      <Why title="為什麼強拍要放和弦音？" apply="即興 Solo、寫 Bass 線、編合聲都遵守同一個原則。">
+      <Why ready={cells.filter((m) => m != null && m >= 0).length >= 4} hint="放 4 個音以上並按播放。" listen={{ label: '再聽一次你的旋律', play }} title="為什麼強拍要放和弦音？" apply="即興 Solo、寫 Bass 線、編合聲都遵守同一個原則。">
         <p>強拍（每拍的開頭）是耳朵最注意的地方。在強拍上唱和弦音，旋律和伴奏會融在一起；把非和弦音放在弱拍，它就變成「從一個和弦音走到另一個」的經過音，讓旋律流動。</p>
       </Why>
-      <Why title="為什麼級進為主、大跳為輔？" apply="分析任何一首你喜歡的歌，數數看有幾次大跳。">
+      <Why ready={cells.filter((m) => m != null && m >= 0).length >= 6} title="為什麼級進為主、大跳為輔？" apply="分析任何一首你喜歡的歌，數數看有幾次大跳。">
         <p>人聲最自然的移動是相鄰音（級進）。大跳像說話時突然提高音量，偶爾用很有戲劇性，太多會難唱又沒重點。經典技巧：大跳之後往反方向級進回來。</p>
       </Why>
-      <Why title="為什麼副歌要比主歌高？" apply="簡報的高潮、影片配樂的爆點，都靠「拉高」製造情緒。">
+      <Why ready={p.melody.verse.some((m) => m != null) && p.melody.chorus.some((m) => m != null)} hint="主歌和副歌都寫一點。" title="為什麼副歌要比主歌高？" apply="簡報的高潮、影片配樂的爆點，都靠「拉高」製造情緒。">
         <p>音高越高，聲帶越緊繃，聽起來越激動。主歌待在中低音域「說故事」，副歌往上「喊出來」，聽眾會自然感受到情緒升溫。</p>
       </Why>
     </>

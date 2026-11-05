@@ -7,7 +7,7 @@ import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame 
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
 
-function HumStep({ p, update }: StepProps) {
+function HumStep({ p, update, notify }: StepProps) {
   const [live, setLive] = useState<PitchFrame[]>([])
   const [ana, setAna] = useState<HumAnalysis | null>(null)
   const [busy, setBusy] = useState(false)
@@ -44,6 +44,7 @@ function HumStep({ p, update }: StepProps) {
       })
       // 把估計結果帶進和聲章節的預設值（學生之後仍可修改）
       update('harmony', (h) => ({ ...h, root: k.root, mode: k.mode }))
+      notify('hum.analyzed', `${a.notes.length}`)
     }, 30)
   }
 
@@ -238,13 +239,13 @@ function HumStep({ p, update }: StepProps) {
         <FeedbackList items={fb} empty="哼完之後，這裡會用綠／黃／紅燈告訴你哪裡很棒、哪裡可以調。" />
       </Card>
 
-      <Why title="為什麼要從哼唱開始？" apply="寫歌卡關時、在路上想到旋律時，先錄音再分析，比坐在鋼琴前硬想更自然。">
+      <Why ready={!!hum} hint="先哼一段（或用示範哼唱）。" listen={{ label: '再聽一次你的哼唱＋主音', play: () => playNotes(true) }} title="為什麼要從哼唱開始？" apply="寫歌卡關時、在路上想到旋律時，先錄音再分析，比坐在鋼琴前硬想更自然。">
         <p>旋律是一首歌最容易被記住的部分。直接從身體裡的聲音出發，比從理論出發更像「你的歌」。分析只是幫你看見你已經會的事。</p>
       </Why>
-      <Why title="電腦怎麼知道我唱什麼音？" apply="調音器 App、卡拉 OK 評分、自動修音（Auto-Tune）都用類似原理。">
+      <Why ready={!!hum} title="電腦怎麼知道我唱什麼音？" apply="調音器 App、卡拉 OK 評分、自動修音（Auto-Tune）都用類似原理。">
         <p>聲音是空氣的振動。唱 A 音時，每秒振動 440 次。程式把聲波跟「往後挪一點的自己」比較（自相關），重疊最好的位移量就是一次振動的長度，換算成頻率就得到音高。</p>
       </Why>
-      <Why title="什麼是「調」？為什麼重要？" apply="選翻唱的 Key、跟樂手溝通、即興伴奏都要先知道調。">
+      <Why ready={!!hum} listen={{ label: '只聽主音（家）', play: () => hum && playNote(60 + hum.keyRoot, 1.5) }} title="什麼是「調」？為什麼重要？" apply="選翻唱的 Key、跟樂手溝通、即興伴奏都要先知道調。">
         <p>調就是一首歌的「家」和它常用的 7 個音。知道調，就知道哪些和弦一定好聽（下一章會用到），也知道哪些音會製造張力。</p>
       </Why>
     </>

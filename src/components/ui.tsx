@@ -17,9 +17,32 @@ export function Coach({ children, title = '老師說' }: { children: ReactNode; 
   )
 }
 
-/** 「為什麼」卡片：原理 + 還能用在哪 */
-export function Why({ title, children, apply }: { title: string; children: ReactNode; apply?: ReactNode }) {
+/**
+ * 「為什麼」卡片：先做再解釋。
+ * ready=false 時只顯示「先動手」提示；ready 後自動展開，並可用剛才的聲音重聽。
+ */
+export function Why({ title, children, apply, ready = true, hint, listen }: {
+  title: string
+  children: ReactNode
+  apply?: ReactNode
+  ready?: boolean
+  hint?: string
+  listen?: { label: string; play: () => void }
+}) {
   const [open, setOpen] = useState(false)
+  const [seenReady, setSeenReady] = useState(ready)
+  if (ready && !seenReady) { setSeenReady(true); setOpen(true) }
+  if (!ready) {
+    return (
+      <div className="why locked">
+        <div className="why-head">
+          <span className="why-q">為什麼？</span>
+          <span className="why-title">{title}</span>
+        </div>
+        <div className="why-body muted small">先動手：{hint ?? '完成上面的練習後，老師會用你剛才的聲音解釋。'}</div>
+      </div>
+    )
+  }
   return (
     <div className={`why ${open ? 'open' : ''}`}>
       <button className="why-head" onClick={() => setOpen(!open)} aria-expanded={open}>
@@ -29,6 +52,7 @@ export function Why({ title, children, apply }: { title: string; children: React
       </button>
       {open && (
         <div className="why-body">
+          {listen && <button className="btn small why-listen" onClick={listen.play}>▶ {listen.label}</button>}
           {children}
           {apply && (
             <div className="why-apply">

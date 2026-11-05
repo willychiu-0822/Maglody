@@ -65,7 +65,7 @@ function download(name: string, content: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
 }
 
-function ReviewStep({ p, update }: StepProps) {
+function ReviewStep({ p, update, notify }: StepProps) {
   const r = p.review
   const [playing, setPlaying] = useState<number>(-1)
   const playerRef = useRef<Player | null>(null)
@@ -73,7 +73,7 @@ function ReviewStep({ p, update }: StepProps) {
 
   const playSong = (i = 0) => {
     if (i === 0) stopFlag.current = false
-    if (stopFlag.current || i >= p.arrangement.length) { setPlaying(-1); return }
+    if (stopFlag.current || i >= p.arrangement.length) { setPlaying(-1); if (i > 0 && !stopFlag.current) notify('review.play', ''); return }
     const s = p.arrangement[i]
     const { bars, melody } = sectionAudio(p, s.kind)
     const reps = Math.max(1, Math.round(s.bars / 4))

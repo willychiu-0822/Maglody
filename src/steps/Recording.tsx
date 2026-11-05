@@ -22,7 +22,7 @@ function dbLevel(db: number): Level {
   return 'warn'
 }
 
-function RecordingStep({ p, update }: StepProps) {
+function RecordingStep({ p, update, notify }: StepProps) {
   const r = p.recording
   const mic = useMic()
   const [mode, setMode] = useState<'level' | 'pitch' | null>(null)
@@ -44,13 +44,14 @@ function RecordingStep({ p, update }: StepProps) {
       holdRef.current++
       if (holdRef.current === 36) {
         setHits((h) => h + 1)
+        notify('record.pitch', target != null ? noteNameOct(target) : '')
         update('recording', (x) => ({ ...x, pitchHits: x.pitchHits + 1 }))
       }
     } else holdRef.current = 0
   }, [mic.midi]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const startLevel = async () => { setMode('level'); mic.resetPeak(); if (!mic.running) await mic.start() }
-  const endLevel = () => { update('recording', { ...r, levelPeakDb: Math.round(mic.peakDb) }); mic.stop(); setMode(null) }
+  const endLevel = () => { update('recording', { ...r, levelPeakDb: Math.round(mic.peakDb) }); mic.stop(); setMode(null); notify('record.level', '') }
   const startPitch = async (m: number) => { setTarget(m); setMode('pitch'); playNote(m, 1.2, { type: 'sine', gain: 0.3 }); holdRef.current = 0; if (!mic.running) await mic.start() }
 
   useEffect(() => {
@@ -155,10 +156,10 @@ function RecordingStep({ p, update }: StepProps) {
         <div className="legend small muted"><Light level="good" /> -24～-6 dB 健康 <Light level="warn" /> 太小或接近上限 <Light level="bad" /> -3 dB 以上會破音</div>
       </Card>
 
-      <Why title="為什麼峰值要留在 -6 dB 以下？" apply="直播、Podcast、錄 Vlog 旁白都用同樣標準。">
+      <Why ready={r.levelPeakDb != null || !!r.checks.nomic} hint="先做音量測試。" title="為什麼峰值要留在 -6 dB 以下？" apply="直播、Podcast、錄 Vlog 旁白都用同樣標準。">
         <p>數位錄音的上限是 0 dB，超過就會「削波」，波形頂端被切掉，聽起來是刺耳的破音，後製完全救不回。留 6 dB 以上的空間（headroom），就算情緒一激動也不怕。</p>
       </Why>
-      <Why title="音分（cent）是什麼？" apply="調樂器、用修音軟體、看調音器時都會看到它。">
+      <Why ready={hits > 0 || r.pitchHits > 0} hint="先跟唱一個音。" listen={target != null ? { label: '再聽一次目標音', play: () => playNote(target, 1.2, { type: 'sine', gain: 0.3 }) } : undefined} title="音分（cent）是什麼？" apply="調樂器、用修音軟體、看調音器時都會看到它。">
         <p>一個半音分成 100 音分。一般人耳對 ±10–25 音分的偏差不太敏感，超過 50 音分（半個半音）就會明顯「走音」。</p>
       </Why>
     </>

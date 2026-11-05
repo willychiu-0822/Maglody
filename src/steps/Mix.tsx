@@ -27,7 +27,7 @@ export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
   return fb
 }
 
-function MixStep({ p, update }: StepProps) {
+function MixStep({ p, update, notify }: StepProps) {
   const [player, setPlayer] = useState<Player | null>(null)
   const [peak, setPeak] = useState<number | null>(null)
   const [level, setLevel] = useState(-60)
@@ -73,10 +73,11 @@ function MixStep({ p, update }: StepProps) {
     const { bars, melody } = sectionAudio(p, 'chorus')
     setPlayer(playLoop({ bpm: p.idea.bpm, bars, melody, loop: true, mix: graphRef.current, layers: { drums: true, bass: true, keys: true, pad: true, melody: true } }))
     update('mix', { ...p.mix, listened: true })
+    notify('mix.play', '')
   }
   const stop = () => { player?.stop(); setPlayer(null); graphRef.current?.dispose(); graphRef.current = null }
 
-  const setT = (id: TrackId, patch: Partial<TrackSettings>) => update('mix', { ...p.mix, tracks: { ...tracks, [id]: { ...tracks[id], ...patch } } })
+  const setT = (id: TrackId, patch: Partial<TrackSettings>) => { update('mix', { ...p.mix, tracks: { ...tracks, [id]: { ...tracks[id], ...patch } } }); notify('mix.change', '') }
   const meterLevel: Level = level > -1 ? 'bad' : level > -6 ? 'warn' : 'good'
   const fb = mixFeedback(p, peak)
 
@@ -90,7 +91,7 @@ function MixStep({ p, update }: StepProps) {
       <Card>
         <div className="row wrap">
           {!player ? <button className="btn btn-primary" onClick={play}>▶ 播放副歌循環</button> : <button className="btn btn-danger" onClick={stop}>■ 停止</button>}
-          <button className={`btn ${bypass ? 'btn-primary' : ''}`} onClick={() => setBypass(!bypass)} disabled={!player}>{bypass ? 'B：未混音（點我回到你的混音）' : 'A/B 比較'}</button>
+          <button className={`btn ${bypass ? 'btn-primary' : ''}`} onClick={() => { setBypass(!bypass); if (!bypass) notify('mix.ab', '') }} disabled={!player}>{bypass ? 'B：未混音（點我回到你的混音）' : 'A/B 比較'}</button>
         </div>
         <div className="level-box">
           <div className="row between small"><span>總輸出</span><span>{player ? `${level.toFixed(0)} dB` : '—'}</span></div>
@@ -128,16 +129,16 @@ function MixStep({ p, update }: StepProps) {
         <FeedbackList items={fb} />
       </Card>
 
-      <Why title="為什麼主旋律最重要？" apply="Podcast 對話、影片旁白配樂，都要讓「說話」最清楚。">
+      <Why ready={p.mix.listened} hint="先按播放。" title="為什麼主旋律最重要？" apply="Podcast 對話、影片旁白配樂，都要讓「說話」最清楚。">
         <p>聽眾哼的是主旋律、記的是歌詞。伴奏再好聽，蓋過人聲就失敗了。專業混音師常先把人聲調好，再把其他東西「放到它周圍」。</p>
       </Why>
-      <Why title="左右聲像（Pan）的邏輯" apply="戴耳機聽喜歡的歌：鼓、吉他、和聲各在哪個位置？">
+      <Why ready={p.mix.listened} title="左右聲像（Pan）的邏輯" apply="戴耳機聽喜歡的歌：鼓、吉他、和聲各在哪個位置？">
         <p>想像一個舞台：主唱、貝斯、大鼓站中間；吉他、鋼琴、和聲分站左右。把不同樂器放在不同位置，就算音量一樣，也能聽得更清楚。</p>
       </Why>
-      <Why title="為什麼要切低頻？" apply="手機錄影的風切聲、冷氣低鳴，也都用 High-pass 濾掉。">
+      <Why ready={tracks.chords.hp || tracks.melody.hp} hint="先在任一軌打開「低頻切除」聽聽差別。" title="為什麼要切低頻？" apply="手機錄影的風切聲、冷氣低鳴，也都用 High-pass 濾掉。">
         <p>每個樂器都會產生一點點低頻，疊起來就變成「悶、糊」。只讓貝斯和大鼓負責低頻，其他軌切掉 150Hz 以下，整體就會清楚很多。這叫「頻率分工」。</p>
       </Why>
-      <Why title="為什麼要 A/B 比較？" apply="修照片、改文章時，也要常常和原稿比較。">
+      <Why ready={p.mix.listened} title="為什麼要 A/B 比較？" apply="修照片、改文章時，也要常常和原稿比較。">
         <p>耳朵會很快「習慣」聲音，調久了就不知道自己變好還是變差。回到原始狀態聽一下，是混音師最常用的校準方法。</p>
       </Why>
     </>

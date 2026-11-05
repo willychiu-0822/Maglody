@@ -1,10 +1,14 @@
 import { Card, Coach, FeedbackList, Light, Why, type Feedback, type Level } from '../components/ui'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, RHYME_GROUPS, cleanLine, countHits, lastChar, rhymeOf } from '../lib/rhyme'
-import { uid, type LyricSection, type SectionKind } from '../lib/store'
+import { uid, type LyricSection, type Project, type SectionKind } from '../lib/store'
 import type { StepDef, StepProps } from './types'
 
 export const KIND_ZH: Record<SectionKind, string> = { intro: '前奏', verse: '主歌', pre: '導歌', chorus: '副歌', bridge: '橋段', inter: '間奏', outro: '尾奏' }
 const LYRIC_KINDS: SectionKind[] = ['verse', 'pre', 'chorus', 'bridge']
+
+const melodyOnsets = (p: Project, part: 'verse' | 'chorus') => p.melody[part].filter((m) => m != null && m >= 0).length
+// 延遲載入避免循環引用（results → Arrangement → Lyrics）
+const RESULTS_SPEAK = (p: Project) => { void import('./results').then((m) => m.RESULTS.lyrics.play(p)) }
 
 const lines = (t: string) => t.split('\n').map((l) => l.trim()).filter(Boolean)
 
@@ -44,7 +48,7 @@ export function analyzeSection(s: LyricSection, hook: string) {
   return { ls, lens, ends, fb }
 }
 
-function LyricsStep({ p, update }: StepProps) {
+function LyricsStep({ p, update, notify }: StepProps) {
   const secs = p.lyrics
   const setSec = (id: string, patch: Partial<LyricSection>) => update('lyrics', secs.map((s) => (s.id === id ? { ...s, ...patch } : s)))
   const add = (kind: SectionKind) => update('lyrics', [...secs, { id: uid(), kind, text: '' }])
@@ -60,7 +64,9 @@ function LyricsStep({ p, update }: StepProps) {
   return (
     <>
       <Coach>
-        歌詞不是作文，是要「被唱出來」的句子。我們一段一段寫：主歌演故事、副歌說結論。
+        旋律已經在等你的字了。歌詞不是作文，是要「被唱出來」的句子：主歌演故事、副歌說結論。
+        {melodyOnsets(p, 'chorus') > 0 && <> 你的副歌旋律有 <strong>{melodyOnsets(p, 'chorus')} 個音</strong>，所以副歌前兩句加起來大約 {melodyOnsets(p, 'chorus')} 個字（一字一音）。</>}
+        {melodyOnsets(p, 'verse') > 0 && <> 主歌旋律有 {melodyOnsets(p, 'verse')} 個音。</>}
         每寫一句，右邊會即時顯示字數和韻腳顏色——同顏色代表押韻。
         {p.idea.image && <> 別忘了你的核心畫面：「{p.idea.image}」。</>}
       </Coach>
@@ -86,7 +92,7 @@ function LyricsStep({ p, update }: StepProps) {
                 rows={Math.max(4, s.text.split('\n').length + 1)}
                 value={s.text}
                 placeholder={s.kind === 'verse' ? '一行一句。先寫場景：在哪裡、看到什麼…' : s.kind === 'chorus' ? '一行一句。放進你的記憶點，說出情緒的結論…' : '一行一句'}
-                onChange={(e) => setSec(s.id, { text: e.target.value })}
+                onChange={(e) => { setSec(s.id, { text: e.target.value }); notify('lyrics.edit', s.kind) }}
               />
               <div className="lyric-meta">
                 {s.text.split('\n').map((raw, j) => {
@@ -124,14 +130,14 @@ function LyricsStep({ p, update }: StepProps) {
         </div>
       </Card>
 
-      <Why title="為什麼主歌和副歌分工？" apply="簡報也是：先給案例和數據（主歌），再下結論（副歌）。">
+      <Why ready={secs.some((s) => lines(s.text).length >= 2)} hint="先寫兩句。" listen={{ label: '聽副歌旋律＋你的詞', play: () => RESULTS_SPEAK(p) }} title="為什麼主歌和副歌分工？" apply="簡報也是：先給案例和數據（主歌），再下結論（副歌）。">
         <p>主歌像電影的鏡頭，帶聽眾進入場景；副歌是情緒的爆發點和結論，會重複出現。如果主歌就把話說完，副歌就沒有力量。</p>
       </Why>
-      <Why title="為什麼要押韻、要字數對稱？" apply="寫口號、對聯、Rap、廣告詞都靠押韻和節奏記憶。">
+      <Why ready={secs.some((s) => lines(s.text).length >= 2)} title="為什麼要押韻、要字數對稱？" apply="寫口號、對聯、Rap、廣告詞都靠押韻和節奏記憶。">
         <p>押韻讓句子有「回音」，耳朵會期待並記住它。字數對稱讓同一段旋律可以重複使用——重複是流行歌好記的秘密。</p>
         <p>中文歌常用「十三轍」分韻：只要韻母相近就算押韻，不必完全相同。</p>
       </Why>
-      <Why title="華語歌詞的聲調問題" apply="填詞、翻唱改詞時都要注意。">
+      <Why ready={secs.some((s) => lines(s.text).length >= 2)} title="華語歌詞的聲調問題（倒字）" apply="填詞、翻唱改詞時都要注意。">
         <p>中文有四聲。如果旋律往下走，卻填上二聲（往上揚）的字，聽起來會像別的字（倒字）。寫完旋律後，記得回來唱一遍，聽聽有沒有字被唱歪。</p>
       </Why>
       <div className="legend small muted">
