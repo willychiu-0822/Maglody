@@ -747,13 +747,7 @@ textarea.one-line { border: 1px solid var(--line) !important; border-radius: 12p
 .desk-name { text-align: left; }
 .sticker { position: relative; right: auto; bottom: auto; min-width: 0; min-height: 48px; padding: 8px 14px 12px; font-size: .95rem; }
 .app.studio { padding-bottom: 48px; }
-
-
-/* R6：首屏工作區極淡呼吸，提示「點這裡」，非 AI 感高亮 */
-.awaiting-touch {
-  animation: soft-breathe 2.8s ease-in-out 2;
-}
-@keyframes soft-breathe {
-  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
-  50% { box-shadow: inset 0 0 0 1px rgba(90, 70, 50, 0.18); }
-}
+/* R6：首屏沒有主動作時，工作區像墨水暈開一樣輕輕亮一下（兩次就停），暗示「從這裡開始」 */
+.nudge { animation: nudge 2.6s ease-in-out 1.2s 2; border-radius: 16px; }
+@keyframes nudge { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent-soft) 70%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .nudge { animation: none; } }

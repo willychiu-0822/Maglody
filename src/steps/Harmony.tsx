@@ -126,7 +126,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
       </div>
       <div className="slots">{[0, 1, 2, 3].map((i) => <Slot key={i} part={part} i={i} />)}</div>
 
-      <div className={`chord-grid${!h.verse.some((d) => d != null) && !h.chorus.some((d) => d != null) ? " awaiting-touch" : ""}`}>
+      <div className={`chord-grid ${!h.verse.some((d) => d != null) ? 'nudge' : ''}`}>
         {chords.filter((c) => c.quality !== 'dim').map((c) => (
           <button key={c.degree} className={`chord ${c.quality} ${humSet.has(c.name) ? 'hum' : ''}`} onClick={() => place(c.degree)}>
             <span className="chord-name">{c.name}</span>

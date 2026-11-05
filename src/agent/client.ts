@@ -15,12 +15,10 @@ const FLAVOR: Record<string, { open: string[]; close: string; idle: string }> = 
 function flavor(reply: AgentReply, persona?: { name: string }, question?: string): AgentReply {
   const f = persona && FLAVOR[persona.name]
   if (!f) return reply
+  // 拒絕代寫的句子保持乾淨，不加口吻前綴
+  if (/不替你寫完|我不替你寫/.test(reply.text)) return reply
   const generic = /離線模式只會回答/.test(reply.text)
   if (generic && question) return { ...reply, text: f.idle, next: undefined }
-  // 拒絕代寫的回覆保持原樣，不加開場，避免語氣被沖淡
-  if (/不替你寫完|不替你寫/.test(reply.text)) return reply
-  // mock 已經加過角色開場（「我哼著聽——」等）就不要再疊一層
-  if (/^.{1,12}——/.test(reply.text)) return { ...reply, next: reply.next ?? f.close }
   const open = f.open[(reply.text.length + persona!.name.length) % f.open.length]
   return { ...reply, text: `${open}${reply.text}`, next: reply.next ?? f.close }
 }

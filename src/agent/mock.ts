@@ -157,21 +157,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
   }
 }
 
-function withVoice(persona: { name: string; voice: string } | undefined, reply: AgentReply): AgentReply {
-  if (!persona || !reply.text) return reply
-  const lead: Record<string, string> = {
-    '製作人': '我聽整首歌的感覺——',
-    '作曲家': '我哼著聽——',
-    '作詞人': '我翻著筆記本——',
-    '編曲': '兩個版本比一下——',
-    '錄音師': '先做一件事——',
-  }
-  const prefix = lead[persona.name]
-  if (!prefix || reply.text.startsWith(prefix) || reply.text.startsWith('這首歌要是你的')) return reply
-  return { ...reply, text: `${prefix}${reply.text}` }
-}
-
-function questionReply(p: Project, step: string, q: string, persona?: { name: string; focus: string; voice: string }): AgentReply {
+function questionReply(p: Project, step: string, q: string): AgentReply {
   const c = chordsOf(p)
   const part: 'verse' | 'chorus' = /主歌/.test(q) ? 'verse' : 'chorus'
   if (/(幫我|替我|直接).*(寫|作|完成)|代寫|寫一首/.test(q)) {
@@ -227,22 +213,14 @@ function questionReply(p: Project, step: string, q: string, persona?: { name: st
     return { text: hi != null ? `你旋律最高是 ${noteNameOct(hi)}${p.hum ? `，哼唱時最舒服的上限是 ${noteNameOct(p.hum.rangeHigh)}` : ''}。` : '還沒有旋律。', next: '可以把整首換低 2 個半音（在和聲章節換調），或只把最高那一句往下移。', learned: '移調（換 Key）不會改變旋律的形狀，只改變高低。' }
   }
   const energyNote = p.arrangement.length ? `（目前結構最高能量 ${Math.max(...p.arrangement.map(energy))}）` : ''
-  const byRole: Record<string, string> = {
-    '製作人': `好問題。離線時我先顧大局${energyNote}：方向、情緒、這首歌像不像你要的。細部和弦／押韻可以問作曲家或作詞人；接上 LLM 後我能聊得更自由。`,
-    '作曲家': `好問題。離線時我拿手的是：為什麼這個和弦、更哀傷／更明亮、旋律怎麼改、音域太高、下一步${energyNote}。接上 LLM 後可以随便哼着問。`,
-    '作詞人': `好問題。離線時我多談畫面、押韻、字和旋律咬不咬合${energyNote}。接上 LLM 後可以一句一句陪你寫，但仍不替你寫完。`,
-    '編曲': `好問題。離線時我愛比兩個版本：誰進來、誰安靜、能量曲線${energyNote}。接上 LLM 後可以更細地談配器。`,
-    '錄音師': `好問題。離線時我一次只講一件：音量、音準、混音位置、怎麼帶進 REAPER${energyNote}。接上 LLM 後步驟可以問得更細。`,
-  }
-  const name = persona?.name ?? ''
   return {
-    text: byRole[name] ?? `好問題。我目前的離線模式只會回答幾類問題${energyNote}：為什麼這個和弦、換更哀傷／更明亮的走向、押韻、旋律怎麼改、音域太高、下一步。接上 LLM 後可以自由問。`,
+    text: `好問題。我目前的離線模式只會回答幾類問題${energyNote}：為什麼這個和弦、換更哀傷／更明亮的走向、押韻、旋律怎麼改、音域太高、下一步。接上 LLM 後可以自由問。`,
     next: `這一檯是「${STEP_ZH[step]}」——先動手，我會在你做完時解釋。`,
   }
 }
 
-export function mockReply(p: Project, input: { step: string; event?: { kind: string; detail: string }; question?: string; persona?: { name: string; focus: string; voice: string } }): AgentReply {
-  if (input.question) return withVoice(input.persona, questionReply(p, input.step, input.question, input.persona))
+export function mockReply(p: Project, input: { step: string; event?: { kind: string; detail: string }; question?: string }): AgentReply {
+  if (input.question) return questionReply(p, input.step, input.question)
   if (input.event) return eventReply(p, input.step, input.event.kind, input.event.detail)
   return { text: '' }
 }
