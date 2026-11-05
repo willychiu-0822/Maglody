@@ -1,0 +1,178 @@
+import { useEffect, useRef, useState } from 'react'
+import { Card, Coach, FeedbackList, Light, Meter, Why, type Feedback, type Level } from '../components/ui'
+import { ac, click, playNote } from '../lib/audio'
+import { useMic } from '../lib/mic'
+import { jianpu, noteNameOct } from '../lib/theory'
+import type { StepDef, StepProps } from './types'
+
+export const REC_CHECKS = [
+  { id: 'room', label: '找安靜的房間，關掉冷氣、風扇', why: '麥克風會收進所有聲音，事後很難去除。' },
+  { id: 'soft', label: '周圍有軟的東西（衣櫃、棉被、窗簾）', why: '軟物吸收回音，硬牆會讓聲音變「空」。衣櫃前錄音是業餘神技。' },
+  { id: 'dist', label: '嘴巴離麥克風約一個拳頭（10–15 公分）', why: '太近低頻過重、噴麥；太遠房間回音變多。' },
+  { id: 'pop', label: '準備防噴罩（或用絲襪套衣架代替）', why: 'ㄅ、ㄆ 的氣流會打到麥克風造成「噗」聲。' },
+  { id: 'phones', label: '戴耳機聽伴奏和節拍器，不要外放', why: '外放的伴奏會被錄進人聲軌，混音時無法分開。' },
+  { id: 'takes', label: '每段至少錄 3 次（take），之後挑最好的', why: '專業歌手也錄很多次。多錄幾次，壓力就小了。' },
+  { id: 'warm', label: '錄前暖嗓 5 分鐘、喝溫水', why: '聲帶是肌肉，暖身後音準和音色都更穩。' },
+  { id: 'sheet', label: '印出或打開歌詞＋和弦表', why: '專心在情緒上，不要邊錄邊想詞。' },
+]
+
+function dbLevel(db: number): Level {
+  if (db > -3) return 'bad'
+  if (db > -24 && db <= -6) return 'good'
+  return 'warn'
+}
+
+function RecordingStep({ p, update }: StepProps) {
+  const r = p.recording
+  const mic = useMic()
+  const [mode, setMode] = useState<'level' | 'pitch' | null>(null)
+  const [target, setTarget] = useState<number | null>(null)
+  const holdRef = useRef(0)
+  const [hits, setHits] = useState(0)
+  const [metro, setMetro] = useState<number | null>(null)
+
+  const notes = [...p.melody.chorus, ...p.melody.verse].filter((m): m is number => m != null && m >= 0)
+  const lo = notes.length ? Math.min(...notes) : p.hum?.rangeLow ?? 57
+  const hi = notes.length ? Math.max(...notes) : p.hum?.rangeHigh ?? 69
+  const targets = [lo, Math.round((lo + hi) / 2), hi].filter((v, i, a) => a.indexOf(v) === i)
+
+  // 音準練習：連續在 ±25 cents 內約 0.6 秒算一次命中
+  const cents = target != null && mic.midi != null ? Math.round((mic.midi - target - Math.round((mic.midi - target) / 12) * 12) * 100) : null
+  const pitchLevel: Level | null = cents == null ? null : Math.abs(cents) <= 25 ? 'good' : Math.abs(cents) <= 50 ? 'warn' : 'bad'
+  useEffect(() => {
+    if (pitchLevel === 'good') {
+      holdRef.current++
+      if (holdRef.current === 36) {
+        setHits((h) => h + 1)
+        update('recording', (x) => ({ ...x, pitchHits: x.pitchHits + 1 }))
+      }
+    } else holdRef.current = 0
+  }, [mic.midi]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const startLevel = async () => { setMode('level'); mic.resetPeak(); if (!mic.running) await mic.start() }
+  const endLevel = () => { update('recording', { ...r, levelPeakDb: Math.round(mic.peakDb) }); mic.stop(); setMode(null) }
+  const startPitch = async (m: number) => { setTarget(m); setMode('pitch'); playNote(m, 1.2, { type: 'sine', gain: 0.3 }); holdRef.current = 0; if (!mic.running) await mic.start() }
+
+  useEffect(() => {
+    if (metro == null) return
+    const c = ac()
+    const beat = 60 / p.idea.bpm
+    let n = 0
+    let t = c.currentTime + 0.1
+    const id = window.setInterval(() => {
+      while (t < c.currentTime + 0.2) { click(t, n % 4 === 0); t += beat; n++ }
+    }, 50)
+    return () => clearInterval(id)
+  }, [metro, p.idea.bpm])
+
+  const lvl = dbLevel(mic.levelDb)
+  const fb: Feedback[] = []
+  if (r.levelPeakDb != null) {
+    const pk = r.levelPeakDb
+    fb.push(pk > -3 ? { level: 'bad', text: `峰值 ${pk} dB，太大聲會破音（削波）。`, tip: '把麥克風／介面的增益（Gain）調小，或離麥克風遠一點。破音是錄音唯一救不回來的錯誤。' } : pk >= -18 ? { level: 'good', text: `峰值 ${pk} dB，音量健康，有足夠空間給最大聲的句子。` } : { level: 'warn', text: `峰值 ${pk} dB，偏小聲。`, tip: '增益調大一點或靠近一些。太小聲的錄音放大後雜音也會變大。' })
+  }
+  const nChecked = REC_CHECKS.filter((c) => r.checks[c.id]).length
+  fb.push(nChecked >= 6 ? { level: 'good', text: `準備清單完成 ${nChecked}/${REC_CHECKS.length}。` } : { level: 'warn', text: `準備清單完成 ${nChecked}/${REC_CHECKS.length}。` })
+  if (r.pitchHits) fb.push(r.pitchHits >= 3 ? { level: 'good', text: `音準練習命中 ${r.pitchHits} 次，聲音準備好了。` } : { level: 'warn', text: `音準練習命中 ${r.pitchHits} 次，再多練幾次。` })
+
+  return (
+    <>
+      <Coach>
+        歌寫好了，要把它錄下來。錄音前的準備比器材更重要——一支手機加一個衣櫃，就能錄出很好的 Demo。
+        我們來做三件事：測音量、暖嗓抓音準、確認環境清單。
+      </Coach>
+
+      <Card title="1. 音量測試（找出最好的增益）">
+        <p className="muted small">用你這首歌最大聲的那句唱一遍。目標：最大聲時落在綠色區，永遠不碰到紅色。</p>
+        <div className="row wrap">
+          {mode !== 'level' ? <button className="btn btn-primary" onClick={startLevel}>● 開始測試</button> : <button className="btn btn-danger" onClick={endLevel}>■ 結束並記錄</button>}
+        </div>
+        {mic.error && <p className="error">{mic.error}</p>}
+        <label className="row small muted" style={{ marginTop: 8 }}>
+          <input type="checkbox" checked={!!r.checks.nomic} onChange={(e) => update('recording', { ...r, checks: { ...r.checks, nomic: e.target.checked } })} />
+          我現在沒有麥克風，正式錄音前再回來測
+        </label>
+        {mode === 'level' && (
+          <div className="level-box">
+            <div className="row between small"><span>目前 {mic.levelDb > -99 ? mic.levelDb.toFixed(0) : '—'} dB</span><span>峰值 {mic.peakDb > -99 ? mic.peakDb.toFixed(0) : '—'} dB</span></div>
+            <Meter value={(mic.levelDb + 60) / 60} level={lvl} />
+            <div className="meter-scale small muted"><span>-60</span><span>-24</span><span>-6</span><span>0 dB</span></div>
+          </div>
+        )}
+      </Card>
+
+      <Card title="2. 暖嗓：音準跟唱">
+        <p className="muted small">點一個音，聽完後跟著唱「啊～」，撐住。指針在中間綠區越久越好（停留約 0.6 秒算一次命中）。這些是你旋律裡的最低、中間、最高音。</p>
+        <div className="row wrap">
+          {targets.map((m) => (
+            <button key={m} className={`btn ${target === m ? 'btn-primary' : ''}`} onClick={() => startPitch(m)}>
+              {noteNameOct(m)}（{jianpu(m, p.harmony.root, p.harmony.mode)}）
+            </button>
+          ))}
+          {mode === 'pitch' && <button className="btn btn-danger" onClick={() => { mic.stop(); setMode(null) }}>■ 停止</button>}
+        </div>
+        {mode === 'pitch' && target != null && (
+          <div className="tuner">
+            <div className="tuner-scale">
+              <div className="tuner-zone warn" /><div className="tuner-zone good" /><div className="tuner-zone warn" />
+              {cents != null && <div className={`tuner-needle n-${pitchLevel}`} style={{ left: `${50 + Math.max(-100, Math.min(100, cents)) / 2}%` }} />}
+            </div>
+            <div className="row between small">
+              <span>偏低</span>
+              <span>{cents == null ? '請開始唱…' : `${cents > 0 ? '+' : ''}${cents} 音分 ${pitchLevel === 'good' ? '準！撐住' : cents > 0 ? '稍微放低' : '稍微抬高'}`}</span>
+              <span>偏高</span>
+            </div>
+            <p className="small">本次命中：{hits}</p>
+          </div>
+        )}
+      </Card>
+
+      <Card title="3. 錄音環境清單">
+        <ul className="checklist">
+          {REC_CHECKS.map((c) => (
+            <li key={c.id}>
+              <label>
+                <input type="checkbox" checked={!!r.checks[c.id]} onChange={(e) => update('recording', { ...r, checks: { ...r.checks, [c.id]: e.target.checked } })} />
+                <span>
+                  {c.label}
+                  <span className="muted small block">{c.why}</span>
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card title="4. 節拍器（你的歌速度）">
+        <div className="row">
+          {metro == null ? <button className="btn" onClick={() => setMetro(Date.now())}>▶ {p.idea.bpm} BPM</button> : <button className="btn btn-danger" onClick={() => setMetro(null)}>■ 停止</button>}
+          <span className="muted small">錄音時戴耳機聽它，人聲才會跟伴奏對齊。</span>
+        </div>
+      </Card>
+
+      <Card title="即時回饋">
+        <FeedbackList items={fb} />
+        <div className="legend small muted"><Light level="good" /> -24～-6 dB 健康 <Light level="warn" /> 太小或接近上限 <Light level="bad" /> -3 dB 以上會破音</div>
+      </Card>
+
+      <Why title="為什麼峰值要留在 -6 dB 以下？" apply="直播、Podcast、錄 Vlog 旁白都用同樣標準。">
+        <p>數位錄音的上限是 0 dB，超過就會「削波」，波形頂端被切掉，聽起來是刺耳的破音，後製完全救不回。留 6 dB 以上的空間（headroom），就算情緒一激動也不怕。</p>
+      </Why>
+      <Why title="音分（cent）是什麼？" apply="調樂器、用修音軟體、看調音器時都會看到它。">
+        <p>一個半音分成 100 音分。一般人耳對 ±10–25 音分的偏差不太敏感，超過 50 音分（半個半音）就會明顯「走音」。</p>
+      </Why>
+    </>
+  )
+}
+
+export const recordingStep: StepDef = {
+  key: 'record',
+  title: '錄音準備',
+  subtitle: '測音量、暖嗓、整理環境',
+  glyph: '錄',
+  Component: RecordingStep,
+  requirements: (p) => [
+    { label: '完成音量測試且沒有破音（或註明稍後再測）', ok: (p.recording.levelPeakDb != null && p.recording.levelPeakDb <= -3) || !!p.recording.checks.nomic },
+    { label: '準備清單至少勾 6 項', ok: REC_CHECKS.filter((c) => p.recording.checks[c.id]).length >= 6 },
+  ],
+}

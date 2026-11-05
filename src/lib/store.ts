@@ -27,7 +27,7 @@ export interface Project {
   idea: { mood: string; theme: string; image: string; story: string; title: string; hook: string; bpm: number }
   lyrics: LyricSection[]
   harmony: { root: number; mode: Mode; verse: (number | null)[]; chorus: (number | null)[]; quizRight: number; quizTotal: number }
-  melody: { cells: (number | null)[]; reflections: string }
+  melody: { verse: (number | null)[]; chorus: (number | null)[]; reflections: string }
   arrangement: ArrSection[]
   recording: { checks: Record<string, boolean>; levelPeakDb: number | null; pitchHits: number }
   mix: { tracks: Record<TrackId, TrackSettings>; listened: boolean }
@@ -49,7 +49,7 @@ export const defaultProject = (): Project => ({
     { id: uid(), kind: 'chorus', text: '' },
   ],
   harmony: { root: 0, mode: 'major', verse: [null, null, null, null], chorus: [null, null, null, null], quizRight: 0, quizTotal: 0 },
-  melody: { cells: new Array(32).fill(null), reflections: '' },
+  melody: { verse: new Array(32).fill(null), chorus: new Array(32).fill(null), reflections: '' },
   arrangement: [],
   recording: { checks: {}, levelPeakDb: null, pitchHits: 0 },
   mix: {

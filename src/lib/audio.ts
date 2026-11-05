@@ -187,6 +187,10 @@ export interface LoopSpec {
 
 export interface Player { stop: () => void }
 
+const active = new Set<Player>()
+/** 換章節時停止所有正在播放的循環 */
+export function stopAll() { [...active].forEach((p) => p.stop()) }
+
 export function playLoop(spec: LoopSpec): Player {
   const c = ac()
   const graph = spec.mix
@@ -250,12 +254,15 @@ export function playLoop(spec: LoopSpec): Player {
     }
   }
   cycle()
-  return {
+  const player: Player = {
     stop: () => {
+      active.delete(player)
       stopped = true
       timers.forEach((t) => clearTimeout(t))
       scheduled.forEach((n) => { try { n.stop() } catch { /* already stopped */ } })
       spec.onStep?.(-1)
     },
   }
+  active.add(player)
+  return player
 }
