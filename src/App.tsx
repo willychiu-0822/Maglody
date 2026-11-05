@@ -128,7 +128,7 @@ export default function App() {
       <main className="desk" key={step.key}>
         <button className="presence" onClick={() => openChat(role.id)} aria-label={`跟${role.name}聊`}>
           <span className="presence-avatar" aria-hidden>{role.glyph}</span>
-          <span className="presence-name">{whisper ? <span className="aside-line">{speaker.id !== role.id && `${speaker.name}：`}{whisper}</span> : !latestRaw ? <em>{role.enter}</em> : role.name}</span>
+          <span className="presence-name">{whisper ? <span className="aside-line">{speaker.id !== role.id && `${speaker.name}：`}{whisper}</span> : role.name}</span>
         </button>
 
         <WhisperContext.Provider value={whisper}>

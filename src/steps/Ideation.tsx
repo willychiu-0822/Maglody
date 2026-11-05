@@ -62,7 +62,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
     <>
       <Coach short={!idea.mood ? '這首歌想帶著什麼感覺？點一個，聽聽看。' : !idea.hook.trim() ? '如果整首歌只能留一句話，會是哪一句？' : `「${idea.hook}」，好。`} />
 
-      <div className={`mood-grid ${!idea.mood ? 'nudge' : ''}`}>
+      <div className={`mood-grid${!idea.mood ? " awaiting-touch" : ""}`}>
         {MOODS.map((m) => (
           <button key={m.id} className={`mood ${idea.mood === m.id ? 'on' : ''}`} onClick={() => pickMood(m)}>{m.name}</button>
         ))}

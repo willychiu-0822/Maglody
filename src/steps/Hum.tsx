@@ -132,7 +132,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
   const hasResult = !!hum && !mic.running && !busy
   return (
     <>
-      <Coach short={mic.running ? '我在聽……哼完按停止。' : hum ? '聽聽整理後的樣子，喜歡就帶著它繼續。' : '哼一段腦中的旋律給我聽。不用好聽，有就好。'} />
+      <Coach short={mic.running ? '我在聽……哼完按停止。' : hum ? <>你最常回去的音是 <strong>{NOTE_NAMES[hum.keyRoot]}</strong>，這首歌的「家」在這裡。</> : '哼一段腦中的旋律給我聽。不用好聽，有就好。'} />
 
       <div className="stage">
         {mic.running && <div className={`big-note ${mic.midi != null ? 'on' : ''}`}>{mic.midi != null ? noteNameOct(mic.midi) : '…'}</div>}
