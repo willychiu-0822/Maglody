@@ -6,6 +6,36 @@
 
 ---
 
+## 最小可跑設定（先在自己電腦試，確認通了再部署）
+
+需要 Node 22.18 以上。開兩個終端機：
+
+**OpenAI**
+```bash
+# 終端機 1：後端
+LLM_PROVIDER=openai OPENAI_API_KEY=sk-你的金鑰 LLM_MODEL=你帳號可用的模型名 npm run server
+# 終端機 2：前端
+VITE_AGENT_URL=http://localhost:8787/api/master npm run dev
+```
+
+**Google Gemini（最簡單的 GCP 路線，只要一把金鑰）**
+```bash
+LLM_PROVIDER=gemini GEMINI_API_KEY=你的金鑰 LLM_MODEL=gemini-2.5-flash npm run server
+```
+
+**Vertex AI（本機）**：先執行 `gcloud auth login`，並在專案裡啟用 Vertex AI API，然後：
+```bash
+LLM_PROVIDER=vertex GCP_PROJECT=你的專案ID GCP_LOCATION=asia-east1 LLM_MODEL=gemini-2.5-flash npm run server
+```
+
+**確認有通**：
+1. 瀏覽器打開 `http://localhost:8787/api/health`，應該看到 provider 和 model。
+2. 打開 `http://localhost:5173`，點角色頭像問一句。對話框上方不再顯示「（離線）」，就代表接上了。
+
+如果啟動時印出「缺少環境變數 XXX」，照提示補上即可。
+
+> ⚠ 以上指令只用本機假端點驗證過格式，**還沒有用真金鑰實測**。第一次跑如果出錯，請把終端機印出的錯誤訊息貼給我。
+
 ## 0. 先選一條路
 
 | 路線 | 你會得到 | 要花的錢 | 難度 | 建議對象 |

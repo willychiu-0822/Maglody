@@ -13,6 +13,13 @@ Repo：<https://github.com/willychiu-0822/Maglody>
 - 大師只當教練，不會替你寫好整首歌。
 - 靈感隨時可以記：文字、語音（自動聽寫）、哼唱、照片可以放在同一則裡，之後一鍵拉回創作。
 
+## ⚠ 目前狀態（誠實版）
+
+- ✅ 已驗證：`npm run build` 通過；模擬 iPhone 13 的斷言式自測 `npm run selftest` 50/50 通過；LLM 後端用本機假端點驗過 OpenAI Chat／Responses、Gemini、Vertex 的請求格式。
+- ❌ **尚未驗證：實體手機**（iOS Safari／Android Chrome 的麥克風權限、靜音鍵、語音聽寫、觸控、PWA 安裝與離線）。
+- ❌ **尚未驗證：真 API key**（OpenAI、Gemini、Vertex 都還沒用真金鑰打過；Cloud Run 取得 Vertex 憑證那段沒執行過）。
+- ⚠ 離線模式的五位角色回答是規則式的，語氣差異很小；構想、和聲、歌詞首屏沒有大按鈕，要實機觀察新手是否看得懂；後端沒有每人次數限制。
+
 ## 📱 手機可直接使用
 
 Maglody 以手機直向為主要設計。主流程在手機上可以從頭走到尾，也可以安裝成 PWA（加入主畫面，可離線開啟）。
