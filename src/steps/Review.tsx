@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Card, Coach, FeedbackList, Light, Why, type Feedback, type Level } from '../components/ui'
+import { Card, Coach, DeskActions, FeedbackList, Light, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { SongSheet } from '../components/SongSheet'
 import { playLoop, type Player } from '../lib/audio'
 import type { Project } from '../lib/store'
@@ -66,7 +66,8 @@ function download(name: string, content: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
 }
 
-function ReviewStep({ p, update, notify }: StepProps) {
+function ReviewStep({ p, update, notify, next }: StepProps) {
+  void next
   const r = p.review
   const [playing, setPlaying] = useState<number>(-1)
   const playerRef = useRef<Player | null>(null)
@@ -89,19 +90,19 @@ function ReviewStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach title="老師最後的話" short="從頭聽一次你的歌。這次換你當老師。">
-        你從一段哼唱走到這裡，已經完成了一首歌的骨架。我不會替你打分數——<strong>好不好，由你判斷</strong>。
-        但我會把一路上的觀察攤開給你看，你再一題一題誠實地評分自己。評分低的地方，就是下一版要改的地方。
-      </Coach>
+      <Coach short={playing >= 0 ? `正在播：${KIND_ZH[p.arrangement[playing].kind]}` : r.verdict.trim() ? '寫下來了。這是你的歌。' : '從頭聽一次。這次換你當老師：哪一句你最想再聽？'} />
 
-      <Card title="完整試聽">
-        <div className="row wrap">
-          {playing < 0 ? <button className="btn btn-primary" onClick={() => playSong(0)} disabled={!p.arrangement.length}>▶ 從頭播放整首</button> : <button className="btn btn-danger" onClick={stopSong}>■ 停止</button>}
-          {playing >= 0 && <span className="muted">正在播放：{KIND_ZH[p.arrangement[playing].kind]}（{playing + 1}/{p.arrangement.length}）</span>}
-        </div>
-        <SongSheet p={p} />
-      </Card>
+      <SongSheet p={p} />
 
+      <textarea className="one-line" rows={3} value={r.verdict} placeholder="這首歌好嗎？最喜歡哪裡？下一版想改什麼？" onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
+
+      {playing >= 0 ? (
+        <DeskActions primary={{ label: '■ 停', onClick: stopSong }} />
+      ) : (
+        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: () => playSong(0), disabled: !p.arrangement.length }} secondary={{ label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
+      )}
+
+      <Toolbox>
       <Card title="自我評量（1 = 還不行，5 = 我很滿意）">
         {DIMENSIONS.map((d) => {
           const items = d.source(p)
@@ -137,11 +138,7 @@ function ReviewStep({ p, update, notify }: StepProps) {
         </ul>
       </Card>
 
-      <Card title="你的判斷">
-        <label className="field">
-          <span>這首歌好嗎？最滿意哪裡？下一版要改哪 3 件事？</span>
-          <textarea rows={5} value={r.verdict} onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
-        </label>
+      <Card title="匯出">
         <div className="row wrap">
           <button className="btn" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
           <button className="btn" onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
@@ -153,6 +150,7 @@ function ReviewStep({ p, update, notify }: StepProps) {
         <p>電腦只能檢查「規則」：有沒有押韻、強拍是不是和弦音。但一首歌會不會打動人，取決於它有沒有說出你真正想說的話。規則是起點，不是終點——很多名曲故意打破規則。</p>
         <p>學會評價自己的作品，才是從學生變成創作者的那一步。</p>
       </Why>
+      </Toolbox>
     </>
   )
 }
@@ -164,8 +162,6 @@ export const reviewStep: StepDef = {
   glyph: '成',
   Component: ReviewStep,
   requirements: (p) => [
-    { label: '7 個面向都自評', ok: DIMENSIONS.every((d) => p.review.ratings[d.id]) },
-    { label: '最後檢查至少完成 4 項', ok: FINAL_CHECKS.filter((c) => p.review.checks[c.id]).length >= 4 },
-    { label: '寫下你的判斷（20 字以上）', ok: p.review.verdict.trim().length >= 20 },
+    { label: '寫下你自己的判斷', ok: p.review.verdict.trim().length >= 4 },
   ],
 }

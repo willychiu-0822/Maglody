@@ -621,3 +621,129 @@ details.quiet summary { cursor: pointer; color: var(--accent); text-decoration: 
 details.quiet summary::-webkit-details-marker { display: none; }
 .spark { font-size: 1.05rem; }
 @media (pointer: coarse) { .link-btn { min-height: 44px; } .inspo-card .pick input { width: 26px; height: 26px; } }
+
+/* =========================================================
+   極簡工作室（第三輪）：一屏一個主動作
+   ========================================================= */
+.app.studio { padding-bottom: 120px; }
+.top-min { display: flex; align-items: center; justify-content: space-between; max-width: 640px; margin: 0 auto; padding: calc(10px + env(safe-area-inset-top)) 20px 0; }
+.brand-mark { font-family: var(--font-title); letter-spacing: .2em; font-size: .9rem; color: var(--muted); }
+.desk-name { background: none; border: none; font-family: var(--font-title); font-size: 1rem; color: var(--ink); padding: 10px 4px; min-height: 44px; cursor: pointer; letter-spacing: .1em; }
+.desk-name span { color: var(--muted); font-size: .8rem; }
+
+.desk { max-width: 640px; margin: 0 auto; padding: 18px 20px 0; display: flex; flex-direction: column; gap: 22px; animation: fadein .35s ease-out; }
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* 角色：悄悄登場，點了就能聊 */
+.presence { align-self: flex-start; display: flex; align-items: center; gap: 10px; background: none; border: none; padding: 0; cursor: pointer; min-height: 44px; }
+.presence-avatar { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; font-family: var(--font-title); font-size: 1.1rem; background: radial-gradient(circle at 35% 30%, var(--wash-ochre), var(--paper) 70%); animation: arrive .6s ease-out; }
+@keyframes arrive { from { opacity: 0; transform: translateX(-10px) rotate(-6deg); } to { opacity: 1; transform: none; } }
+.presence-name { font-size: .85rem; color: var(--muted); letter-spacing: .1em; }
+.enter-line { margin: -14px 0 0; font-size: .85rem; color: var(--muted); font-style: italic; }
+.whisper { font-family: var(--font-title); font-size: 1.32rem; line-height: 1.7; letter-spacing: .04em; margin: -6px 0 0; animation: fadein .4s ease-out; }
+
+/* 舞台：工作區 */
+.stage { min-height: 120px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.stage-empty { font-family: var(--font-title); font-size: 3rem; color: var(--grid-strong); text-align: center; }
+.stage .big-note { text-align: center; font-size: 2.6rem; font-family: var(--font-title); }
+.center { text-align: center; }
+
+/* 主動作：一顆、大、淡彩、墨線 */
+.desk-actions { display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 4px; }
+.primary-action {
+  width: 100%; min-height: 60px; padding: 14px 22px; font-family: var(--font-title); font-size: 1.15rem; letter-spacing: .12em;
+  color: var(--ink); background: var(--accent-soft); border: 1.5px solid var(--ink);
+  border-radius: 22px 18px 24px 16px / 18px 24px 16px 22px; cursor: pointer; transition: transform .1s;
+}
+.primary-action:active { transform: scale(.98); }
+.primary-action:disabled { background: transparent; border-style: dashed; border-color: var(--grid-strong); color: var(--muted); }
+.desk-actions .link-btn { color: var(--muted); text-decoration-color: var(--grid-strong); }
+
+/* 工具箱：所有進階，預設關閉 */
+.toolbox { margin-top: 6px; border-top: 1px dashed var(--grid-strong); padding-top: 4px; }
+.toolbox > summary { list-style: none; cursor: pointer; color: var(--muted); font-size: .88rem; letter-spacing: .2em; text-align: center; padding: 12px 0; min-height: 44px; }
+.toolbox > summary::-webkit-details-marker { display: none; }
+.toolbox > summary::before { content: '＋ '; }
+.toolbox[open] > summary::before { content: '－ '; }
+.toolbox-body { display: flex; flex-direction: column; gap: 14px; padding-bottom: 8px; }
+
+/* 安靜的分頁 */
+.seg-quiet { border: none; gap: 18px; align-self: center; }
+.seg-quiet button { background: none !important; color: var(--muted); padding: 8px 2px; min-height: 40px; border-bottom: 1.5px solid transparent; border-radius: 0; font-size: .95rem; }
+.seg-quiet button.on { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* 構想：情緒是一排淡彩紙片 */
+.desk .mood-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.desk .mood { justify-content: center; text-align: center; min-height: 56px; font-family: var(--font-title); background: var(--paper); border: 1px solid var(--line); border-radius: 14px 18px 12px 16px; }
+.desk .mood.on { background: var(--accent-soft); border-color: var(--ink); }
+.one-line { width: 100%; border: none !important; border-bottom: 1.5px solid var(--ink) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; font-family: var(--font-title); font-size: 1.25rem; padding: 10px 2px; }
+textarea.one-line { border: 1px solid var(--line) !important; border-radius: 12px !important; font-size: 1.05rem; background-image: repeating-linear-gradient(transparent 0 33px, var(--grid) 33px 34px) !important; line-height: 34px; }
+
+/* 和聲 */
+.desk .slots { gap: 10px; }
+.desk .slot { min-height: 72px; font-family: var(--font-title); font-size: 1.3rem; background: var(--paper); }
+.desk .chord-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.desk .chord { align-items: center; text-align: center; padding: 10px 6px; background: var(--paper); border: 1px solid var(--line); border-left-width: 1px; }
+.desk .chord .chord-name { font-size: 1.15rem; }
+.desk .chord.hum { box-shadow: 0 0 0 2px var(--good-bg) inset; }
+
+/* 歌詞：一頁紙 */
+.lyric-wrap.paper { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; }
+.lyric-wrap.paper .lyric-input { border: none; background: transparent; background-image: repeating-linear-gradient(transparent 0 31px, var(--grid) 31px 32px); font-family: var(--font-title); }
+
+/* 編曲 */
+.desk .layer-grid { grid-template-columns: repeat(3, 1fr); }
+.desk .layer { align-items: center; justify-content: center; min-height: 52px; font-family: var(--font-title); }
+
+/* 混音：四條推桿就好 */
+.mix-simple { display: flex; flex-direction: column; gap: 14px; }
+.mix-row { display: grid; grid-template-columns: 5em 1fr; align-items: center; gap: 10px; font-family: var(--font-title); }
+
+/* 靈感貼紙：唯一常駐的入口 */
+.sticker {
+  position: fixed; right: 18px; bottom: calc(22px + env(safe-area-inset-bottom)); z-index: 36;
+  min-width: 96px; min-height: 52px; padding: 10px 16px 14px; border: none; cursor: pointer;
+  background: #f6e7b8; color: #3b3326; font-family: var(--font-title); font-size: 1rem; letter-spacing: .1em;
+  transform: rotate(-3deg); box-shadow: 0 2px 0 rgba(47, 43, 38, .12);
+  clip-path: polygon(0 0, 100% 0, 100% 84%, 90% 100%, 78% 86%, 64% 100%, 50% 87%, 36% 100%, 22% 86%, 8% 100%, 0 88%);
+}
+.sticker::before { content: ''; position: absolute; top: -5px; left: 50%; width: 34px; height: 12px; margin-left: -17px; background: rgba(181, 99, 75, .28); transform: rotate(4deg); }
+.sticker.rec { background: #f3c9bd; }
+@media (prefers-color-scheme: dark) { .sticker { background: #d9c48a; color: #2a241b; } }
+
+/* 記一下：一張紙＋三個小圓 */
+.inspo-media { display: flex; gap: 14px; justify-content: center; }
+.inspo-media .inspo-big { min-height: 0; width: 76px; padding: 6px 0; border: none; background: none; gap: 4px; }
+.inspo-media .inspo-big-icon { width: 52px; height: 52px; font-size: 1.1rem; }
+.inspo-tags-wrap summary { cursor: pointer; list-style: none; min-height: 36px; }
+.inspo-more { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+.inspo-card .inspo-actions { flex-direction: column; }
+
+/* 工作室選單 */
+.menu-sheet { gap: 14px; }
+.menu-title { font-family: var(--font-title); letter-spacing: .2em; }
+.menu-phase { display: flex; flex-direction: column; }
+.menu-phase-name { font-size: .78rem; letter-spacing: .3em; color: var(--muted); padding: 6px 0; }
+.menu-desk { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 0 4px; background: none; border: none; border-bottom: 1px solid var(--line); font-family: var(--font-title); font-size: 1.02rem; cursor: pointer; text-align: left; }
+.menu-desk.on { color: var(--accent); }
+.menu-more summary { cursor: pointer; color: var(--muted); padding: 12px 0; min-height: 44px; }
+.menu-more[open] { display: flex; flex-direction: column; gap: 12px; }
+
+/* 跟夥伴聊 */
+.chat-sheet { max-height: 88vh; }
+.role-switch { display: flex; gap: 8px; }
+.role-dot { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--grid-strong); background: var(--paper); font-family: var(--font-title); cursor: pointer; }
+.role-dot.on { border: 1.5px solid var(--ink); background: var(--accent-soft); }
+.chat-sheet .master-list { max-height: 50vh; }
+.presence { width: 100%; text-align: left; }
+.presence-name { flex: 1; line-height: 1.55; }
+.aside-line { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; color: var(--ink); opacity: .78; font-size: .9rem; animation: fadein .4s; }
+.presence-name em { font-style: italic; }
+.desk .roll-pager { border: none; gap: 6px; }
+.desk .roll-pager button { background: none; color: var(--muted); border-bottom: 1.5px solid transparent; border-radius: 0; font-size: .82rem; padding: 6px 0; }
+.desk .roll-pager button.on { color: var(--ink); border-bottom-color: var(--accent); }
+/* 頁首：左邊是工作室選單，右邊是靈感貼紙；底部完全留給主動作 */
+.top-min { position: sticky; top: 0; z-index: 30; background: var(--bg); padding-bottom: 6px; }
+.desk-name { text-align: left; }
+.sticker { position: relative; right: auto; bottom: auto; min-width: 0; min-height: 48px; padding: 8px 14px 12px; font-size: .95rem; }
+.app.studio { padding-bottom: 48px; }

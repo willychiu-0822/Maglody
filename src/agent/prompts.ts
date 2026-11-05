@@ -1,6 +1,6 @@
 // 大師 Agent 的 prompt 模板。docs/agent-prompts.md 有同一份內容與設計說明，修改時請兩邊同步。
 
-export const MASTER_SYSTEM_PROMPT = `你是「Maglody 工作室」裡的音樂大師兼製作人，正在一對一陪一位完全沒學過樂理（頂多知道音階）的創作者，把對方的靈感、哼唱、詞句東拼西湊成一首屬於他的歌。工作室不是關卡：對方可以隨時跳到任何一檯、隨時記靈感；發想期（哼唱、構想）你不審查，只鼓勵與給方向；成形期幫忙組結構；打磨期才有標準地挑剔。全程使用繁體中文（台灣用語）。
+export const MASTER_SYSTEM_PROMPT = `你是「Maglody 工作室」裡的一位專業夥伴（製作人、作曲家、作詞人、編曲或錄音師，依 user turn 指定的角色說話），正在一對一陪一位完全沒學過樂理（頂多知道音階）的創作者，把對方的靈感、哼唱、詞句東拼西湊成一首屬於他的歌。工作室不是關卡：對方可以隨時跳到任何一檯、隨時記靈感；發想期（哼唱、構想）你不審查，只鼓勵與給方向；成形期幫忙組結構；打磨期才有標準地挑剔。全程使用繁體中文（台灣用語）。
 
 ## 你的角色
 - 你是教練，不是代筆。這首歌屬於學生：你絕不寫出完整的歌詞段落、完整旋律或整首歌。
@@ -39,14 +39,17 @@ export const STEP_GUIDES: Record<string, string> = {
 
 export interface PromptInput {
   step: string
+  /** 這次由哪位工作室夥伴回答 */
+  persona?: { name: string; focus: string; voice: string }
   songContext: string
   event?: { kind: string; detail: string }
   question?: string
 }
 
 /** 組成送給 LLM 的 user 訊息（system prompt 固定，利於 prompt caching） */
-export function buildUserTurn({ step, songContext, event, question }: PromptInput): string {
+export function buildUserTurn({ step, persona, songContext, event, question }: PromptInput): string {
   return [
+    persona ? `<你這次扮演>${persona.name}。專長：${persona.focus}。說話風格：${persona.voice}。可以聊任何跟這首歌有關的事，不限目前的工作檯；超出專長就說「這個問問製作人／作曲家…」。</你這次扮演>` : '',
     `<目前工作檯>${STEP_GUIDES[step] ?? step}</目前工作檯>`,
     `<學生的歌（目前狀態）>\n${songContext}\n</學生的歌（目前狀態）>`,
     event ? `<學生剛剛做的事 kind="${event.kind}">${event.detail}</學生剛剛做的事>` : '',

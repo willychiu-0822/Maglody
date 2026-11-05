@@ -6,7 +6,8 @@ import type { Project, Update } from '../lib/store'
 import { uid } from '../lib/store'
 import { keyName } from '../lib/theory'
 import { pullOptions, collageOptions } from './pull'
-import { canTranscribe, useRecorder } from './recorder'
+import { useRecorder } from './recorder'
+import { DeskActions } from '../components/ui'
 import { TAG_ZH, type InspoApi, type InspoTag, type Inspiration } from './store'
 
 interface Draft {
@@ -73,6 +74,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const [toast, setToast] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [picked, setPicked] = useState<string[]>([])
+  const [collage, setCollage] = useState(false)
   const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((i) => i !== id) : [...x, id]))
   const rec = useRecorder()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -152,11 +154,10 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
     if (goto && goto !== step) onGo(goto)
   }
 
-  const recBtn = (kind: 'voice' | 'hum', label: string, sub: string) => (
+  const recBtn = (kind: 'voice' | 'hum', label: string, _sub: string) => (
     <button className={`inspo-big ${rec.recording === kind ? 'rec' : ''}`} onClick={() => void toggleRec(kind)} disabled={busy}>
       <span className="inspo-big-icon">{rec.recording === kind ? '■' : kind === 'voice' ? '說' : '哼'}</span>
-      <span>{rec.recording === kind ? `停止（${fmt(rec.elapsed)}）` : label}</span>
-      <span className="small muted">{sub}</span>
+      <span className="small">{rec.recording === kind ? fmt(rec.elapsed) : label}</span>
     </button>
   )
 
@@ -168,25 +169,22 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
         <div className="inspo-overlay" onClick={(e) => e.target === e.currentTarget && setOpen(null)}>
           <div className="inspo-sheet" role="dialog" aria-label="靈感">
             <div className="row between">
-              <div className="seg">
-                <button className={open === 'capture' ? 'on' : ''} onClick={() => setOpen('capture')}>隨手記</button>
-                <button className={open === 'library' ? 'on' : ''} onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
-              </div>
+              {open === 'capture'
+                ? <button className="link-btn" onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
+                : <button className="link-btn" onClick={() => setOpen('capture')}>← 記新的</button>}
               <button className="icon-btn" onClick={() => setOpen(null)} aria-label="關閉">✕</button>
             </div>
 
             {open === 'capture' && (
               <div className="inspo-capture">
-                <p className="muted small">想到什麼就寫下來，不用完整、不用好。也可以說、可以哼、可以拍——一起放進同一頁。記完回到「{stepTitle}」。</p>
                 <textarea autoFocus rows={3} value={draft.text} placeholder="幾個字就好……" onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
                 {rec.recording === 'voice' && rec.live && <div className="inspo-live">聽寫中：{rec.live}</div>}
-                <div className="inspo-bigs">
-                  {recBtn('voice', '說話', canTranscribe() ? '錄音＋自動聽寫' : '錄一段語音')}
-                  {recBtn('hum', '哼一段', '錄音＋音高分析')}
+                <div className="inspo-media">
+                  {recBtn('voice', '說', '')}
+                  {recBtn('hum', '哼', '')}
                   <button className="inspo-big" onClick={() => fileRef.current?.click()}>
-                    <span className="inspo-big-icon">照</span>
-                    <span>拍照／選圖</span>
-                    <span className="small muted">錄音中也能加</span>
+                    <span className="inspo-big-icon">拍</span>
+                    <span className="small">拍照</span>
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages(e.target.files); e.target.value = '' }} />
                 </div>
@@ -198,21 +196,21 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                     {draft.images.map((im) => <Thumb key={im.assetId} id={im.assetId} />)}
                   </div>
                 )}
-                <div className="inspo-tags">
-                  <span className="small muted">它也許是（可不選）：</span>
-                  {(Object.keys(TAG_ZH) as InspoTag[]).map((t) => (
-                    <button key={t} className={`chip ${draft.tags.includes(t) ? 'on' : ''}`} onClick={() => toggleTag(t)}>{TAG_ZH[t]}</button>
-                  ))}
-                </div>
-                <button className="btn btn-primary btn-lg inspo-save" disabled={!hasContent && !rec.recording} onClick={() => void save()}>
-                  {busy ? '收好中…' : '夾進本子，回去繼續'}
-                </button>
+                <details className="inspo-tags-wrap">
+                  <summary className="small muted">它也許是……（可不選）</summary>
+                  <div className="inspo-tags">
+                    {(Object.keys(TAG_ZH) as InspoTag[]).map((t) => (
+                      <button key={t} className={`chip ${draft.tags.includes(t) ? 'on' : ''}`} onClick={() => toggleTag(t)}>{TAG_ZH[t]}</button>
+                    ))}
+                  </div>
+                </details>
+                <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: !hasContent && !rec.recording }} />
               </div>
             )}
 
             {open === 'library' && (
               <div className="inspo-list">
-                <p className="muted small">勾選幾則碎片，可以把它們拼成新的東西：一段歌詞、一條接起來的旋律，或一則新的靈感。</p>
+                <button className="link-btn" onClick={() => { setCollage(!collage); setPicked([]) }}>{collage ? '不拼了' : '拼貼：挑幾則拼成新東西'}</button>
                 {picked.length >= 2 && (
                   <div className="collage-bar">
                     <strong className="small">拼貼 {picked.length} 則：</strong>
@@ -236,7 +234,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                   const isOpen = expanded === x.id
                   return (
                     <article key={x.id} className={`inspo-card ${picked.includes(x.id) ? 'picked' : ''}`}>
-                      <label className="pick"><input type="checkbox" checked={picked.includes(x.id)} onChange={() => togglePick(x.id)} /> 拿來拼</label>
+                      {collage && <label className="pick"><input type="checkbox" checked={picked.includes(x.id)} onChange={() => togglePick(x.id)} /> 拿來拼</label>}
                       <button className="inspo-card-head" onClick={() => setExpanded(isOpen ? null : x.id)}>
                         <strong className="inspo-text">{x.text || x.voice?.transcript || '（無文字）'}</strong>
                         <span className="small muted">{new Date(x.createdAt).toLocaleDateString('zh-TW')} · {x.tags.map((t) => TAG_ZH[t]).join('、') || '未分類'}{x.used.length ? ` · 已用 ${x.used.length} 次` : ''}</span>
@@ -247,12 +245,15 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                         {x.hum && x.hum.notes.length > 0 && <button className="chip" onClick={() => playHumNotes(x.hum!)}>▶ 哼唱 {x.hum.notes.length} 音</button>}
                         {x.images.map((im) => <Thumb key={im.assetId} id={im.assetId} />)}
                       </div>
-                      <div className="inspo-actions">
-                        <button className="btn btn-primary" onClick={() => pull(x, start)}>{start.label}</button>
-                        {here.slice(0, isOpen ? 99 : 2).map((o) => <button key={o.how + o.label} className="btn" onClick={() => pull(x, o)}>{o.label}</button>)}
-                        {here.length > 2 && <button className="btn btn-ghost small" onClick={() => setExpanded(isOpen ? null : x.id)}>{isOpen ? '收起' : `更多（${here.length - 2}）`}</button>}
-                        {isOpen && x.id !== 'seed-fuzui-qianxing' && <button className="btn btn-ghost small" onClick={() => { if (confirm('刪除這則靈感？')) api.remove(x.id) }}>刪除</button>}
-                      </div>
+                      {isOpen && !collage && (
+                        <div className="inspo-actions">
+                          <DeskActions primary={{ label: start.label, onClick: () => pull(x, start) }} />
+                          <div className="inspo-more">
+                            {here.map((o) => <button key={o.how + o.label} className="link-btn" onClick={() => pull(x, o)}>{o.label}</button>)}
+                            {x.id !== 'seed-fuzui-qianxing' && <button className="link-btn muted" onClick={() => { if (confirm('刪除這則靈感？')) api.remove(x.id) }}>刪除</button>}
+                          </div>
+                        </div>
+                      )}
                     </article>
                   )
                 })}

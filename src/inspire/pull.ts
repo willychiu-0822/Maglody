@@ -64,6 +64,7 @@ export function pullOptions(x: Inspiration, step: string, p: Project): { here: P
       update('idea', {
         ...pp.idea,
         title: x.tags.includes('title') && w ? w : pp.idea.title,
+        hook: w || pp.idea.hook,
         vibe: w && !pp.idea.vibe.includes(w) ? appendLine(pp.idea.vibe, w) : pp.idea.vibe,
         image: x.tags.includes('image') && w && !pp.idea.image ? w : pp.idea.image,
       })

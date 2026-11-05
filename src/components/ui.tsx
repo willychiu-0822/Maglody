@@ -8,21 +8,37 @@ export interface Feedback { level: Level; text: string; tip?: string }
 
 const LEVEL_ZH: Record<Level, string> = { good: '很好', warn: '可以更好', bad: '需要調整' }
 
+/** 大師最新一句話（由 App 提供）；有的話取代開場白 */
+export const WhisperContext = createContext<string | null>(null)
+
 /**
- * 老師的開場：只說一句「先做什麼」（short），想聽再多說（children）。
- * 學習是火種，不是一開始就把知識倒滿。
+ * 每一檯最上方只有一句話：大師剛說的，或這一檯要做的事。
+ * children（較長的說明）不再顯示在畫面上，避免一開頭就是一面字牆。
  */
-export function Coach({ children, short, title = '老師說' }: { children?: ReactNode; short?: ReactNode; title?: string }) {
-  const [more, setMore] = useState(false)
+export function Coach({ short }: { children?: ReactNode; short?: ReactNode; title?: string }) {
+  return <p className="whisper">{short}</p>
+}
+
+/** 一個畫面只允許：1 個主動作（大、輕柔）＋ 最多 1 個次要動作（文字連結） */
+export function DeskActions({ primary, secondary }: {
+  primary?: { label: ReactNode; onClick: () => void; disabled?: boolean }
+  secondary?: { label: ReactNode; onClick: () => void }
+}) {
   return (
-    <div className="coach">
-      <div className="coach-avatar" aria-hidden>師</div>
-      <div className="coach-bubble">
-        <div className="coach-title">{title}</div>
-        <div>{short ?? children}</div>
-        {short && children && (more ? <div className="coach-more">{children}</div> : <button className="link-btn" onClick={() => setMore(true)}>多說一點</button>)}
-      </div>
+    <div className="desk-actions">
+      {primary && <button className="primary-action" onClick={primary.onClick} disabled={primary.disabled}>{primary.label}</button>}
+      {secondary && <button className="link-btn" onClick={secondary.onClick}>{secondary.label}</button>}
     </div>
+  )
+}
+
+/** 工具箱：進階功能、回饋、原理全部收在這裡，預設關閉 */
+export function Toolbox({ children, label = '工具箱' }: { children: ReactNode; label?: string }) {
+  return (
+    <details className="toolbox">
+      <summary>{label}</summary>
+      <div className="toolbox-body">{children}</div>
+    </details>
   )
 }
 

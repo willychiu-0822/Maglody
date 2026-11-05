@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Card, Coach, FeedbackList, Light, Meter, Why, type Feedback, type Level } from '../components/ui'
+import { Card, Coach, DeskActions, FeedbackList, Light, Meter, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { ac, click, playNote } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { jianpu, noteNameOct } from '../lib/theory'
@@ -22,7 +22,7 @@ function dbLevel(db: number): Level {
   return 'warn'
 }
 
-function RecordingStep({ p, update, notify }: StepProps) {
+function RecordingStep({ p, update, notify, next }: StepProps) {
   const r = p.recording
   const mic = useMic()
   const [mode, setMode] = useState<'level' | 'pitch' | null>(null)
@@ -78,30 +78,27 @@ function RecordingStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach short={'錄之前先做三件小事：測音量、暖嗓、看看環境。'}>
-        歌寫好了，要把它錄下來。錄音前的準備比器材更重要——一支手機加一個衣櫃，就能錄出很好的 Demo。
-        我們來做三件事：測音量、暖嗓抓音準、確認環境清單。
-      </Coach>
+      <Coach short={mode === 'level' ? '唱你這首歌最大聲的那一句。' : r.levelPeakDb != null ? (r.levelPeakDb > -3 ? `最大聲到 ${r.levelPeakDb} dB，太滿了，退後一點再試。` : `最大聲 ${r.levelPeakDb} dB，安全。`) : '錄之前，先確定最大聲時不會破音。'} />
 
-      <Card title="1. 音量測試（找出最好的增益）">
-        <p className="muted small">用你這首歌最大聲的那句唱一遍。目標：最大聲時落在綠色區，永遠不碰到紅色。</p>
-        <div className="row wrap">
-          {mode !== 'level' ? <button className="btn btn-primary" onClick={startLevel}>● 開始測試</button> : <button className="btn btn-danger" onClick={endLevel}>■ 結束並記錄</button>}
-        </div>
-        {mic.error && <p className="error">{mic.error}</p>}
-        <label className="row small muted" style={{ marginTop: 8 }}>
-          <input type="checkbox" checked={!!r.checks.nomic} onChange={(e) => update('recording', { ...r, checks: { ...r.checks, nomic: e.target.checked } })} />
-          我現在沒有麥克風，正式錄音前再回來測
-        </label>
-        {mode === 'level' && (
+      <div className="stage">
+        {mode === 'level' ? (
           <div className="level-box">
-            <div className="row between small"><span>目前 {mic.levelDb > -99 ? mic.levelDb.toFixed(0) : '—'} dB</span><span>峰值 {mic.peakDb > -99 ? mic.peakDb.toFixed(0) : '—'} dB</span></div>
             <Meter value={(mic.levelDb + 60) / 60} level={lvl} />
-            <div className="meter-scale small muted"><span>-60</span><span>-24</span><span>-6</span><span>0 dB</span></div>
+            <div className="meter-scale small muted"><span>小聲</span><span>剛好</span><span>太滿</span></div>
           </div>
-        )}
-      </Card>
+        ) : <div className="stage-empty" aria-hidden>◎</div>}
+        {mic.error && <p className="error small">{mic.error}</p>}
+      </div>
 
+      {mode === 'level' ? (
+        <DeskActions primary={{ label: '■ 唱完了', onClick: endLevel }} />
+      ) : recordingStep.requirements(p).every((x) => x.ok) && next ? (
+        <DeskActions primary={{ label: <>準備好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '再測一次', onClick: startLevel }} />
+      ) : (
+        <DeskActions primary={{ label: '● 測音量', onClick: startLevel }} secondary={{ label: '沒有麥克風，先跳過', onClick: () => update('recording', { ...r, checks: { ...r.checks, nomic: true } }) }} />
+      )}
+
+      <Toolbox>
       <Card title="2. 暖嗓：音準跟唱">
         <p className="muted small">點一個音，聽完後跟著唱「啊～」，撐住。指針在中間綠區越久越好（停留約 0.6 秒算一次命中）。這些是你旋律裡的最低、中間、最高音。</p>
         <div className="row wrap">
@@ -162,6 +159,7 @@ function RecordingStep({ p, update, notify }: StepProps) {
       <Why ready={hits > 0 || r.pitchHits > 0} hint="先跟唱一個音。" listen={target != null ? { label: '再聽一次目標音', play: () => playNote(target, 1.2, { type: 'sine', gain: 0.3 }) } : undefined} title="音分（cent）是什麼？" apply="調樂器、用修音軟體、看調音器時都會看到它。">
         <p>一個半音分成 100 音分。一般人耳對 ±10–25 音分的偏差不太敏感，超過 50 音分（半個半音）就會明顯「走音」。</p>
       </Why>
+      </Toolbox>
     </>
   )
 }
@@ -173,7 +171,6 @@ export const recordingStep: StepDef = {
   glyph: '錄',
   Component: RecordingStep,
   requirements: (p) => [
-    { label: '完成音量測試且沒有破音（或註明稍後再測）', ok: (p.recording.levelPeakDb != null && p.recording.levelPeakDb <= -3) || !!p.recording.checks.nomic },
-    { label: '準備清單至少勾 6 項', ok: REC_CHECKS.filter((c) => p.recording.checks[c.id]).length >= 6 },
+    { label: '測過音量且沒有破音（或先跳過）', ok: (p.recording.levelPeakDb != null && p.recording.levelPeakDb <= -3) || !!p.recording.checks.nomic },
   ],
 }

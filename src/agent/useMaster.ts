@@ -3,6 +3,7 @@ import type { Project } from '../lib/store'
 import { askMaster } from './client'
 import type { AgentMessage } from './types'
 import { uid } from '../lib/store'
+import { DESK_ROLE, ROLES, type RoleId } from './roles'
 
 /**
  * 大師 Agent 的對話狀態。
@@ -22,13 +23,15 @@ export function useMaster(getProject: () => Project) {
 
   const push = (m: AgentMessage) => setMessages((xs) => [...xs.slice(-40), m])
 
-  const run = useCallback(async (step: string, input: { event?: { kind: string; detail: string }; question?: string }) => {
+  const run = useCallback(async (step: string, input: { event?: { kind: string; detail: string }; question?: string }, roleId?: RoleId) => {
+    const rid = roleId ?? DESK_ROLE[step] ?? 'producer'
+    const r = ROLES[rid]
     setBusy(true)
     // 等一個 tick，讓剛剛的 state 更新寫進專案後再讀
-    await new Promise((r) => setTimeout(r, 0))
-    const { reply, source } = await askMaster(getProject(), { step, ...input, history: history() })
+    await new Promise((res) => setTimeout(res, 0))
+    const { reply, source } = await askMaster(getProject(), { step, ...input, persona: { name: r.name, focus: r.focus, voice: r.voice }, history: history() })
     setBusy(false)
-    if (reply.text || reply.learned) push({ id: uid(), role: 'master', step, text: reply.text, reply, source })
+    if (reply.text || reply.learned) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
   }, [getProject]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const notify = useCallback((step: string, kind: string, detail = '') => {
@@ -44,9 +47,9 @@ export function useMaster(getProject: () => Project) {
     }, delay)
   }, [run])
 
-  const ask = useCallback((step: string, question: string) => {
-    push({ id: uid(), role: 'student', step, text: question })
-    void run(step, { question })
+  const ask = useCallback((step: string, question: string, roleId?: RoleId) => {
+    push({ id: uid(), role: 'student', role_id: roleId, step, text: question })
+    void run(step, { question }, roleId)
   }, [run])
 
   return { messages, busy, notify, ask }

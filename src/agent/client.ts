@@ -17,6 +17,7 @@ export const agentMode = (): 'llm' | 'mock' => (ENDPOINT ? 'llm' : 'mock')
 
 export interface AskInput {
   step: string
+  persona?: { name: string; focus: string; voice: string }
   event?: { kind: string; detail: string }
   question?: string
   history?: { role: 'user' | 'assistant'; content: string }[]
@@ -29,7 +30,7 @@ function isReply(x: unknown): x is AgentReply {
 export async function askMaster(p: Project, input: AskInput): Promise<{ reply: AgentReply; source: 'mock' | 'llm' }> {
   if (!ENDPOINT) return { reply: mockReply(p, input), source: 'mock' }
   try {
-    const user = buildUserTurn({ step: input.step, songContext: songContext(p), event: input.event, question: input.question })
+    const user = buildUserTurn({ step: input.step, persona: input.persona, songContext: songContext(p), event: input.event, question: input.question })
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

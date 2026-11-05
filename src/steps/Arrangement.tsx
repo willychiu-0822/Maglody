@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Coach, FeedbackList, Why, type Feedback } from '../components/ui'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { playLoop, type Player } from '../lib/audio'
 import { uid, type ArrSection, type LayerId, type Project, type SectionKind } from '../lib/store'
 import { chordVoicing, diatonicChords } from '../lib/theory'
@@ -60,7 +60,7 @@ export function arrangementFeedback(p: Project): Feedback[] {
   return fb
 }
 
-function ArrangementStep({ p, update, notify }: StepProps) {
+function ArrangementStep({ p, update, notify, next }: StepProps) {
   const a = p.arrangement
   const [sel, setSel] = useState<string | null>(a[0]?.id ?? null)
   const [player, setPlayer] = useState<Player | null>(null)
@@ -87,76 +87,75 @@ function ArrangementStep({ p, update, notify }: StepProps) {
   const maxE = LAYERS.reduce((x, l) => x + l.w, 0)
   const fb = arrangementFeedback(p)
 
+  const sketch = () => {
+    // 只排「骨架」：前奏 → 主歌 → 副歌 → 主歌 → 副歌 → 尾奏，全部只有鋼琴與主唱；誰要加進來，由你決定
+    const kinds: SectionKind[] = ['intro', 'verse', 'chorus', 'verse', 'chorus', 'outro']
+    const list = kinds.map((k) => ({ id: uid(), kind: k, bars: k === 'intro' || k === 'outro' ? 4 : 8, layers: { ...DEFAULT_LAYERS[k] } }))
+    update('arrangement', list)
+    setSel(list[2].id)
+    notify('arrange.change', '')
+  }
+  const ready = arrangementStep.requirements(p).every((r) => r.ok)
+  const say = a.length === 0 ? '先排出段落，再決定每一段誰上場。'
+    : !ready ? '點一段，決定誰上場。副歌要比主歌熱鬧。'
+    : '能量有起伏了。聽聽看。'
   return (
     <>
-      <Coach short={'排出段落，決定每一段誰上場，然後按試聽。'}>
-        同樣的旋律和和弦，靠「編曲」可以從安靜的獨白變成全場大合唱。編曲的秘密不是加很多樂器，而是決定<strong>什麼時候加、什麼時候拿掉</strong>。
-        先排出歌曲的段落順序，再為每段決定要哪些樂器，看看下面的能量曲線有沒有起伏。
-      </Coach>
+      <Coach short={say} />
 
-      <Card title="1. 段落順序">
-        <div className="row wrap">
-          {(['intro', 'verse', 'pre', 'chorus', 'bridge', 'inter', 'outro'] as SectionKind[]).map((k) => (
-            <button key={k} className="btn btn-ghost small" onClick={() => add(k)}>＋ {KIND_ZH[k]}</button>
+      {a.length > 0 && (
+        <div className="energy">
+          {a.map((s) => (
+            <button key={s.id} className={`energy-col ${sel === s.id ? 'on' : ''} k-${s.kind}`} style={{ flexGrow: s.bars }} onClick={() => setSel(s.id)}>
+              <div className="energy-bar" style={{ height: `${(energy(s) / maxE) * 100}%` }} />
+              <span className="energy-label">{KIND_ZH[s.kind]}</span>
+            </button>
           ))}
         </div>
-        {a.length === 0 && <p className="muted small">提示：一首常見的流行歌是「前奏 → 主歌 → 副歌 → 主歌 → 副歌 → 橋段 → 副歌 → 尾奏」。你可以照這個排，也可以打破它。</p>}
-
-        {a.length > 0 && (
-          <div className="energy">
-            {a.map((s, i) => (
-              <button key={s.id} className={`energy-col ${sel === s.id ? 'on' : ''} k-${s.kind}`} style={{ flexGrow: s.bars }} onClick={() => setSel(s.id)}>
-                <div className="energy-bar" style={{ height: `${(energy(s) / maxE) * 100}%` }} />
-                <span className="energy-label">{KIND_ZH[s.kind]}</span>
-                <span className="energy-sub">{i + 1}</span>
-              </button>
-            ))}
-          </div>
-        )}
-        {a.length > 0 && <p className="muted small">長條高度＝能量（樂器越多越高），寬度＝小節數。全長約 {fmtTime(songSeconds(p))}（{p.idea.bpm} BPM）。</p>}
-      </Card>
+      )}
 
       {cur && (
-        <Card title={`2. 編輯：${KIND_ZH[cur.kind]}（第 ${a.indexOf(cur) + 1} 段）`}>
-          <div className="row wrap between">
-            <label className="row small">小節數
+        <div className="layer-grid">
+          {LAYERS.map((l) => (
+            <button key={l.id} className={`layer ${cur.layers[l.id] ? 'on' : ''}`} onClick={() => set(cur.id, { layers: { ...cur.layers, [l.id]: !cur.layers[l.id] } })}>{l.name}</button>
+          ))}
+        </div>
+      )}
+
+      {player ? (
+        <DeskActions primary={{ label: '■ 停', onClick: () => { player.stop(); setPlayer(null) } }} />
+      ) : a.length === 0 ? (
+        <DeskActions primary={{ label: '排一個常見的骨架', onClick: sketch }} />
+      ) : ready && next ? (
+        <DeskActions primary={{ label: <>編好了，去{next.label} →</>, onClick: next.go }} secondary={cur ? { label: `▶ 試聽${KIND_ZH[cur.kind]}`, onClick: () => preview(cur) } : undefined} />
+      ) : cur ? (
+        <DeskActions primary={{ label: `▶ 試聽${KIND_ZH[cur.kind]}`, onClick: () => preview(cur) }} />
+      ) : null}
+
+      <Toolbox>
+        <div className="row wrap">
+          {(['intro', 'verse', 'pre', 'chorus', 'bridge', 'inter', 'outro'] as SectionKind[]).map((k) => (
+            <button key={k} className="btn small" onClick={() => add(k)}>＋ {KIND_ZH[k]}</button>
+          ))}
+        </div>
+        {cur && (
+          <div className="row wrap">
+            <label className="row small">{KIND_ZH[cur.kind]} 小節數
               <select value={cur.bars} onChange={(e) => set(cur.id, { bars: +e.target.value })}>
                 {[2, 4, 8, 12, 16].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </label>
-            <div className="row">
-              <button className="icon-btn" onClick={() => move(a.indexOf(cur), -1)} aria-label="往前">←</button>
-              <button className="icon-btn" onClick={() => move(a.indexOf(cur), 1)} aria-label="往後">→</button>
-              <button className="icon-btn" onClick={() => { update('arrangement', a.filter((s) => s.id !== cur.id)); setSel(null) }} aria-label="刪除">✕</button>
-            </div>
+            <button className="btn small" onClick={() => move(a.indexOf(cur), -1)}>往前</button>
+            <button className="btn small" onClick={() => move(a.indexOf(cur), 1)}>往後</button>
+            <button className="btn small" onClick={() => { update('arrangement', a.filter((s) => s.id !== cur.id)); setSel(null) }}>刪掉</button>
           </div>
-          <div className="layer-grid">
-            {LAYERS.map((l) => (
-              <button key={l.id} className={`layer ${cur.layers[l.id] ? 'on' : ''}`} onClick={() => set(cur.id, { layers: { ...cur.layers, [l.id]: !cur.layers[l.id] } })}>
-                <strong>{l.name}</strong>
-                <span className="small muted">{l.why}</span>
-              </button>
-            ))}
-          </div>
-          <div className="row">
-            {!player ? <button className="btn btn-primary" onClick={() => preview(cur)}>▶ 試聽這段（4 小節）</button> : <button className="btn btn-danger" onClick={() => { player.stop(); setPlayer(null) }}>■ 停止</button>}
-          </div>
-        </Card>
-      )}
-
-      <Card title="即時回饋">
+        )}
+        {a.length > 0 && <p className="muted small">長條越高越熱鬧，越寬越長。全長約 {fmtTime(songSeconds(p))}。</p>}
         <FeedbackList items={fb} />
-      </Card>
-
-      <Why ready={a.length >= 3} hint="先排 3 段以上，並試聽兩段比較。" title="為什麼要「減法編曲」？" apply="做簡報時，重點頁才放大圖大字；影片剪輯時，高潮前先安靜。">
-        <p>耳朵對「變化」最敏感，而不是對「多」。如果從頭到尾都很滿，副歌就沒有爆發感。主歌少一點，副歌才顯得大。</p>
-      </Why>
-      <Why ready={a.length >= 1} title="每種樂器的工作是什麼？" apply="聽歌時試著只聽貝斯、只聽鼓，你會開始聽見編曲。">
-        <p>鼓＝時間與能量；貝斯＝連結鼓和和弦的低音地基；鋼琴/吉他＝和聲與律動；弦樂鋪底＝空間與情緒；主唱＝故事。每個樂器佔不同的音域和角色，才不會互相打架。</p>
-      </Why>
-      <Why ready={a.length >= 4} title="為什麼結構常是主歌–副歌–主歌–副歌–橋段–副歌？" apply="寫文章的起承轉合、電影的三幕劇，都是同一套張力設計。">
-        <p>重複讓人記住，變化讓人不膩。橋段（Bridge）是唯一「新的東西」，讓最後一次副歌聽起來像回家。</p>
-      </Why>
+        <Why ready={a.length >= 3} title="為什麼主歌要少一點樂器？">
+          <p>耳朵對「變化」比對「多」敏感。主歌先收著，副歌全員進來，才聽得出爆發。</p>
+        </Why>
+      </Toolbox>
     </>
   )
 }

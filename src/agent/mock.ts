@@ -150,7 +150,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
     case 'step.complete': {
       const i = STEP_ORDER.indexOf(step)
       const nxt = STEP_ORDER[i + 1]
-      return { text: `「${STEP_ZH[step]}」完成。`, learned: learnedFor(step, p), next: nxt ? `下一檯「${STEP_ZH[nxt]}」會直接用到你剛做的東西。` : '你完成了第一首歌。下一版會更好。', suggestions: [{ label: '▶ 聽聽目前的成果', action: { type: 'playResult' } }] }
+      return { text: learnedFor(step, p), next: nxt ? `下一檯「${STEP_ZH[nxt]}」會直接用到你剛做的東西。` : '你完成了第一首歌。下一版會更好。', suggestions: [{ label: '▶ 聽聽目前的成果', action: { type: 'playResult' } }] }
     }
     default:
       return { text: '我聽到了。' }

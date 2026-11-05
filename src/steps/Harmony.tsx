@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Card, Coach, FeedbackList, Why, type Feedback } from '../components/ui'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { playChord, playLoop, type Player } from '../lib/audio'
-import { CHORD_ROLE, chordVoicing, diatonicChord, diatonicChords, keyName, NOTE_NAMES, pc, type Mode } from '../lib/theory'
+import { CHORD_ROLE, chordVoicing, diatonicChord, diatonicChords, keyName, NOTE_NAMES, type Mode } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
 
 const TEMPLATES: { name: string; degs: number[]; note: string }[] = [
@@ -44,7 +44,7 @@ export function progressionFeedback(degs: (number | null)[], mode: Mode, label: 
   return fb
 }
 
-function HarmonyStep({ p, update, notify }: StepProps) {
+function HarmonyStep({ p, update, notify, next }: StepProps) {
   const h = p.harmony
   const [target, setTarget] = useState<{ part: 'verse' | 'chorus'; i: number }>({ part: 'verse', i: 0 })
   const [player, setPlayer] = useState<Player | null>(null)
@@ -62,7 +62,6 @@ function HarmonyStep({ p, update, notify }: StepProps) {
     if (!arr.includes(null)) notify('harmony.progression', target.part)
     const ni = target.i + 1
     if (ni < 4) setTarget({ ...target, i: ni })
-    else if (target.part === 'verse') setTarget({ part: 'chorus', i: 0 })
   }
   const play = (part: 'verse' | 'chorus') => {
     player?.stop()
@@ -103,20 +102,49 @@ function HarmonyStep({ p, update, notify }: StepProps) {
     const playing = step === i + (part === 'chorus' ? 4 : 0)
     return (
       <button className={`slot ${active ? 'active' : ''} ${playing ? 'playing' : ''}`} onClick={() => { setTarget({ part, i }); if (d != null) playChord(chordVoicing(chords[d])) }}>
-        {d != null ? <><strong>{chords[d].name}</strong><span className="small muted">{chords[d].roman}</span></> : <span className="muted">第{i + 1}小節</span>}
+        {d != null ? <strong>{chords[d].name}</strong> : <span className="muted">{i + 1}</span>}
       </button>
     )
   }
 
+  const part = target.part
+  const full = !h[part].includes(null)
+  const bothFull = !h.verse.includes(null) && !h.chorus.includes(null)
+  const shortRole = (d: number) => CHORD_ROLE[h.mode][d].split('：')[0].replace(/（.*）/, '')
+  const say = !h.verse.some((d) => d != null)
+    ? '點一個和弦聽聽，喜歡就留下。湊滿 4 個，就是一圈。'
+    : !full ? `再挑 ${h[part].filter((d) => d == null).length} 個。`
+    : part === 'verse' && h.chorus.includes(null) ? '主歌這一圈好了。聽聽看，再換副歌。'
+    : '一圈好了，循環聽聽看。'
   return (
     <>
-      <Coach short={'點點看這些和弦，挑 4 個你喜歡的，排成一圈。'}>
-        和弦是旋律腳下的地板。每個調都有 7 個「保證不會錯」的和弦，它們各有個性：有的像家、有的像出門、有的想回家。
-        {p.hum && <> 我已經依你的哼唱把調設成 <strong>{keyName(p.hum.keyRoot, p.hum.keyMode)}</strong>，你也可以換。</>}
-        先點每個和弦聽聽它的個性，再選 4 個排成主歌、4 個排成副歌。
-      </Coach>
+      <Coach short={say} />
 
-      <Card title="調性">
+      <div className="seg seg-quiet">
+        <button className={part === 'verse' ? 'on' : ''} onClick={() => { stop(); setTarget({ part: 'verse', i: Math.max(0, h.verse.indexOf(null)) }) }}>主歌</button>
+        <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setTarget({ part: 'chorus', i: Math.max(0, h.chorus.indexOf(null)) }) }}>副歌</button>
+      </div>
+      <div className="slots">{[0, 1, 2, 3].map((i) => <Slot key={i} part={part} i={i} />)}</div>
+
+      <div className="chord-grid">
+        {chords.filter((c) => c.quality !== 'dim').map((c) => (
+          <button key={c.degree} className={`chord ${c.quality} ${humSet.has(c.name) ? 'hum' : ''}`} onClick={() => place(c.degree)}>
+            <span className="chord-name">{c.name}</span>
+            <span className="chord-role">{shortRole(c.degree)}</span>
+          </button>
+        ))}
+      </div>
+
+      {player ? (
+        <DeskActions primary={{ label: '■ 停', onClick: stop }} />
+      ) : bothFull && next ? (
+        <DeskActions primary={{ label: <>地板鋪好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }} />
+      ) : full ? (
+        <DeskActions primary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }}
+          secondary={part === 'verse' && h.chorus.includes(null) ? { label: '換副歌 →', onClick: () => setTarget({ part: 'chorus', i: 0 }) } : undefined} />
+      ) : null}
+
+      <Toolbox>
         <div className="row wrap">
           <select value={h.root} onChange={(e) => setKey(+e.target.value, h.mode)}>
             {NOTE_NAMES.map((n, i) => <option key={n} value={i}>{n}</option>)}
@@ -125,86 +153,48 @@ function HarmonyStep({ p, update, notify }: StepProps) {
             <button className={h.mode === 'major' ? 'on' : ''} onClick={() => setKey(h.root, 'major')}>大調</button>
             <button className={h.mode === 'minor' ? 'on' : ''} onClick={() => setKey(h.root, 'minor')}>小調</button>
           </div>
+          <button className="btn small" onClick={() => place(6)}>{chords[6].name}（緊繃）</button>
         </div>
-      </Card>
-
-      <Card title="調內和弦（點擊試聽並放入選取的格子）">
-        <div className="chord-grid">
-          {chords.map((c) => (
-            <button key={c.degree} className={`chord ${c.quality} ${humSet.has(c.name) ? 'hum' : ''}`} onClick={() => place(c.degree)}>
-              <span className="chord-name">{c.name}</span>
-              <span className="chord-roman">{c.roman}</span>
-              <span className="chord-role">{CHORD_ROLE[h.mode][c.degree]}</span>
-              {humSet.has(c.name) && <span className="badge">哼唱建議</span>}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      <Card title="你的和弦進行">
-        <div className="prog-label">主歌</div>
-        <div className="slots">{[0, 1, 2, 3].map((i) => <Slot key={i} part="verse" i={i} />)}</div>
-        <div className="row"><button className="btn" onClick={() => play('verse')}>▶ 循環主歌</button></div>
-        <div className="prog-label">副歌</div>
-        <div className="slots">{[0, 1, 2, 3].map((i) => <Slot key={i} part="chorus" i={i} />)}</div>
-        <div className="row wrap">
-          <button className="btn" onClick={() => play('chorus')}>▶ 循環副歌</button>
-          {player && <button className="btn btn-danger" onClick={stop}>■ 停止</button>}
-        </div>
+        {humSet.size > 0 && <p className="muted small">外框淡綠的和弦，是你的哼唱裡最常出現的音組成的。</p>}
         <details className="templates">
-          <summary>卡住了？看看經典走法（參考用，選了之後請自己改改看）</summary>
+          <summary>卡住了？看看常見的走法</summary>
           {TEMPLATES.map((t) => (
             <div key={t.name} className="tpl">
               <div><strong>{t.name}</strong>：{t.degs.map((d) => chords[d].name).join(' → ')}<div className="muted small">{t.note}</div></div>
               <div className="row">
                 <button className="btn btn-ghost small" onClick={() => playLoop({ bpm: p.idea.bpm, bars: t.degs.map((d) => chordVoicing(chords[d])), layers: { drums: false, bass: true, keys: true, pad: false, melody: false } })}>▶</button>
-                <button className="btn btn-ghost small" onClick={() => { update('harmony', { ...h, [target.part]: t.degs }); notify('harmony.progression', target.part) }}>放到{target.part === 'verse' ? '主歌' : '副歌'}</button>
+                <button className="btn btn-ghost small" onClick={() => { update('harmony', { ...h, [part]: t.degs }); notify('harmony.progression', part) }}>用這個</button>
               </div>
             </div>
           ))}
         </details>
-      </Card>
-
-      <Card title="即時回饋">
         <FeedbackList items={fb} />
-      </Card>
-
-      <Card title="耳朵練習：用聽的分辨">
-        <p className="muted small">理論要變成直覺，只能靠耳朵。答對 {h.quizRight} / {h.quizTotal}</p>
-        {!quiz ? (
-          <button className="btn btn-primary" onClick={newQuiz}>開始一題</button>
-        ) : (
-          <div className={`quiz ${quizRes ?? ''}`}>
-            <p>{quiz.kind === 'quality' ? '這個和弦聽起來比較…' : '這段和弦最後一下，比較像…'}</p>
-            <div className="row wrap">
-              <button className="btn" onClick={quiz.play}>↻ 再聽一次</button>
-              <button className="btn" onClick={() => answer('a')}>{quiz.kind === 'quality' ? '明亮（大三和弦）' : '句號（回到 I）'}</button>
-              <button className="btn" onClick={() => answer('b')}>{quiz.kind === 'quality' ? '憂傷（小三和弦）' : '問號（停在 V）'}</button>
+        <details className="templates">
+          <summary>耳朵小遊戲（答對 {h.quizRight} / {h.quizTotal}）</summary>
+          {!quiz ? (
+            <button className="btn small" onClick={newQuiz}>來一題</button>
+          ) : (
+            <div className={`quiz ${quizRes ?? ''}`}>
+              <p>{quiz.kind === 'quality' ? '這個和弦聽起來比較…' : '最後一下比較像…'}</p>
+              <div className="row wrap">
+                <button className="btn small" onClick={quiz.play}>↻ 再聽</button>
+                <button className="btn small" onClick={() => answer('a')}>{quiz.kind === 'quality' ? '明亮' : '句號'}</button>
+                <button className="btn small" onClick={() => answer('b')}>{quiz.kind === 'quality' ? '憂傷' : '問號'}</button>
+              </div>
+              {quizRes && (
+                <p className={quizRes === 'right' ? 'ok-text' : 'err-text'}>
+                  {quizRes === 'right' ? '對。' : '不是喔。'}
+                  {quiz.kind === 'quality' ? (quiz.answer === 'a' ? '中間那個音高一點，聽起來開闊。' : '中間那個音低半音，聽起來有陰影。') : (quiz.answer === 'a' ? '回到家了，像句號。' : '停在想回家的地方，耳朵還在等。')}
+                  <button className="link-btn" onClick={newQuiz}>下一題</button>
+                </p>
+              )}
             </div>
-            {quizRes && (
-              <p className={quizRes === 'right' ? 'ok-text' : 'err-text'}>
-                {quizRes === 'right' ? '答對！' : '不對喔，'}
-                {quiz.kind === 'quality'
-                  ? quiz.answer === 'a' ? '大三和弦的中間音比較高（大三度），聽起來開闊。' : '小三和弦的中間音低半音（小三度），聽起來有陰影。'
-                  : quiz.answer === 'a' ? '最後回到 I，緊張感完全解除，像句號。' : '最後停在 V，張力沒有解決，耳朵還在等。'}
-                <button className="btn btn-ghost small" onClick={newQuiz}>下一題</button>
-              </p>
-            )}
-          </div>
-        )}
-      </Card>
-
-      <Why ready={h.verse.some((d) => d != null)} hint="先點幾個和弦、放進主歌格子。" title="為什麼調內和弦「保證不會錯」？" apply="在 KTV 自彈自唱、即興伴奏、看吉他譜時，先找出調內的 7 個和弦就能應付大部分歌曲。">
-        <p>調內和弦都是從同一個音階的 7 個音堆出來的（每隔一個音取一個：1-3-5、2-4-6…），所以彼此「說同一種語言」，放在一起一定協調。</p>
-        <p>大寫羅馬數字（I、IV、V）是大三和弦，小寫（ii、iii、vi）是小三和弦。用級數而不用音名，換調時進行不變。</p>
-      </Why>
-      <Why ready={!h.verse.includes(null) || !h.chorus.includes(null)} hint="排滿 4 格，聽聽結尾停在哪裡。" listen={{ label: '聽 V → I（想回家→到家）', play: () => { playChord(chordVoicing(chords[4]), 1); setTimeout(() => playChord(chordVoicing(chords[0]), 1.4), 1000) } }} title="為什麼 V 會「想回家」？" apply="電影配樂用 V 製造懸念；歌曲結尾用 V→I 給人完結感。">
-        <p>V 和弦裡有一個音（第 7 級音，Si）距離主音只差半音，耳朵會強烈期待它往上「解決」到 Do。這種「緊張→解決」就是音樂推動力的來源。</p>
-      </Why>
-      <Why ready={!!p.hum} hint="先完成哼唱解析。" title="和弦跟我的哼唱有什麼關係？" apply="幫現成旋律配和弦（例如幫朋友的歌配吉他）就是這個方法。">
-        <p>旋律在某一刻唱的音，如果剛好是當下和弦的組成音，就會很和諧。標著「哼唱建議」的和弦，是你哼唱裡出現最多的組成音所對應的和弦。</p>
-        <p>你哼唱的主音是 {p.hum ? NOTE_NAMES[pc(p.hum.keyRoot)] : '—'}。</p>
-      </Why>
+          )}
+        </details>
+        <Why ready={full} title="為什麼這幾個和弦放在一起都好聽？" listen={{ label: '聽「想回家 → 到家」', play: () => { playChord(chordVoicing(chords[4]), 1); setTimeout(() => playChord(chordVoicing(chords[0]), 1.4), 1000) } }}>
+          <p>它們都是從同一組 7 個音堆出來的，說同一種語言。每個和弦有自己的角色：「家」最穩，「想回家」最緊，耳朵聽到它就會等著回家。</p>
+        </Why>
+      </Toolbox>
     </>
   )
 }
@@ -218,6 +208,5 @@ export const harmonyStep: StepDef = {
   requirements: (p) => [
     { label: '主歌 4 個和弦', ok: !p.harmony.verse.includes(null) },
     { label: '副歌 4 個和弦', ok: !p.harmony.chorus.includes(null) },
-    { label: '耳朵練習至少答 4 題', ok: p.harmony.quizTotal >= 4 },
   ],
 }

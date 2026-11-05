@@ -1,4 +1,4 @@
-import { Card, Coach, FeedbackList, Why, type Feedback } from '../components/ui'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { playChord, ac, click } from '../lib/audio'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, cleanLine, countHits } from '../lib/rhyme'
 import { chordVoicing, diatonicChord, keyName } from '../lib/theory'
@@ -13,7 +13,7 @@ export const MOODS = [
   { id: 'dream', name: '夢幻漂浮', mode: 'major', bpm: [70, 90], why: '大調 + 長音鋪底，留白多，像飄在空中。' },
 ] as const
 
-function IdeationStep({ p, update, notify }: StepProps) {
+function IdeationStep({ p, update, notify, next }: StepProps) {
   const idea = p.idea
   const set = (k: keyof typeof idea, v: string | number) => update('idea', { ...idea, [k]: v })
   const mood = MOODS.find((m) => m.id === idea.mood)
@@ -50,97 +50,53 @@ function IdeationStep({ p, update, notify }: StepProps) {
   if (idea.title && idea.hook && (idea.hook.includes(idea.title) || idea.title.includes(cleanLine(idea.hook).slice(0, 2))))
     fb.push({ level: 'good', text: '歌名出現在記憶點裡，聽眾聽完就知道歌名。' })
 
+  const pickMood = (m: (typeof MOODS)[number]) => {
+    const bpm = Math.round((m.bpm[0] + m.bpm[1]) / 2)
+    update('idea', { ...idea, mood: m.id, bpm })
+    if (!p.hum) update('harmony', (h) => ({ ...h, mode: m.mode }))
+    notify('idea.mood', m.id)
+    preview(p.hum?.keyMode ?? m.mode, bpm)
+  }
+  const ready = !!idea.mood && !!idea.hook.trim()
   return (
     <>
-      <Coach short={'這首歌想帶著什麼感覺？先點一個情緒聽聽看。'}>
-        有了旋律的種子，現在決定這首歌要「說什麼」。寫歌最常見的失敗不是技術，而是不知道自己要說什麼。
-        我們用一句話的故事、一個畫面、一句記憶點，替整首歌定好方向。
-      </Coach>
+      <Coach short={!idea.mood ? '這首歌想帶著什麼感覺？點一個，聽聽看。' : !idea.hook.trim() ? '如果整首歌只能留一句話，會是哪一句？' : `「${idea.hook}」，好。`} />
 
-      <Card title="1. 這首歌的情緒">
-        <div className="mood-grid">
-          {MOODS.map((m) => (
-            <button
-              key={m.id}
-              className={`mood ${idea.mood === m.id ? 'on' : ''}`}
-              onClick={() => {
-                update('idea', { ...idea, mood: m.id, bpm: Math.round((m.bpm[0] + m.bpm[1]) / 2) })
-                // 情緒影響調性：沒有哼唱時以情緒決定大小調；有哼唱則保留哼唱的調，由學生在和聲章節決定
-                if (!p.hum) update('harmony', (h) => ({ ...h, mode: m.mode }))
-                notify('idea.mood', m.id)
-                preview(p.hum?.keyMode ?? m.mode, Math.round((m.bpm[0] + m.bpm[1]) / 2))
-              }}
-            >
-              <strong>{m.name}</strong>
-              <span className="small muted">{m.mode === 'major' ? '大調' : '小調'} · {m.bpm[0]}–{m.bpm[1]} BPM</span>
-            </button>
-          ))}
-        </div>
-        {mood && (
-          <div className="explain">
-            <p>{mood.why}</p>
-            <div className="row wrap">
-              <button className="btn" onClick={() => preview(mood.mode, idea.bpm)}>▶ 聽聽這個感覺</button>
-              <button className="btn btn-ghost" onClick={() => preview(mood.mode === 'major' ? 'minor' : 'major', idea.bpm)}>▶ 對照：換成{mood.mode === 'major' ? '小' : '大'}調</button>
-            </div>
-          </div>
-        )}
+      <div className="mood-grid">
+        {MOODS.map((m) => (
+          <button key={m.id} className={`mood ${idea.mood === m.id ? 'on' : ''}`} onClick={() => pickMood(m)}>{m.name}</button>
+        ))}
+      </div>
+
+      {idea.mood && (
+        <input className="one-line" value={idea.hook} placeholder="一句話就好……" onChange={(e) => update('idea', { ...idea, hook: e.target.value, title: idea.title && idea.title !== idea.hook ? idea.title : e.target.value })} />
+      )}
+
+      {ready && next ? (
+        <DeskActions primary={{ label: <>帶著這句話，去{next.label} →</>, onClick: next.go }} secondary={mood ? { label: '▶ 再聽一次這個感覺', onClick: () => preview(mood.mode, idea.bpm) } : undefined} />
+      ) : mood ? (
+        <DeskActions secondary={{ label: '▶ 再聽一次這個感覺', onClick: () => preview(mood.mode, idea.bpm) }} />
+      ) : null}
+
+      <Toolbox label="多寫一點（選填）">
+        <label className="field"><span>歌名（不填就用上面那句）</span><input value={idea.title} onChange={(e) => set('title', e.target.value)} /></label>
+        <label className="field"><span>Vibe：聽起來像什麼？（場景、聲音、參考的歌）</span><input value={idea.vibe} placeholder="深夜騎車、街燈、帶點雨聲" onChange={(e) => set('vibe', e.target.value)} /></label>
+        <label className="field"><span>閉上眼睛看到的畫面</span><input value={idea.image} onChange={(e) => set('image', e.target.value)} /></label>
+        <label className="field"><span>故事：誰、在哪、發生什麼</span><textarea rows={3} value={idea.story} onChange={(e) => set('story', e.target.value)} /></label>
         <label className="field">
-          <span>速度（BPM，每分鐘幾拍）：<strong>{idea.bpm}</strong></span>
+          <span>速度：<strong>{idea.bpm}</strong> BPM</span>
           <input type="range" min={55} max={170} value={idea.bpm} onChange={(e) => set('bpm', +e.target.value)} />
         </label>
-        <button className="btn btn-ghost small" onClick={() => { const c = ac(); const b = 60 / idea.bpm; for (let i = 0; i < 8; i++) click(c.currentTime + 0.05 + i * b, i % 4 === 0) }}>▶ 聽 8 拍節拍器</button>
+        {mood && <button className="btn small" onClick={() => preview(mood.mode === 'major' ? 'minor' : 'major', idea.bpm)}>▶ 對照：換成{mood.mode === 'major' ? '小' : '大'}調</button>}
         {p.hum && <p className="muted small">你的哼唱在 {keyName(p.hum.keyRoot, p.hum.keyMode)}。</p>}
-      </Card>
-
-      <Card title="2. Vibe 板：這首歌「聽起來像」什麼？">
-        <label className="field">
-          <span>參考的歌、場景、聲音、顏色（隨意寫，像在跟朋友形容）</span>
-          <input value={idea.vibe} placeholder="例如：深夜騎車、街燈、像老 City Pop、帶點雨聲" onChange={(e) => set('vibe', e.target.value)} />
-        </label>
-        <p className="muted small">Vibe 不用專業術語。之後每一檯，大師都會回來對照它：「這個和弦像不像你說的深夜？」</p>
-      </Card>
-
-      <Card title="3. 一句話的故事">
-        <label className="field">
-          <span>主題（關於什麼？）</span>
-          <input value={idea.theme} placeholder="例如：搬離住了十年的家" onChange={(e) => set('theme', e.target.value)} />
-        </label>
-        <label className="field">
-          <span>故事（誰、在哪、發生什麼、然後呢？）</span>
-          <textarea rows={3} value={idea.story} placeholder="用你自己的經驗寫，越具體越好" onChange={(e) => set('story', e.target.value)} />
-        </label>
-        <label className="field">
-          <span>核心畫面（閉上眼睛會看到什麼？）</span>
-          <input value={idea.image} placeholder="一個看得見的場景" onChange={(e) => set('image', e.target.value)} />
-        </label>
-      </Card>
-
-      <Card title="4. 歌名與記憶點（Hook）">
-        <label className="field">
-          <span>暫定歌名</span>
-          <input value={idea.title} onChange={(e) => set('title', e.target.value)} />
-        </label>
-        <label className="field">
-          <span>記憶點：副歌裡最想讓人跟著唱的一句</span>
-          <input value={idea.hook} onChange={(e) => set('hook', e.target.value)} />
-        </label>
-      </Card>
-
-      <Card title="即時回饋">
-        <FeedbackList items={fb} />
-      </Card>
-
-      <Why ready={!!idea.mood} hint="先點一個情緒，聽聽它。" listen={{ label: '再聽一次你選的情緒', play: () => mood && preview(mood.mode, idea.bpm) }} title="為什麼要先決定情緒和速度？" apply="做簡報配樂、剪影片挑音樂、幫活動選歌，都是先定情緒再找速度。">
-        <p>情緒決定了後面所有選擇：大調或小調、和弦怎麼走、編曲要熱鬧還是留白。先定方向，後面每一步都有判斷標準，不會越寫越歪。</p>
-        <p>BPM 是速度。人走路約 100 BPM、休息心跳約 60–80。慢歌靠近心跳，快歌靠近跑步。</p>
-      </Why>
-      <Why ready={cleanLine(idea.story).length >= 8} hint="先寫幾句故事。" title="為什麼要具體，不要抽象？" apply="寫文案、說故事、寫履歷自傳都一樣：細節讓人相信。">
-        <p>「我好寂寞」每個人都寫過；「便利商店的微波爐，只熱一個便當」才會讓人起雞皮疙瘩。具體畫面讓聽眾用自己的記憶填滿情緒，這叫 show, don't tell。</p>
-      </Why>
-      <Why ready={!!idea.hook} hint="先寫下你的記憶點。" title="什麼是 Hook？" apply="廣告標語、品牌口號、演講金句都是 Hook 的概念。">
-        <p>Hook 是聽完一次就卡在腦中的那句話。流行歌通常把歌名放進 Hook，並在副歌重複 2–4 次。</p>
-      </Why>
+        <FeedbackList items={fb} empty="寫一點之後，這裡會有幾句觀察。" />
+        <Why ready={!!idea.mood} title="為什麼情緒會改變和弦和速度？">
+          <p>{mood?.why} 速度越接近休息時的心跳（60–80），聽起來越放鬆；越接近跑步，越激動。</p>
+        </Why>
+        <Why ready={!!idea.hook} title="什麼是 Hook？">
+          <p>聽一次就卡在腦中的那句話。流行歌通常把它放進副歌，重複 2–4 次。</p>
+        </Why>
+      </Toolbox>
     </>
   )
 }
@@ -152,9 +108,7 @@ export const ideationStep: StepDef = {
   glyph: '想',
   Component: IdeationStep,
   requirements: (p) => [
-    { label: '選擇情緒', ok: !!p.idea.mood },
-    { label: '寫下故事（15 字以上）', ok: cleanLine(p.idea.story).length >= 15 },
-    { label: '寫下核心畫面', ok: !!p.idea.image.trim() },
-    { label: '暫定歌名與記憶點', ok: !!p.idea.title.trim() && !!p.idea.hook.trim() },
+    { label: '選一個情緒', ok: !!p.idea.mood },
+    { label: '留下一句話', ok: !!p.idea.hook.trim() },
   ],
 }

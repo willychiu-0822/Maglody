@@ -1,107 +1,92 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AgentAction, AgentMessage } from '../agent/types'
 import { agentMode } from '../agent/client'
+import { ROLES, ROLE_ORDER, type RoleId } from '../agent/roles'
 
-const QUICK: Record<string, string[]> = {
-  hum: ['為什麼是這個調？', '下一步'],
-  idea: ['Hook 要怎麼想？', '下一步'],
-  harmony: ['為什麼這和弦？', '換一個更哀傷的走向', '換更明亮的走向'],
-  melody: ['旋律怎麼改？', '太高唱不上去', '為什麼這和弦？'],
-  lyrics: ['押韻怎麼找？', '幫我寫一句', '下一步'],
-  arrange: ['下一步', '副歌怎麼更有爆發力？'],
-  record: ['下一步', '太高唱不上去'],
-  mix: ['下一步'],
-  review: ['下一步'],
+const QUICK: Record<RoleId, string[]> = {
+  producer: ['這首歌像我要的感覺嗎？', '下一步'],
+  composer: ['為什麼這和弦？', '換一個更哀傷的走向'],
+  lyricist: ['押韻怎麼找？', '幫我寫一句'],
+  arranger: ['副歌怎麼更有爆發力？'],
+  engineer: ['太高唱不上去', '怎麼帶進 REAPER？'],
 }
 
 interface Props {
+  open: boolean
+  roleId: RoleId
+  setRoleId: (r: RoleId) => void
+  onClose: () => void
   step: string
   messages: AgentMessage[]
   busy: boolean
-  onAsk: (q: string) => void
+  onAsk: (q: string, roleId: RoleId) => void
   onAction: (a: AgentAction, apply: boolean) => void
-  onPlayResult?: () => void
-  onInspire?: () => void
-  recordingIdea?: boolean
 }
 
-/** 大師旁白條：收合時顯示最新一句旁白；展開後可以看完整對話並提問 */
-export function MasterPanel({ step, messages, busy, onAsk, onAction, onPlayResult, onInspire, recordingIdea }: Props) {
-  const [open, setOpen] = useState(false)
+/** 跟工作室夥伴聊天：點誰就跟誰聊，不限目前的工作檯 */
+export function MasterPanel({ open, roleId, setRoleId, onClose, messages, busy, onAsk, onAction }: Props) {
   const [q, setQ] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
-  const latest = [...messages].reverse().find((m) => m.role === 'master')
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight }) }, [messages, open])
-  const send = (text: string) => { if (!text.trim()) return; onAsk(text.trim()); setQ(''); setOpen(true) }
-
-  const Msg = ({ m }: { m: AgentMessage }) => (
-    <div className={`msg msg-${m.role}`}>
-      {m.role === 'master' && <div className="msg-avatar" aria-hidden>師</div>}
-      <div className="msg-body">
-        {m.text && <div>{m.text}</div>}
-        {m.reply?.learned && <div className="msg-learned"><strong>你學到：</strong>{m.reply.learned}</div>}
-        {m.reply?.next && <div className="msg-next"><strong>下一步：</strong>{m.reply.next}</div>}
-        {!!m.reply?.suggestions?.length && (
-          <div className="msg-sugs">
-            {m.reply.suggestions.map((s, i) => (
-              <span key={i} className="sug">
-                {s.action?.type === 'tryProgression' ? (
-                  <>
-                    <button className="chip" onClick={() => onAction(s.action!, false)}>▶ {s.label}</button>
-                    <button className="chip on" onClick={() => onAction(s.action!, true)}>選這個</button>
-                  </>
-                ) : (
-                  <button className="chip" onClick={() => s.action && onAction(s.action, true)}>{s.label}</button>
-                )}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
+  if (!open) return null
+  const role = ROLES[roleId]
+  const send = (text: string) => { if (!text.trim()) return; onAsk(text.trim(), roleId); setQ('') }
 
   return (
-    <div className={`master ${open ? 'open' : ''}`}>
-      {open && (
-        <div className="master-sheet">
-          <div className="row between">
-            <strong>大師</strong>
-            <span className="muted small">{agentMode() === 'llm' ? 'LLM 模式' : '離線模式'}</span>
-            <button className="icon-btn" onClick={() => setOpen(false)} aria-label="收合">⌄</button>
+    <div className="inspo-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="inspo-sheet chat-sheet" role="dialog" aria-label={`跟${role.name}聊`}>
+        <div className="row between">
+          <div className="role-switch" role="tablist" aria-label="選擇夥伴">
+            {ROLE_ORDER.map((id) => (
+              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name}>{ROLES[id].glyph}</button>
+            ))}
           </div>
-          <div className="master-list" ref={listRef}>
-            {messages.length === 0 && <p className="muted small">先動手做做看，我會在你做完時告訴你剛剛發生了什麼。</p>}
-            {messages.map((m) => <Msg key={m.id} m={m} />)}
-            {busy && <div className="msg msg-master"><div className="msg-avatar">師</div><div className="msg-body typing">聽你剛剛做的…</div></div>}
-          </div>
-          <div className="master-quick">
-            {(QUICK[step] ?? ['下一步']).map((t) => <button key={t} className="chip" onClick={() => send(t)}>{t}</button>)}
-          </div>
-          <form className="master-input" onSubmit={(e) => { e.preventDefault(); send(q) }}>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="問大師：為什麼這和弦？幫我換更哀傷的走向…" />
-            <button className="btn btn-primary" type="submit">問</button>
-          </form>
+          <button className="icon-btn" onClick={onClose} aria-label="關閉">✕</button>
         </div>
-      )}
-      {!open && (
-        <div className="master-bar-wrap">
-        {onPlayResult && <button className="master-play" onClick={onPlayResult} aria-label="聽目前為止的 Demo">▶</button>}
-        <button className="master-bar" onClick={() => setOpen(true)}>
-          <span className="msg-avatar" aria-hidden>師</span>
-          <span className="master-bar-text">
-            {busy ? '聽你剛剛做的…' : latest ? (latest.reply?.learned && !latest.text ? latest.reply.learned : latest.text) : '我在這裡。先動手，做完我會解釋。點這裡可以問我問題。'}
-          </span>
-          <span className="master-bar-cta">對話</span>
-        </button>
-        {onInspire && (
-          <button className={`inspo-fab ${recordingIdea ? 'rec' : ''}`} onClick={onInspire} aria-label="隨手記下靈感">
-            <span className="inspo-fab-plus">{recordingIdea ? '●' : '✎'}</span>
-            <span>{recordingIdea ? '錄音中' : '記一下'}</span>
-          </button>
-        )}
+        <div className="small muted">{role.name}　·　{role.focus}{agentMode() === 'mock' ? '（離線）' : ''}</div>
+
+        <div className="master-list" ref={listRef}>
+          {messages.length === 0 && <p className="muted small">想聊什麼都可以：靈感、卡住的地方、哪一版比較好。</p>}
+          {messages.map((m) => {
+            const r = m.role_id ? ROLES[m.role_id as RoleId] : null
+            return (
+              <div key={m.id} className={`msg msg-${m.role}`}>
+                {m.role === 'master' && <div className="msg-avatar" aria-hidden>{r?.glyph ?? '師'}</div>}
+                <div className="msg-body">
+                  {m.text && <div>{m.text}</div>}
+                  {m.reply?.learned && <div className="msg-learned">{m.reply.learned}</div>}
+                  {m.reply?.next && <div className="msg-next">{m.reply.next}</div>}
+                  {!!m.reply?.suggestions?.length && (
+                    <div className="msg-sugs">
+                      {m.reply.suggestions.map((s, i) => (
+                        <span key={i} className="sug">
+                          {s.action?.type === 'tryProgression' ? (
+                            <>
+                              <button className="chip" onClick={() => onAction(s.action!, false)}>▶ {s.label}</button>
+                              <button className="link-btn" onClick={() => onAction(s.action!, true)}>就用這個</button>
+                            </>
+                          ) : (
+                            <button className="chip" onClick={() => s.action && onAction(s.action, true)}>{s.label}</button>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+          {busy && <div className="msg msg-master"><div className="msg-avatar">{role.glyph}</div><div className="msg-body typing">想一下……</div></div>}
         </div>
-      )}
+
+        <div className="master-quick">
+          {QUICK[roleId].map((t) => <button key={t} className="chip" onClick={() => send(t)}>{t}</button>)}
+        </div>
+        <form className="master-input" onSubmit={(e) => { e.preventDefault(); send(q) }}>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`跟${role.name}說……`} />
+          <button className="btn" type="submit">送出</button>
+        </form>
+      </div>
     </div>
   )
 }

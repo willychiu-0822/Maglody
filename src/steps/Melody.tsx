@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Card, Coach, FeedbackList, Why, type Feedback, type Level } from '../components/ui'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { playLoop, playNote, type Player } from '../lib/audio'
 import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, scaleNote, snapToScale, SCALES, type Chord, type Mode } from '../lib/theory'
 import { cleanLine } from '../lib/rhyme'
@@ -110,7 +110,7 @@ function useNarrow() {
   return n
 }
 
-function MelodyStep({ p, update, notify }: StepProps) {
+function MelodyStep({ p, update, notify, next }: StepProps) {
   const narrow = useNarrow()
   const [page, setPage] = useState(0)
   const [part, setPart] = useState<Part>('chorus')
@@ -174,31 +174,17 @@ function MelodyStep({ p, update, notify }: StepProps) {
   const shownPage = narrow && col >= 0 ? Math.floor(col / 8) : page
   const visible = Array.from({ length: narrow ? 8 : STEPS }, (_, k) => (narrow ? shownPage * 8 : 0) + k)
   const missingChords = prog.some((d) => d == null)
+  const notes = cells.filter((m) => m != null && m >= 0).length
+  const empty = notes === 0
+  const bothReady = p.melody.verse.filter((m) => m != null && m >= 0).length >= 4 && p.melody.chorus.filter((m) => m != null && m >= 0).length >= 4
 
   return (
     <>
-      <Coach short={'把哼唱匯入格子，按播放，哪裡聽起來怪就改哪裡。'}>
-        現在把旋律寫進格子裡。每一格是半拍，每 8 格是一小節，上方是你在「和聲」選的和弦。
-        綠色＝和弦音（最穩）、黃色＝經過音（帶動流動）、紅色＝強拍上的衝突音（有張力，要小心用）。
-        {p.hum && ' 可以先把你的哼唱匯入當草稿，再一格一格修。'}
-        一邊播放一邊改，用耳朵當最後的裁判。
-      </Coach>
-
-      <Card>
-        <div className="row wrap between">
-          <div className="seg">
-            <button className={part === 'verse' ? 'on' : ''} onClick={() => { stop(); setPart('verse') }}>主歌旋律</button>
-            <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setPart('chorus') }}>副歌旋律</button>
-          </div>
-          <div className="row wrap">
-            <button className={`btn ${penta ? 'btn-primary' : ''}`} onClick={() => setPenta(!penta)} title="只顯示五聲音階">{penta ? '五聲安全區：開' : '完整音階'}</button>
-            <button className={`btn ${hold ? 'btn-primary' : ''}`} onClick={() => setHold(!hold)}>{hold ? '延長模式：開' : '延長模式'}</button>
-            {!player ? <button className="btn btn-primary" onClick={play} disabled={missingChords}>▶ 循環播放</button> : <button className="btn btn-danger" onClick={stop}>■ 停止</button>}
-          </div>
-        </div>
-        {penta && cells.some((m) => m != null && m >= 0 && !rows.includes(m)) && <p className="muted small">有些音（Fa 或 Si 等）不在五聲安全區裡，切到「完整音階」才看得到。</p>}
-        {missingChords && <p className="error small">請先回到「和聲」把{part === 'verse' ? '主歌' : '副歌'}的 4 個和弦排好。</p>}
-
+      <Coach short={empty && p.hum ? '先把你的哼唱倒進格子裡，再一格一格修。' : missingChords ? '先回和聲那一檯，把這段的 4 個和弦排好。' : notes < 4 ? '點格子放音。綠色的最穩。' : '播放，哪裡聽起來怪就改哪裡。'} />
+      <div className="seg seg-quiet">
+        <button className={part === 'verse' ? 'on' : ''} onClick={() => { stop(); setPart('verse') }}>主歌</button>
+        <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setPart('chorus') }}>副歌</button>
+      </div>
         {narrow && (
           <div className="seg roll-pager" aria-label="選擇小節">
             {[0, 1, 2, 3].map((b) => (
@@ -244,31 +230,32 @@ function MelodyStep({ p, update, notify }: StepProps) {
             })}
           </div>
         </div>
-        <div className="row wrap" style={{ marginTop: 8 }}>
-          {p.hum && <button className="btn btn-ghost" onClick={importHum}>匯入我的哼唱當草稿</button>}
-          {part === 'chorus' && p.melody.verse.some((x) => x != null) && <button className="btn btn-ghost" onClick={() => setCells(p.melody.verse.map((m) => (m != null && m >= 0 ? (inScale(m + 4, p.harmony.root, p.harmony.mode) ? m + 4 : m + 3) : m)))}>從主歌複製並往上移（再自己改）</button>}
-          <button className="btn btn-ghost" onClick={() => setCells(new Array(STEPS).fill(null))}>清空</button>
+      {player ? (
+        <DeskActions primary={{ label: '■ 停', onClick: stop }} />
+      ) : empty && p.hum ? (
+        <DeskActions primary={{ label: '用我的哼唱當草稿', onClick: importHum }} />
+      ) : bothReady && next ? (
+        <DeskActions primary={{ label: <>旋律有了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 循環聽', onClick: play }} />
+      ) : (
+        <DeskActions primary={{ label: '▶ 循環聽', onClick: play, disabled: missingChords || notes === 0 }}
+          secondary={part === 'verse' && notes >= 4 && p.melody.chorus.every((m) => m == null) ? { label: '換副歌 →', onClick: () => setPart('chorus') } : undefined} />
+      )}
+
+      <Toolbox>
+        <div className="row wrap">
+          <button className={`btn small ${penta ? 'on' : ''}`} onClick={() => setPenta(!penta)}>{penta ? '只用五聲音階（安全）' : '用完整音階'}</button>
+          <button className={`btn small ${hold ? 'on' : ''}`} onClick={() => setHold(!hold)}>{hold ? '點格子＝拉長前一個音' : '拉長模式'}</button>
+          {p.hum && <button className="btn small" onClick={importHum}>重新匯入哼唱</button>}
+          {part === 'chorus' && p.melody.verse.some((x) => x != null) && <button className="btn small" onClick={() => setCells(p.melody.verse.map((m) => (m != null && m >= 0 ? (inScale(m + 4, p.harmony.root, p.harmony.mode) ? m + 4 : m + 3) : m)))}>從主歌複製並升高</button>}
+          <button className="btn small" onClick={() => setCells(new Array(STEPS).fill(null))}>清空</button>
         </div>
-        <p className="muted small">左側數字是簡譜（點一下可試聽）。淡綠底色的格子是當下和弦的組成音。延長模式下點格子＝把前一個音拉長。</p>
-      </Card>
-
-      <Card title="即時回饋">
+        {penta && cells.some((m) => m != null && m >= 0 && !rows.includes(m)) && <p className="muted small">有些音不在五聲音階裡，切到「完整音階」才看得到。</p>}
+        <p className="muted small">左邊的數字是簡譜，點一下可以試聽。淡綠底的格子是當下和弦裡的音。</p>
         <FeedbackList items={fb} />
-      </Card>
-
-      <Card title="自我聆聽筆記">
-        <textarea rows={3} value={p.melody.reflections} placeholder="播放 3 次後寫下：哪一句最想一直唱？哪一個音聽起來怪怪的？" onChange={(e) => update('melody', { ...p.melody, reflections: e.target.value })} />
-      </Card>
-
-      <Why ready={cells.filter((m) => m != null && m >= 0).length >= 4} hint="放 4 個音以上並按播放。" listen={{ label: '再聽一次你的旋律', play }} title="為什麼強拍要放和弦音？" apply="即興 Solo、寫 Bass 線、編合聲都遵守同一個原則。">
-        <p>強拍（每拍的開頭）是耳朵最注意的地方。在強拍上唱和弦音，旋律和伴奏會融在一起；把非和弦音放在弱拍，它就變成「從一個和弦音走到另一個」的經過音，讓旋律流動。</p>
-      </Why>
-      <Why ready={cells.filter((m) => m != null && m >= 0).length >= 6} title="為什麼級進為主、大跳為輔？" apply="分析任何一首你喜歡的歌，數數看有幾次大跳。">
-        <p>人聲最自然的移動是相鄰音（級進）。大跳像說話時突然提高音量，偶爾用很有戲劇性，太多會難唱又沒重點。經典技巧：大跳之後往反方向級進回來。</p>
-      </Why>
-      <Why ready={p.melody.verse.some((m) => m != null) && p.melody.chorus.some((m) => m != null)} hint="主歌和副歌都寫一點。" title="為什麼副歌要比主歌高？" apply="簡報的高潮、影片配樂的爆點，都靠「拉高」製造情緒。">
-        <p>音高越高，聲帶越緊繃，聽起來越激動。主歌待在中低音域「說故事」，副歌往上「喊出來」，聽眾會自然感受到情緒升溫。</p>
-      </Why>
+        <Why ready={notes >= 4} title="為什麼綠色的音特別穩？" listen={{ label: '再聽一次', play }}>
+          <p>綠色是當下和弦裡的音。放在每拍的開頭，旋律和伴奏會融在一起；黃色的音放在中間，會變成兩個綠色之間的過門，讓旋律流動。</p>
+        </Why>
+      </Toolbox>
     </>
   )
 }
@@ -280,7 +267,7 @@ export const melodyStep: StepDef = {
   glyph: '曲',
   Component: MelodyStep,
   requirements: (p) => [
-    { label: '主歌旋律至少 8 個音', ok: p.melody.verse.filter((m) => m != null && m >= 0).length >= 8 },
-    { label: '副歌旋律至少 8 個音', ok: p.melody.chorus.filter((m) => m != null && m >= 0).length >= 8 },
+    { label: '主歌有幾個音', ok: p.melody.verse.filter((m) => m != null && m >= 0).length >= 4 },
+    { label: '副歌有幾個音', ok: p.melody.chorus.filter((m) => m != null && m >= 0).length >= 4 },
   ],
 }

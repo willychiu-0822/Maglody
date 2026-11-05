@@ -1,4 +1,5 @@
-import { Card, Coach, FeedbackList, Light, Why, type Feedback, type Level } from '../components/ui'
+import { useState } from 'react'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, RHYME_GROUPS, cleanLine, countHits, lastChar, rhymeOf } from '../lib/rhyme'
 import { uid, type LyricSection, type Project, type SectionKind } from '../lib/store'
 import type { StepDef, StepProps } from './types'
@@ -48,7 +49,7 @@ export function analyzeSection(s: LyricSection, hook: string) {
   return { ls, lens, ends, fb }
 }
 
-function LyricsStep({ p, update, notify }: StepProps) {
+function LyricsStep({ p, update, notify, next }: StepProps) {
   const secs = p.lyrics
   const setSec = (id: string, patch: Partial<LyricSection>) => update('lyrics', secs.map((s) => (s.id === id ? { ...s, ...patch } : s)))
   const add = (kind: SectionKind) => update('lyrics', [...secs, { id: uid(), kind, text: '' }])
@@ -61,89 +62,89 @@ function LyricsStep({ p, update, notify }: StepProps) {
     update('lyrics', n)
   }
 
+  const [curId, setCurId] = useState<string | null>(null)
+  const cur = secs.find((s) => s.id === curId) ?? secs.find((s) => s.kind === 'chorus' && !s.text.trim() && secs.some((x) => x.kind === 'verse' && lines(x.text).length >= 2)) ?? secs[0]
+  const ci = cur ? secs.indexOf(cur) : -1
+  const a = cur ? analyzeSection(cur, p.idea.hook) : null
+  const target = cur ? melodyOnsets(p, cur.kind === 'chorus' ? 'chorus' : 'verse') : 0
+  const ready = lyricsStep.requirements(p).every((r) => r.ok)
+  const say = !cur ? '' : !cur.text.trim()
+    ? cur.kind === 'chorus' ? `副歌。把「${p.idea.hook || '你那句話'}」放進來。${target ? `大約 ${target} 個字。` : ''}` : `${KIND_ZH[cur.kind]}。先寫你看到的畫面。${target ? `大約 ${target} 個字。` : ''}`
+    : '寫下來就好，之後還能改。'
   return (
     <>
-      <Coach short={<>讓字住進旋律裡。一行一句，想到什麼先寫下來。{melodyOnsets(p, 'chorus') > 0 && <> 副歌旋律有 {melodyOnsets(p, 'chorus')} 個音，前兩句大約就這麼多字。</>}</>}>
-        旋律已經在等你的字了。歌詞不是作文，是要「被唱出來」的句子：主歌演故事、副歌說結論。
-        {melodyOnsets(p, 'chorus') > 0 && <> 你的副歌旋律有 <strong>{melodyOnsets(p, 'chorus')} 個音</strong>，所以副歌前兩句加起來大約 {melodyOnsets(p, 'chorus')} 個字（一字一音）。</>}
-        {melodyOnsets(p, 'verse') > 0 && <> 主歌旋律有 {melodyOnsets(p, 'verse')} 個音。</>}
-        每寫一句，右邊會即時顯示字數和韻腳顏色——同顏色代表押韻。
-        {p.idea.image && <> 別忘了你的核心畫面：「{p.idea.image}」。</>}
-      </Coach>
+      <Coach short={say} />
 
-      {secs.map((s, i) => {
-        const a = analyzeSection(s, p.idea.hook)
-        return (
-          <Card key={s.id} className="lyric-card" title={
-            <div className="row between">
-              <select value={s.kind} onChange={(e) => setSec(s.id, { kind: e.target.value as SectionKind })}>
-                {LYRIC_KINDS.map((k) => <option key={k} value={k}>{KIND_ZH[k]}</option>)}
-              </select>
-              <span className="row">
-                <button className="icon-btn" onClick={() => move(i, -1)} aria-label="上移">↑</button>
-                <button className="icon-btn" onClick={() => move(i, 1)} aria-label="下移">↓</button>
-                <button className="icon-btn" onClick={() => remove(s.id)} aria-label="刪除">✕</button>
-              </span>
-            </div>
-          }>
-            <div className="lyric-wrap">
-              <textarea
-                className="lyric-input"
-                rows={Math.max(4, s.text.split('\n').length + 1)}
-                value={s.text}
-                placeholder={s.kind === 'verse' ? '一行一句。先寫場景：在哪裡、看到什麼…' : s.kind === 'chorus' ? '一行一句。放進你的記憶點，說出情緒的結論…' : '一行一句'}
-                onChange={(e) => { setSec(s.id, { text: e.target.value }); notify('lyrics.edit', s.kind) }}
-              />
-              <div className="lyric-meta">
-                {s.text.split('\n').map((raw, j) => {
-                  const n = cleanLine(raw).length
-                  const r = rhymeOf(lastChar(raw))
-                  return (
-                    <div key={j} className="lyric-meta-row">
-                      {n > 0 && <>
-                        <span className={`count ${n > 14 ? 'over' : ''}`}>{n}</span>
-                        <span className={`rhyme-tag ${r ? `rh-${r.idx}` : 'rh-none'}`}>{r?.group ?? '?'}</span>
-                      </>}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-            <FeedbackList items={a.fb} empty="寫兩句以上，老師就會開始回饋。" />
-          </Card>
-        )
-      })}
-
-      <div className="row wrap">
-        {LYRIC_KINDS.map((k) => <button key={k} className="btn btn-ghost" onClick={() => add(k)}>＋ {KIND_ZH[k]}</button>)}
-      </div>
-
-      <details className="card cheat">
-        <summary className="card-title">想找押韻的字？翻翻韻腳小抄</summary>
-        <div className="rhyme-table">
-          {RHYME_GROUPS.map((g, i) => (
-            <div key={g.group} className="rhyme-row">
-              <span className={`rhyme-tag rh-${i}`}>{g.group}</span>
-              <span className="muted small">{g.sound}</span>
-              <span className="small">{g.sample}</span>
-            </div>
-          ))}
+      {secs.length > 1 && (
+        <div className="seg seg-quiet">
+          {secs.map((s) => <button key={s.id} className={s.id === cur?.id ? 'on' : ''} onClick={() => setCurId(s.id)}>{KIND_ZH[s.kind]}</button>)}
         </div>
-      </details>
+      )}
 
-      <Why ready={secs.some((s) => lines(s.text).length >= 2)} hint="先寫兩句。" listen={{ label: '聽副歌旋律＋你的詞', play: () => RESULTS_SPEAK(p) }} title="為什麼主歌和副歌分工？" apply="簡報也是：先給案例和數據（主歌），再下結論（副歌）。">
-        <p>主歌像電影的鏡頭，帶聽眾進入場景；副歌是情緒的爆發點和結論，會重複出現。如果主歌就把話說完，副歌就沒有力量。</p>
-      </Why>
-      <Why ready={secs.some((s) => lines(s.text).length >= 2)} title="為什麼要押韻、要字數對稱？" apply="寫口號、對聯、Rap、廣告詞都靠押韻和節奏記憶。">
-        <p>押韻讓句子有「回音」，耳朵會期待並記住它。字數對稱讓同一段旋律可以重複使用——重複是流行歌好記的秘密。</p>
-        <p>中文歌常用「十三轍」分韻：只要韻母相近就算押韻，不必完全相同。</p>
-      </Why>
-      <Why ready={secs.some((s) => lines(s.text).length >= 2)} title="華語歌詞的聲調問題（倒字）" apply="填詞、翻唱改詞時都要注意。">
-        <p>中文有四聲。如果旋律往下走，卻填上二聲（往上揚）的字，聽起來會像別的字（倒字）。寫完旋律後，記得回來唱一遍，聽聽有沒有字被唱歪。</p>
-      </Why>
-      <div className="legend small muted">
-        <Light level={'good' as Level} /> 很好 <Light level="warn" /> 可以更好 <Light level="bad" /> 需要調整
-      </div>
+      {cur && (
+        <div className="lyric-wrap paper">
+          <textarea
+            className="lyric-input"
+            rows={Math.max(4, cur.text.split('\n').length + 1)}
+            value={cur.text}
+            placeholder="一行一句……"
+            onChange={(e) => { setSec(cur.id, { text: e.target.value }); notify('lyrics.edit', cur.kind) }}
+          />
+          <div className="lyric-meta">
+            {cur.text.split('\n').map((raw, j) => {
+              const n = cleanLine(raw).length
+              const r = rhymeOf(lastChar(raw))
+              return (
+                <div key={j} className="lyric-meta-row">
+                  {n > 0 && <>
+                    <span className={`count ${n > 14 ? 'over' : ''}`}>{n}</span>
+                    <span className={`rhyme-tag ${r ? `rh-${r.idx}` : 'rh-none'}`}>{r?.group ?? '?'}</span>
+                  </>}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {ready && next ? (
+        <DeskActions primary={{ label: <>詞有了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 聽詞配旋律', onClick: () => RESULTS_SPEAK(p) }} />
+      ) : cur && lines(cur.text).length >= 2 ? (
+        <DeskActions primary={{ label: '▶ 聽詞配旋律', onClick: () => RESULTS_SPEAK(p) }}
+          secondary={cur.kind === 'verse' && !secs.some((s) => s.kind === 'chorus' && s.text.trim()) ? { label: '換副歌 →', onClick: () => setCurId(secs.find((s) => s.kind === 'chorus')?.id ?? null) } : undefined} />
+      ) : null}
+
+      <Toolbox>
+        {cur && (
+          <div className="row wrap">
+            <select value={cur.kind} onChange={(e) => setSec(cur.id, { kind: e.target.value as SectionKind })}>
+              {LYRIC_KINDS.map((k) => <option key={k} value={k}>{KIND_ZH[k]}</option>)}
+            </select>
+            <button className="btn small" onClick={() => move(ci, -1)}>往前</button>
+            <button className="btn small" onClick={() => move(ci, 1)}>往後</button>
+            {secs.length > 1 && <button className="btn small" onClick={() => { remove(cur.id); setCurId(null) }}>刪掉這段</button>}
+          </div>
+        )}
+        <div className="row wrap">
+          {LYRIC_KINDS.map((k) => <button key={k} className="btn small" onClick={() => { add(k) }}>＋ {KIND_ZH[k]}</button>)}
+        </div>
+        {a && <FeedbackList items={a.fb} empty="寫兩句以上，這裡會有幾句觀察。" />}
+        <details className="templates">
+          <summary>找押韻的字</summary>
+          <div className="rhyme-table">
+            {RHYME_GROUPS.map((g, i) => (
+              <div key={g.group} className="rhyme-row">
+                <span className={`rhyme-tag rh-${i}`}>{g.group}</span>
+                <span className="muted small">{g.sound}</span>
+                <span className="small">{g.sample}</span>
+              </div>
+            ))}
+          </div>
+        </details>
+        <Why ready={secs.some((s) => lines(s.text).length >= 2)} title="右邊的數字和顏色是什麼？">
+          <p>數字是字數，旁邊的色塊是句尾的韻。上下兩句字數差不多，旋律才能重複；同一個顏色代表押韻，聽起來會有回音。唱一遍時，注意有沒有字被旋律唱歪了，這叫「倒字」。</p>
+        </Why>
+      </Toolbox>
     </>
   )
 }

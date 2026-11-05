@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Card, Coach, FeedbackList, Why, type Feedback } from '../components/ui'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { PitchCanvas } from '../components/PitchCanvas'
 import { ac, playNote, tone } from '../lib/audio'
 import { useMic } from '../lib/mic'
@@ -7,7 +7,7 @@ import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame 
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
 
-function HumStep({ p, update, notify }: StepProps) {
+function HumStep({ p, update, notify, next }: StepProps) {
   const [live, setLive] = useState<PitchFrame[]>([])
   const [ana, setAna] = useState<HumAnalysis | null>(null)
   const [busy, setBusy] = useState(false)
@@ -129,129 +129,79 @@ function HumStep({ p, update, notify }: StepProps) {
   const hist = ana?.hist
   const histMax = hist ? Math.max(...hist, 0.001) : 1
 
+  const hasResult = !!hum && !mic.running && !busy
   return (
     <>
-      <Coach short={'哼一段腦中的旋律給我聽，不用好聽，有就好。'}>
-        每首歌都從一個「哼出來的念頭」開始。別擔心唱得好不好——先把腦中那段旋律哼給我聽，我幫你看見它：它在哪個調、喜歡哪些和弦。
-        之後不管你在哪一檯，都可以回頭用到這段哼唱，也可以拿別的靈感來拼。
-      </Coach>
+      <Coach short={mic.running ? '我在聽……哼完按停止。' : hum ? <>你最常回去的音是 <strong>{NOTE_NAMES[hum.keyRoot]}</strong>，這首歌的「家」在這裡。</> : '哼一段腦中的旋律給我聽。不用好聽，有就好。'} />
 
-      <Card title="錄一段哼唱（8–20 秒）">
+      <div className="stage">
+        {mic.running && <div className={`big-note ${mic.midi != null ? 'on' : ''}`}>{mic.midi != null ? noteNameOct(mic.midi) : '…'}</div>}
+        {(shownFrames.length > 0 || shownNotes.length > 0) ? (
+          <PitchCanvas frames={shownFrames} notes={shownNotes} duration={shownDur} keyRoot={hum?.keyRoot} keyMode={hum?.keyMode} playhead={playhead} height={180} />
+        ) : !mic.running && <div className="stage-empty" aria-hidden>～</div>}
+        {busy && <p className="muted small center">在聽你剛剛哼的……</p>}
+        {mic.error && <p className="error small">{mic.error}</p>}
+      </div>
+
+      {mic.running ? (
+        <DeskActions primary={{ label: '■ 哼完了', onClick: toggleRec }} />
+      ) : hasResult && next ? (
+        <DeskActions primary={{ label: <>用這段繼續：{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 聽聽整理後的音', onClick: () => playNotes(true) }} />
+      ) : (
+        <DeskActions primary={{ label: '● 哼一段', onClick: toggleRec }} secondary={{ label: '沒有麥克風？聽示範', onClick: demo }} />
+      )}
+
+      <Toolbox>
         <div className="row wrap">
-          <button className={`btn ${mic.running ? 'btn-danger' : 'btn-primary'}`} onClick={toggleRec}>
-            {mic.running ? '■ 停止並分析' : '● 開始哼唱'}
-          </button>
-          <label className="btn">
+          {hum && <button className="btn small" onClick={toggleRec}>● 再哼一次</button>}
+          <label className="btn small">
             上傳音檔
             <input type="file" accept="audio/*" hidden onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
           </label>
-          <button className="btn btn-ghost" onClick={demo}>沒有麥克風？用示範哼唱體驗</button>
+          {ana && <button className="btn small" onClick={playOriginal}>▶ 原始錄音</button>}
+          {hum && <button className="btn small" onClick={() => playNotes(false)}>▶ 只聽旋律</button>}
         </div>
-        {mic.error && <p className="error">{mic.error}</p>}
-        {mic.running && (
-          <div className="live-pitch">
-            <span className={`big-note ${mic.midi != null ? 'on' : ''}`}>{mic.midi != null ? noteNameOct(mic.midi) : '—'}</span>
-            <span className="muted small">即時音高：線條越平穩，代表你的音越穩。</span>
-          </div>
-        )}
-        {busy && <p className="muted">分析中…</p>}
-        {(shownFrames.length > 0 || shownNotes.length > 0) && (
-          <PitchCanvas frames={shownFrames} notes={shownNotes} duration={shownDur} keyRoot={hum?.keyRoot} keyMode={hum?.keyMode} playhead={playhead} />
-        )}
-        {(ana || hum) && !mic.running && (
-          <div className="row wrap" style={{ marginTop: 8 }}>
-            {ana && <button className="btn" onClick={playOriginal}>▶ 原始錄音</button>}
-            <button className="btn" onClick={() => playNotes(false)}>▶ 整理後的音</button>
-            <button className="btn" onClick={() => playNotes(true)}>▶ 加上主音襯底</button>
-          </div>
-        )}
-        <p className="muted small">灰線：每 10 毫秒偵測到的音高。色塊：整理成音符後的結果（綠＝在調內，紅＝調外音）。</p>
-      </Card>
-
-      {hum && (
-        <Card title="老師的解析">
+        {hum && (
           <div className="result-grid">
-            <div className="result">
-              <div className="muted small">估計調性</div>
-              <div className="result-big">{keyName(hum.keyRoot, hum.keyMode)}</div>
-            </div>
-            <div className="result">
-              <div className="muted small">你的舒適音域</div>
-              <div className="result-big">{noteNameOct(hum.rangeLow)}–{noteNameOct(hum.rangeHigh)}</div>
-            </div>
-            <div className="result">
-              <div className="muted small">建議和弦</div>
-              <div className="result-big">{[...new Set(hum.chordHints)].slice(0, 4).join(' · ') || '—'}</div>
-            </div>
+            <div className="result"><div className="muted small">調</div><div className="result-big">{keyName(hum.keyRoot, hum.keyMode)}</div></div>
+            <div className="result"><div className="muted small">舒服的音域</div><div className="result-big">{noteNameOct(hum.rangeLow)}–{noteNameOct(hum.rangeHigh)}</div></div>
+            <div className="result"><div className="muted small">可能適合的和弦</div><div className="result-big">{[...new Set(hum.chordHints)].slice(0, 4).join(' · ') || '—'}</div></div>
           </div>
-
-          {hist && (
-            <div className="hist">
-              {hist.map((v, i) => (
-                <div key={i} className="hist-col" title={`${NOTE_NAMES[i]}：${v.toFixed(1)} 秒`}>
-                  <div className={`hist-bar ${SCALES[hum.keyMode].includes(pc(i - hum.keyRoot)) ? 'in' : ''} ${i === hum.keyRoot ? 'tonic' : ''}`} style={{ height: `${(v / histMax) * 100}%` }} />
-                  <span>{NOTE_NAMES[i]}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="explain">
-            <p className="spark">你最常回去的音是 <strong>{NOTE_NAMES[hum.keyRoot]}</strong>——它就是這首歌的「家」。</p>
-            <details className="quiet">
-            <summary>我怎麼聽出來的？</summary>
-            <p>
-              <strong>白話解釋：</strong>我把你唱的每個音「唱了多久」加總起來（上面的長條圖）。
-              你停留最久、最常回去的音，通常就是這首歌的「家」——主音 <strong>{NOTE_NAMES[hum.keyRoot]}</strong>。
-              再拿這個分佈去跟 24 個調的典型樣子比對，最像的是 <strong>{keyName(hum.keyRoot, hum.keyMode)}</strong>
-              {hum.keyMode === 'major' ? '：大調通常聽起來明亮、開闊。' : '：小調通常聽起來內斂、帶點憂傷。'}
-            </p>
-            {ana && ana.chordHints.length > 0 && (
-              <ol className="hint-list">
-                {ana.chordHints.slice(0, 6).map((h, i) => (
-                  <li key={i}>
-                    <strong>{h.start.toFixed(1)}–{h.end.toFixed(1)} 秒 → {h.chord}（{h.roman}）</strong>
-                    <div className="muted small">{h.why}</div>
-                  </li>
-                ))}
-              </ol>
-            )}
-            </details>
-            {ana && (
-              <div className="row wrap small">
-                <span className="muted">不像嗎？試試其他候選：</span>
-                {ana.keys.slice(0, 3).map((k, i) => (
-                  <button
-                    key={i}
-                    className={`chip ${k.root === hum.keyRoot && k.mode === hum.keyMode ? 'on' : ''}`}
-                    onClick={() => {
-                      update('hum', { ...hum, keyRoot: k.root, keyMode: k.mode })
-                      update('harmony', (h) => ({ ...h, root: k.root, mode: k.mode }))
-                      playNote(60 + k.root, 0.8)
-                    }}
-                  >
-                    {keyName(k.root, k.mode)}
-                  </button>
-                ))}
+        )}
+        {ana && hum && (
+          <div className="row wrap small">
+            <span className="muted">聽起來不像？換一個調：</span>
+            {ana.keys.slice(0, 3).map((k, i) => (
+              <button key={i} className={`chip ${k.root === hum.keyRoot && k.mode === hum.keyMode ? 'on' : ''}`}
+                onClick={() => { update('hum', { ...hum, keyRoot: k.root, keyMode: k.mode }); update('harmony', (h) => ({ ...h, root: k.root, mode: k.mode })); playNote(60 + k.root, 0.8) }}>
+                {keyName(k.root, k.mode)}
+              </button>
+            ))}
+          </div>
+        )}
+        {hist && hum && (
+          <div className="hist">
+            {hist.map((v, i) => (
+              <div key={i} className="hist-col" title={`${NOTE_NAMES[i]}：${v.toFixed(1)} 秒`}>
+                <div className={`hist-bar ${SCALES[hum.keyMode].includes(pc(i - hum.keyRoot)) ? 'in' : ''} ${i === hum.keyRoot ? 'tonic' : ''}`} style={{ height: `${(v / histMax) * 100}%` }} />
+                <span>{NOTE_NAMES[i]}</span>
               </div>
-            )}
+            ))}
           </div>
-        </Card>
-      )}
-
-      <Card title="即時回饋">
-        <FeedbackList items={fb} empty="哼完之後，這裡會用綠／黃／紅燈告訴你哪裡很棒、哪裡可以調。" />
-      </Card>
-
-      <Why ready={!!hum} hint="先哼一段（或用示範哼唱）。" listen={{ label: '再聽一次你的哼唱＋主音', play: () => playNotes(true) }} title="為什麼要從哼唱開始？" apply="寫歌卡關時、在路上想到旋律時，先錄音再分析，比坐在鋼琴前硬想更自然。">
-        <p>旋律是一首歌最容易被記住的部分。直接從身體裡的聲音出發，比從理論出發更像「你的歌」。分析只是幫你看見你已經會的事。</p>
-      </Why>
-      <Why ready={!!hum} title="電腦怎麼知道我唱什麼音？" apply="調音器 App、卡拉 OK 評分、自動修音（Auto-Tune）都用類似原理。">
-        <p>聲音是空氣的振動。唱 A 音時，每秒振動 440 次。程式把聲波跟「往後挪一點的自己」比較（自相關），重疊最好的位移量就是一次振動的長度，換算成頻率就得到音高。</p>
-      </Why>
-      <Why ready={!!hum} listen={{ label: '只聽主音（家）', play: () => hum && playNote(60 + hum.keyRoot, 1.5) }} title="什麼是「調」？為什麼重要？" apply="選翻唱的 Key、跟樂手溝通、即興伴奏都要先知道調。">
-        <p>調就是一首歌的「家」和它常用的 7 個音。知道調，就知道哪些和弦一定好聽（和聲那一檯會用到），也知道哪些音會製造張力。</p>
-      </Why>
+        )}
+        <FeedbackList items={fb} empty="哼完之後，這裡會有幾句觀察。" />
+        <Why ready={!!hum} title="我怎麼聽出你的「家」？" listen={{ label: '只聽主音', play: () => hum && playNote(60 + hum.keyRoot, 1.5) }}>
+          <p>我把你每個音「唱了多久」加起來（上面的長條圖）。停留最久、最常回去的音，通常就是這首歌的家，也就是主音。再拿這個分佈去比對 24 個調的典型樣子，最像的那個就是你的調。</p>
+          {ana && ana.chordHints.length > 0 && (
+            <ol className="hint-list">
+              {ana.chordHints.slice(0, 4).map((h, i) => <li key={i}><strong>{h.start.toFixed(1)}–{h.end.toFixed(1)} 秒 → {h.chord}</strong><div className="muted small">{h.why}</div></li>)}
+            </ol>
+          )}
+        </Why>
+        <Why ready={!!hum} title="電腦怎麼知道我唱什麼音？">
+          <p>唱 A 音時，空氣每秒振動 440 次。程式把聲波跟「往後挪一點的自己」比較，重疊最好的位移量就是一次振動的長度，換算成頻率就是音高。</p>
+        </Why>
+      </Toolbox>
     </>
   )
 }

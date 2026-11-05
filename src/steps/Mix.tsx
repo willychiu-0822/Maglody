@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Card, Coach, FeedbackList, Meter, Why, type Feedback, type Level } from '../components/ui'
+import { Card, Coach, DeskActions, FeedbackList, Meter, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { applyTrack, createMixGraph, playLoop, type MixGraph, type Player, type TrackId, type TrackSettings } from '../lib/audio'
 import type { Project } from '../lib/store'
 import { sectionAudio } from './Arrangement'
@@ -27,7 +27,7 @@ export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
   return fb
 }
 
-function MixStep({ p, update, notify }: StepProps) {
+function MixStep({ p, update, notify, next }: StepProps) {
   const [player, setPlayer] = useState<Player | null>(null)
   const [peak, setPeak] = useState<number | null>(null)
   const [level, setLevel] = useState(-60)
@@ -83,22 +83,30 @@ function MixStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach short={'按播放，把每個聲音推回它該在的位置。'}>
-        混音就是「讓每個聲音都有自己的位置」。我故意把起始設定弄得有點亂：主旋律太小聲、貝斯偏到右邊。
-        按下播放，一邊聽一邊調整，看回饋燈怎麼變。隨時按「A/B 比較」聽聽原始狀態，訓練你的耳朵。
-      </Coach>
+      <Coach short={!p.mix.listened ? '按播放，聽聽每個聲音在哪。' : '把主旋律推到最清楚，其他往後站。'} />
 
-      <Card>
-        <div className="row wrap">
-          {!player ? <button className="btn btn-primary" onClick={play}>▶ 播放副歌循環</button> : <button className="btn btn-danger" onClick={stop}>■ 停止</button>}
-          <button className={`btn ${bypass ? 'btn-primary' : ''}`} onClick={() => { setBypass(!bypass); if (!bypass) notify('mix.ab', '') }} disabled={!player}>{bypass ? 'B：未混音（點我回到你的混音）' : 'A/B 比較'}</button>
-        </div>
+      <div className="mix-simple">
+        {TRACKS.map((tr) => (
+          <label key={tr.id} className="mix-row">
+            <span>{tr.name.replace(/（.*）/, '')}</span>
+            <input type="range" min={0} max={1.2} step={0.01} value={tracks[tr.id].vol} onChange={(e) => setT(tr.id, { vol: +e.target.value })} />
+          </label>
+        ))}
+      </div>
+
+      {player ? (
+        <DeskActions primary={{ label: '■ 停', onClick: stop }} secondary={{ label: bypass ? '回到我的混音' : '聽聽沒混之前', onClick: () => { setBypass(!bypass); if (!bypass) notify('mix.ab', '') } }} />
+      ) : mixStep.requirements(p).every((x) => x.ok) && next ? (
+        <DeskActions primary={{ label: <>聽清楚了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 再聽一次', onClick: play }} />
+      ) : (
+        <DeskActions primary={{ label: '▶ 播放副歌', onClick: play }} />
+      )}
+
+      <Toolbox>
         <div className="level-box">
           <div className="row between small"><span>總輸出</span><span>{player ? `${level.toFixed(0)} dB` : '—'}</span></div>
           <Meter value={(level + 48) / 48} level={meterLevel} />
         </div>
-      </Card>
-
       <div className="mixer">
         {TRACKS.map((tr) => {
           const s = tracks[tr.id]
@@ -141,6 +149,7 @@ function MixStep({ p, update, notify }: StepProps) {
       <Why ready={p.mix.listened} title="為什麼要 A/B 比較？" apply="修照片、改文章時，也要常常和原稿比較。">
         <p>耳朵會很快「習慣」聲音，調久了就不知道自己變好還是變差。回到原始狀態聽一下，是混音師最常用的校準方法。</p>
       </Why>
+      </Toolbox>
     </>
   )
 }
