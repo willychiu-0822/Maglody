@@ -57,12 +57,13 @@ VITE_AGENT_URL=http://localhost:8787/api/master npm run dev
 | `GCP_PROJECT` | GCP 專案 ID（`vertex` 必填） | — |
 | `GCP_LOCATION` | Vertex 區域，例如 `us-central1`、`asia-east1`、`global` | `us-central1` |
 | `GCP_ACCESS_TOKEN` | OAuth 存取權杖；未設定時自動執行 `gcloud auth print-access-token`（需先 `gcloud auth login` 並啟用 Vertex AI API） | — |
+| `GCP_USE_METADATA` | 部署在 Cloud Run 時設為 `1`，改用服務帳戶自動取得權杖（不需要金鑰檔） | — |
 | `GEMINI_API_KEY` | Gemini Developer API 金鑰（`gemini` 必填，適合本機開發） | — |
 | `PORT` | 後端埠號 | `8787` |
-| `ALLOW_ORIGIN` | 允許呼叫後端的前端網址（CORS） | `http://localhost:5173` |
+| `ALLOW_ORIGIN` | 允許呼叫後端的前端網址（CORS），多個請用逗號分隔 | `http://localhost:5173` |
 | `VITE_AGENT_URL` | **前端**：後端網址；不設定就用離線 mock | — |
 
-健康檢查：`curl localhost:8787/api/health`。Prompt 模板見 [docs/agent-prompts.md](docs/agent-prompts.md)。
+健康檢查：`curl localhost:8787/api/health`。**一步一步的雲端設定（OpenAI、Gemini、Vertex、Netlify／Render／Cloud Run 部署）見 [docs/cloud-setup.md](docs/cloud-setup.md)，給非工程背景的人也能照做。**Prompt 模板見 [docs/agent-prompts.md](docs/agent-prompts.md)。
 
 ## 帶進 DAW：預設教學用 REAPER
 
@@ -85,6 +86,7 @@ REAPER 選擇原因：輕量、跨平台、可完整試用 60 天。試用期結
 - [docs/architecture.md](docs/architecture.md)：前後端架構、LLM provider 抽象層、資料模型
 - [docs/agent-prompts.md](docs/agent-prompts.md)：大師 Agent 的 prompt 模板
 - [docs/design.md](docs/design.md)：視覺語言（紙、墨、淡彩）與禁止清單
+- [docs/cloud-setup.md](docs/cloud-setup.md)：雲端與部署設定（非工程新手版）
 - [docs/ux-review.md](docs/ux-review.md)：新手手機路徑自測紀錄與修正狀態
 
 ## 技術

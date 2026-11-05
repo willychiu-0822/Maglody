@@ -52,6 +52,8 @@ interface LlmProvider {
 }
 ```
 
+Vertex 的權杖取得順序：`GCP_ACCESS_TOKEN` → Cloud Run 服務帳戶（`GCP_USE_METADATA=1`）→ 本機 `gcloud`。`server/Dockerfile` 可直接 `gcloud run deploy --source server` 部署。測試或公司代理可用 `OPENAI_BASE_URL`、`GEMINI_BASE_URL`、`VERTEX_BASE_URL` 覆寫端點。
+
 新增供應商只要實作這個介面，並加進 `server/llm/index.ts` 的 switch。後端不信任模型輸出：`sanitize()` 會截斷長度、過濾未知 action、檢查和弦級數範圍。環境變數見 README。
 
 ## 資料模型

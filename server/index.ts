@@ -6,7 +6,8 @@ import { createProvider } from './llm/index.ts'
 import { ProviderError, type ChatTurn } from './llm/types.ts'
 
 const PORT = Number(process.env.PORT ?? 8787)
-const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN ?? 'http://localhost:5173'
+// 可用逗號列出多個前端網址，例如 https://maglody.netlify.app,http://localhost:5173
+const ALLOWED = (process.env.ALLOW_ORIGIN ?? 'http://localhost:5173').split(',').map((x) => x.trim())
 let provider: ReturnType<typeof createProvider>
 try {
   provider = createProvider()
@@ -47,7 +48,9 @@ function sanitize(raw: string) {
 }
 
 const server = http.createServer(async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', ALLOW_ORIGIN)
+  const origin = req.headers.origin ?? ''
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED.includes('*') ? '*' : ALLOWED.includes(origin) ? origin : ALLOWED[0])
+  res.setHeader('Vary', 'Origin')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   if (req.method === 'OPTIONS') { res.writeHead(204).end(); return }

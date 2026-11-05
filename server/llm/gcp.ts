@@ -1,7 +1,7 @@
 // Google provider：
 //  - vertex：Vertex AI Gemini（GCP 專案 + OAuth 存取權杖）
 //      env：GCP_PROJECT（必填）、GCP_LOCATION（預設 us-central1，可設 global）、LLM_MODEL
-//      權杖：GCP_ACCESS_TOKEN，未設定時自動執行 `gcloud auth print-access-token`（需先 gcloud auth login 或 ADC）
+//      權杖順序：GCP_ACCESS_TOKEN → Cloud Run 服務帳戶（GCP_USE_METADATA=1）→ 本機 `gcloud auth print-access-token`
 //  - gemini：Gemini Developer API（只需 GEMINI_API_KEY，適合本機開發）
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
@@ -14,12 +14,21 @@ async function accessToken(): Promise<string> {
   if (process.env.GCP_ACCESS_TOKEN) return process.env.GCP_ACCESS_TOKEN
   // gcloud 權杖約 60 分鐘有效，快取 45 分鐘
   if (cached && Date.now() - cached.at < 45 * 60_000) return cached.token
+  // 部署在 Cloud Run 時（部署指令會設 GCP_USE_METADATA=1）：向 GCP metadata server 取得服務帳戶權杖，
+  // 這是 Google 官方函式庫在 Cloud Run 上取得憑證的同一種方式，不需要任何金鑰檔。本機開發不會走這條路。
+  if (process.env.GCP_USE_METADATA === '1') {
+    const res = await fetch('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', { headers: { 'Metadata-Flavor': 'Google' } })
+    if (!res.ok) throw new ProviderError(`無法從 Cloud Run 取得服務帳戶權杖（${res.status}）`, 500)
+    const j = (await res.json()) as { access_token: string; expires_in: number }
+    cached = { token: j.access_token, at: Date.now() }
+    return cached.token
+  }
   try {
     const { stdout } = await run('gcloud', ['auth', 'print-access-token'])
     cached = { token: stdout.trim(), at: Date.now() }
     return cached.token
   } catch {
-    throw new ProviderError('取得 GCP 存取權杖失敗：請設定 GCP_ACCESS_TOKEN，或先執行 gcloud auth login', 500)
+    throw new ProviderError('取得 GCP 存取權杖失敗：本機請先執行 gcloud auth login；Cloud Run 上請設 GCP_USE_METADATA=1 並給服務帳戶「Vertex AI 使用者」角色', 500)
   }
 }
 
