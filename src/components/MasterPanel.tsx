@@ -20,10 +20,11 @@ interface Props {
   busy: boolean
   onAsk: (q: string) => void
   onAction: (a: AgentAction, apply: boolean) => void
+  onPlayResult?: () => void
 }
 
 /** 大師旁白條：收合時顯示最新一句旁白；展開後可以看完整對話並提問 */
-export function MasterPanel({ step, messages, busy, onAsk, onAction }: Props) {
+export function MasterPanel({ step, messages, busy, onAsk, onAction, onPlayResult }: Props) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
@@ -82,6 +83,8 @@ export function MasterPanel({ step, messages, busy, onAsk, onAction }: Props) {
         </div>
       )}
       {!open && (
+        <div className="master-bar-wrap">
+        {onPlayResult && <button className="master-play" onClick={onPlayResult} aria-label="聽本章成果">▶</button>}
         <button className="master-bar" onClick={() => setOpen(true)}>
           <span className="msg-avatar" aria-hidden>師</span>
           <span className="master-bar-text">
@@ -89,6 +92,7 @@ export function MasterPanel({ step, messages, busy, onAsk, onAction }: Props) {
           </span>
           <span className="master-bar-cta">對話</span>
         </button>
+        </div>
       )}
     </div>
   )

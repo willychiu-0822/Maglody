@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ac } from './audio'
+import { ac, setAudioSession } from './audio'
 import { decimate, detectPitch } from './pitch'
 import { freqToMidi } from './theory'
 
@@ -28,6 +28,7 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
     r.src?.disconnect()
     r.stream?.getTracks().forEach((t) => t.stop())
     r.stream = undefined
+    setAudioSession('playback')
     setState((s) => ({ ...s, running: false, midi: null }))
     if (!optsRef.current.record || !r.chunks.length) return null
     const len = r.chunks.reduce((a, c) => a + c.length, 0)
@@ -40,6 +41,7 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
 
   const start = useCallback(async () => {
     const c = ac()
+    setAudioSession('play-and-record')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
       const r = refs.current

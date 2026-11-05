@@ -3,10 +3,17 @@ import { midiToFreq } from './theory'
 
 let ctx: AudioContext | null = null
 
+/** iOS Safari 16.4+：讓播放不受靜音開關影響；錄音時切成 play-and-record */
+export function setAudioSession(type: 'playback' | 'play-and-record') {
+  const s = (navigator as unknown as { audioSession?: { type: string } }).audioSession
+  if (s) try { s.type = type } catch { /* 不支援時忽略 */ }
+}
+
 export function ac(): AudioContext {
   if (!ctx) {
     const C = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
     ctx = new C()
+    setAudioSession('playback')
   }
   if (ctx.state === 'suspended') void ctx.resume()
   return ctx

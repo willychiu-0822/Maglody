@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, Coach, FeedbackList, Why, type Feedback, type Level } from '../components/ui'
 import { playLoop, playNote, type Player } from '../lib/audio'
 import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, scaleNote, snapToScale, SCALES, type Chord, type Mode } from '../lib/theory'
@@ -97,7 +97,22 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   return fb
 }
 
+/** 手機直向：一次顯示 2 小節，格子才夠大好點 */
+function useNarrow() {
+  const q = '(max-width: 640px)'
+  const [n, setN] = useState(() => typeof window !== 'undefined' && window.matchMedia(q).matches)
+  useEffect(() => {
+    const m = window.matchMedia(q)
+    const f = () => setN(m.matches)
+    m.addEventListener('change', f)
+    return () => m.removeEventListener('change', f)
+  }, [])
+  return n
+}
+
 function MelodyStep({ p, update, notify }: StepProps) {
+  const narrow = useNarrow()
+  const [page, setPage] = useState(0)
   const [part, setPart] = useState<Part>('chorus')
   const [hold, setHold] = useState(false)
   const [penta, setPenta] = useState(() => ![...p.melody.verse, ...p.melody.chorus].some((m) => m != null && m >= 0 && isAvoid(m, p.harmony.root, p.harmony.mode)))
@@ -155,6 +170,9 @@ function MelodyStep({ p, update, notify }: StepProps) {
   }
 
   const fb = melodyFeedback(p, part)
+  // 播放時頁面跟著播放頭走
+  const shownPage = narrow && col >= 0 ? Math.floor(col / 16) : page
+  const visible = Array.from({ length: narrow ? 16 : STEPS }, (_, k) => (narrow ? shownPage * 16 : 0) + k)
   const missingChords = prog.some((d) => d == null)
 
   return (
@@ -181,10 +199,16 @@ function MelodyStep({ p, update, notify }: StepProps) {
         {penta && cells.some((m) => m != null && m >= 0 && !rows.includes(m)) && <p className="muted small">有些音（Fa 或 Si 等）不在五聲安全區裡，切到「完整音階」才看得到。</p>}
         {missingChords && <p className="error small">請先回到「和聲」把{part === 'verse' ? '主歌' : '副歌'}的 4 個和弦排好。</p>}
 
+        {narrow && (
+          <div className="seg roll-pager">
+            <button className={shownPage === 0 ? 'on' : ''} onClick={() => setPage(0)}>第 1–2 小節</button>
+            <button className={shownPage === 1 ? 'on' : ''} onClick={() => setPage(1)}>第 3–4 小節</button>
+          </div>
+        )}
         <div className="roll-scroll">
-          <div className="roll" style={{ gridTemplateColumns: `44px repeat(${STEPS}, minmax(26px, 1fr))` }}>
+          <div className={`roll ${narrow ? 'narrow' : ''}`} style={{ gridTemplateColumns: `44px repeat(${visible.length}, minmax(${narrow ? 18 : 26}px, 1fr))` }}>
             <div className="roll-corner" />
-            {[0, 1, 2, 3].map((b) => (
+            {(narrow ? [shownPage * 2, shownPage * 2 + 1] : [0, 1, 2, 3]).map((b) => (
               <div key={b} className="roll-chord" style={{ gridColumn: `span 8` }}>{prog[b] != null ? `${chords[prog[b]!].name}（${chords[prog[b]!].roman}）` : '—'}</div>
             ))}
             {rows.map((m) => {
@@ -195,7 +219,7 @@ function MelodyStep({ p, update, notify }: StepProps) {
                     <strong>{jianpu(m, p.harmony.root, p.harmony.mode)}</strong>
                     <span>{noteNameOct(m)}</span>
                   </button>
-                  {cells.map((_, i) => {
+                  {visible.map((i) => {
                     const sounding = soundingAt(cells, i)
                     const isStart = cells[i] === m
                     const isHold = cells[i] === HOLD && sounding === m

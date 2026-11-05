@@ -3,6 +3,7 @@ import { useProject } from './lib/store'
 import { playChord, playLoop, stopAll } from './lib/audio'
 import { chordVoicing, diatonicChords } from './lib/theory'
 import { SongSheet } from './components/SongSheet'
+import { ReaperGuide } from './components/ReaperGuide'
 import { MasterPanel } from './components/MasterPanel'
 import { useMaster } from './agent/useMaster'
 import { learnedFor } from './agent/mock'
@@ -41,7 +42,8 @@ export default function App() {
 
   useEffect(() => {
     stopAll()
-    topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    document.querySelector('.node.cur')?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
     master.notify(step.key, 'step.enter')
   }, [cur]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -83,7 +85,7 @@ export default function App() {
         <div className="brand">
           <span className="logo" aria-hidden>♪</span>
           <div>
-            <div className="brand-name">Music Lab 新手音樂工作室</div>
+            <div className="brand-name">Maglody 新手音樂工作室</div>
             <div className="brand-sub">跟著大師，從一段哼唱完成你的第一首歌</div>
           </div>
           <button className="btn btn-ghost small sheet-toggle" onClick={() => setSheetOpen(!sheetOpen)}>我的歌</button>
@@ -115,6 +117,7 @@ export default function App() {
           )}
 
           <Comp p={p} update={update} notify={notify} />
+          <ReaperGuide step={step.key} p={p} />
 
           <section className="footer-card">
             {result && (
@@ -176,7 +179,8 @@ export default function App() {
         {sheetOpen && <div className="scrim" onClick={() => setSheetOpen(false)} />}
       </div>
 
-      <MasterPanel step={step.key} messages={master.messages} busy={master.busy} onAsk={(q) => master.ask(step.key, q)} onAction={onAction} />
+      <MasterPanel step={step.key} messages={master.messages} busy={master.busy} onAsk={(q) => master.ask(step.key, q)} onAction={onAction}
+        onPlayResult={result?.available(p) ? () => { stopAll(); result.play(p) } : undefined} />
     </div>
   )
 }

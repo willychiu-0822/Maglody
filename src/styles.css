@@ -349,3 +349,46 @@ textarea { resize: vertical; }
 .why.locked { opacity: .75; }
 .why.locked .why-q { background: var(--grid-strong); color: var(--muted); }
 .why-listen { margin-bottom: 8px; }
+
+/* ---------- mobile-first touch ergonomics ---------- */
+html { -webkit-text-size-adjust: 100%; }
+body { overscroll-behavior-y: contain; }
+button, .btn, .chip, .cell, a { touch-action: manipulation; }
+input, textarea, select { font-size: 16px; } /* iOS：小於 16px 會在聚焦時自動放大 */
+.master-bar-wrap { width: 100%; max-width: 760px; display: flex; gap: 8px; align-items: stretch; }
+.master-play { flex: none; width: 56px; border-radius: 16px; border: 0; background: var(--accent); color: #fff; font-size: 1.3rem; box-shadow: 0 8px 30px rgba(31, 42, 68, .18); cursor: pointer; }
+.roll-pager { margin-top: 10px; width: 100%; }
+.roll-pager button { flex: 1; }
+.roll.narrow { min-width: 0; }
+.reaper .why-head { padding: 0; }
+.reaper-q { background: #3a7f3a !important; color: #fff !important; }
+.reaper-steps { padding-left: 1.3em; margin: 8px 0; }
+.reaper-steps li { margin: 4px 0; }
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
+  .btn.small { min-height: 40px; }
+  .chip { min-height: 38px; padding: 6px 14px; }
+  .icon-btn { width: 44px; height: 44px; }
+  .cell { height: 38px; }
+  .star { width: 48px; height: 48px; }
+  input[type=range] { height: 32px; }
+}
+@media (max-width: 640px) {
+  .top { padding: 8px 12px 4px; }
+  .brand-name { font-size: .95rem; }
+  .logo { width: 28px; height: 28px; font-size: 1rem; }
+  .journey { margin-top: 6px; }
+  .node { flex: 0 0 58px; }
+  .layout { padding: 12px; gap: 12px; }
+  .coach-bubble { padding: 10px 12px; font-size: .95rem; }
+  .master { padding: 0 8px calc(8px + env(safe-area-inset-bottom)); }
+  .master-sheet { max-height: 78vh; border-radius: 18px 18px 12px 12px; }
+  .master-bar-text { font-size: .9rem; }
+  .result-row { flex-direction: column; align-items: stretch; }
+  .result-row .btn { width: 100%; }
+  .footer-card .row.between { flex-direction: column-reverse; align-items: stretch; }
+  .footer-card .row.between > * { width: 100%; }
+  .footer-card .row.wrap .btn { flex: 1; }
+  .mixer { grid-template-columns: 1fr; }
+  .tpl { flex-direction: column; align-items: flex-start; }
+}

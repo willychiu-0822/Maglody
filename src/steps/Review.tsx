@@ -3,6 +3,7 @@ import { Card, Coach, FeedbackList, Light, Why, type Feedback, type Level } from
 import { SongSheet } from '../components/SongSheet'
 import { playLoop, type Player } from '../lib/audio'
 import type { Project } from '../lib/store'
+import { downloadMidi } from '../lib/midi'
 import { diatonicChords, keyName } from '../lib/theory'
 import { analyzeSection, KIND_ZH } from './Lyrics'
 import { progressionFeedback } from './Harmony'
@@ -143,6 +144,7 @@ function ReviewStep({ p, update, notify }: StepProps) {
         </label>
         <div className="row wrap">
           <button className="btn" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
+          <button className="btn" onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
           <button className="btn btn-ghost" onClick={() => download('music-lab-project.json', JSON.stringify(p, null, 2), 'application/json')}>備份專案（.json）</button>
         </div>
       </Card>
