@@ -59,6 +59,23 @@ function playSong(p: Project) {
   })
 }
 
+/** 目前為止的 Demo：有什麼放什麼（和弦、旋律或哼唱、已排的段落），讓「完整爛草稿」隨時聽得到 */
+export function demoAvailable(p: Project) {
+  return !!p.hum || [...p.harmony.verse, ...p.harmony.chorus].some((d) => d != null) || [...p.melody.verse, ...p.melody.chorus].some((m) => m != null)
+}
+export function playDemo(p: Project) {
+  const hasChords = [...p.harmony.verse, ...p.harmony.chorus].some((d) => d != null)
+  const hasMelody = [...p.melody.verse, ...p.melody.chorus].some((m) => m != null && m >= 0)
+  if (p.arrangement.length && hasChords) return playSong(p)
+  if (hasChords || hasMelody) {
+    const ch = diatonicChords(p.harmony.root, p.harmony.mode)
+    const bars = [...p.harmony.verse, ...p.harmony.chorus].map((d) => (d != null ? chordVoicing(ch[d]) : []))
+    playLoop({ bpm: p.idea.bpm, bars, melody: [...p.melody.verse, ...p.melody.chorus], layers: { drums: hasChords, bass: hasChords, keys: hasChords, pad: false, melody: true } })
+    return
+  }
+  playHum(p)
+}
+
 export const RESULTS: Record<string, StepResult> = {
   hum: { label: '你的哼唱＋主音', available: (p) => !!p.hum, play: playHum },
   idea: { label: '你的情緒與速度', available: (p) => !!p.idea.mood, play: playVibe },

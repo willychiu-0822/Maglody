@@ -589,3 +589,35 @@ h1 { font-size: 1.85rem; letter-spacing: .08em; }
 .chip.on { background: var(--accent-soft); color: var(--ink); border-color: var(--ink); }
 .seg button.on { background: var(--accent-soft); color: var(--ink); }
 .msg-student .msg-body { background: var(--wash-indigo); color: var(--ink); }
+
+/* ---------- 工作室：三階段、起點、版本 ---------- */
+.phases { display: flex; gap: 4px; max-width: 1200px; margin: 8px auto 0; font-size: .74rem; letter-spacing: .3em; color: var(--muted); }
+.phases span { text-align: center; border-bottom: 1px dashed var(--grid-strong); padding-bottom: 2px; flex-basis: 0; }
+.phases span.on { color: var(--accent); border-bottom: 1.5px solid var(--accent); }
+.start-paths { display: flex; flex-direction: column; gap: 8px; }
+.start-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.start-card { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; padding: 10px 12px; min-height: 64px; background: var(--paper); border: 1px dashed var(--grid-strong); border-radius: 14px 10px 16px 12px; cursor: pointer; }
+.start-card strong { font-family: var(--font-title); font-weight: 600; }
+.start-card span { font-size: .8rem; color: var(--muted); }
+@media (max-width: 640px) { .start-row { grid-template-columns: repeat(2, 1fr); } .phases { font-size: .7rem; letter-spacing: .2em; } }
+.versions { margin-top: 12px; padding: 12px; border: 1px dashed var(--grid-strong); border-radius: 14px; display: flex; flex-direction: column; gap: 8px; }
+.version { display: flex; justify-content: space-between; gap: 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 8px; }
+.fb-gentle { list-style: none; padding: 0 2px; }
+.collage-bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px; background: var(--wash-ochre); border-radius: 12px; }
+.inspo-card .pick { display: flex; gap: 6px; align-items: center; font-size: .85rem; color: var(--muted); cursor: pointer; }
+.inspo-card.picked { background: color-mix(in srgb, var(--wash-ochre) 55%, transparent); }
+/* 火種式學習：一行好奇心，不是知識牆 */
+.link-btn { background: none; border: none; padding: 4px 0; min-height: 32px; color: var(--accent); text-decoration: underline dotted; text-underline-offset: 4px; cursor: pointer; font-size: .9rem; }
+.coach-more { margin-top: 6px; color: var(--ink); }
+.why { border-style: dotted; }
+.why-head { padding: 10px 14px; }
+.why-title { font-weight: 400; }
+.why-apply summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
+.inspo-card .pick { min-height: 40px; }
+.cheat summary { cursor: pointer; list-style: none; margin: 0; }
+.cheat summary::-webkit-details-marker { display: none; }
+.cheat[open] summary { margin-bottom: 10px; }
+details.quiet summary { cursor: pointer; color: var(--accent); text-decoration: underline dotted; text-underline-offset: 4px; font-size: .9rem; min-height: 36px; display: flex; align-items: center; list-style: none; }
+details.quiet summary::-webkit-details-marker { display: none; }
+.spark { font-size: 1.05rem; }
+@media (pointer: coarse) { .link-btn { min-height: 44px; } .inspo-card .pick input { width: 26px; height: 26px; } }

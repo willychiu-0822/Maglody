@@ -5,7 +5,7 @@ import { analyzeBuffer, toMono } from '../lib/pitch'
 import type { Project, Update } from '../lib/store'
 import { uid } from '../lib/store'
 import { keyName } from '../lib/theory'
-import { pullOptions } from './pull'
+import { pullOptions, collageOptions } from './pull'
 import { canTranscribe, useRecorder } from './recorder'
 import { TAG_ZH, type InspoApi, type InspoTag, type Inspiration } from './store'
 
@@ -72,6 +72,8 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [picked, setPicked] = useState<string[]>([])
+  const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((i) => i !== id) : [...x, id]))
   const rec = useRecorder()
   const fileRef = useRef<HTMLInputElement>(null)
   useEffect(() => { onRecordingChange?.(!!rec.recording) }, [rec.recording]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -210,12 +212,31 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
 
             {open === 'library' && (
               <div className="inspo-list">
+                <p className="muted small">勾選幾則碎片，可以把它們拼成新的東西：一段歌詞、一條接起來的旋律，或一則新的靈感。</p>
+                {picked.length >= 2 && (
+                  <div className="collage-bar">
+                    <strong className="small">拼貼 {picked.length} 則：</strong>
+                    {collageOptions(api.list.filter((x) => picked.includes(x.id)), p).map((o) => (
+                      <button key={o.how} className="btn small" onClick={() => {
+                        const items = api.list.filter((x) => picked.includes(x.id))
+                        const goto = o.apply(p, update, api)
+                        items.forEach((x) => api.markUsed(x.id, step, o.how))
+                        setPicked([])
+                        setOpen(null)
+                        flash(`拼好了：${o.label}`)
+                        onEvent('inspiration.used', items.map((x) => x.text).filter(Boolean).join(' / '))
+                        if (goto && goto !== step) onGo(goto)
+                      }}>{o.label}</button>
+                    ))}
+                  </div>
+                )}
                 {api.list.length === 0 && <p className="muted">本子還是空的。任何時候按右下角那張小紙條就能記。</p>}
                 {api.list.map((x) => {
                   const { here, start } = pullOptions(x, step, p)
                   const isOpen = expanded === x.id
                   return (
-                    <article key={x.id} className="inspo-card">
+                    <article key={x.id} className={`inspo-card ${picked.includes(x.id) ? 'picked' : ''}`}>
+                      <label className="pick"><input type="checkbox" checked={picked.includes(x.id)} onChange={() => togglePick(x.id)} /> 拿來拼</label>
                       <button className="inspo-card-head" onClick={() => setExpanded(isOpen ? null : x.id)}>
                         <strong className="inspo-text">{x.text || x.voice?.transcript || '（無文字）'}</strong>
                         <span className="small muted">{new Date(x.createdAt).toLocaleDateString('zh-TW')} · {x.tags.map((t) => TAG_ZH[t]).join('、') || '未分類'}{x.used.length ? ` · 已用 ${x.used.length} 次` : ''}</span>

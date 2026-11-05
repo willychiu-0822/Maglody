@@ -78,7 +78,7 @@ function RecordingStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach>
+      <Coach short={'錄之前先做三件小事：測音量、暖嗓、看看環境。'}>
         歌寫好了，要把它錄下來。錄音前的準備比器材更重要——一支手機加一個衣櫃，就能錄出很好的 Demo。
         我們來做三件事：測音量、暖嗓抓音準、確認環境清單。
       </Coach>

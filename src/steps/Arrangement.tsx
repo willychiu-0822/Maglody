@@ -89,7 +89,7 @@ function ArrangementStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach>
+      <Coach short={'排出段落，決定每一段誰上場，然後按試聽。'}>
         同樣的旋律和和弦，靠「編曲」可以從安靜的獨白變成全場大合唱。編曲的秘密不是加很多樂器，而是決定<strong>什麼時候加、什麼時候拿掉</strong>。
         先排出歌曲的段落順序，再為每段決定要哪些樂器，看看下面的能量曲線有沒有起伏。
       </Coach>

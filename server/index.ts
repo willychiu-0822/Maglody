@@ -7,7 +7,13 @@ import { ProviderError, type ChatTurn } from './llm/types.ts'
 
 const PORT = Number(process.env.PORT ?? 8787)
 const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN ?? 'http://localhost:5173'
-const provider = createProvider()
+let provider: ReturnType<typeof createProvider>
+try {
+  provider = createProvider()
+} catch (e) {
+  console.error(`[master] 無法啟動：${(e as Error).message}。請參考 README 的環境變數表。`)
+  process.exit(1)
+}
 const ACTIONS = new Set(['tryProgression', 'goStep', 'playResult'])
 const STEPS = new Set(['hum', 'idea', 'harmony', 'melody', 'lyrics', 'arrange', 'record', 'mix', 'review'])
 

@@ -221,7 +221,7 @@ export function playLoop(spec: LoopSpec): Player {
       if (spec.layers.pad) {
         voicing.slice(0, 3).forEach((m) => scheduled.push(tone(m + 12, bt, barDur * 0.95, { gain: 0.035, type: 'sawtooth', attack: 0.3, release: 0.4, dest: dest('chords') })))
       }
-      if (spec.layers.bass) {
+      if (spec.layers.bass && voicing.length) {
         const root = voicing[voicing.length - 1] - 12
         ;[0, 3, 4, 6].forEach((s) => scheduled.push(tone(root, bt + s * eighth, eighth * 0.9, { gain: 0.3, type: 'sine', dest: dest('bass') })))
       }

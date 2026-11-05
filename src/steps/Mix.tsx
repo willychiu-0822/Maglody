@@ -83,7 +83,7 @@ function MixStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach>
+      <Coach short={'按播放，把每個聲音推回它該在的位置。'}>
         混音就是「讓每個聲音都有自己的位置」。我故意把起始設定弄得有點亂：主旋律太小聲、貝斯偏到右邊。
         按下播放，一邊聽一邊調整，看回饋燈怎麼變。隨時按「A/B 比較」聽聽原始狀態，訓練你的耳朵。
       </Coach>

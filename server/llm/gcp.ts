@@ -43,7 +43,9 @@ export function createVertex(): LlmProvider {
   const location = process.env.GCP_LOCATION ?? 'us-central1'
   const model = env('LLM_MODEL', 'gemini-2.5-flash')
   const host = location === 'global' ? 'aiplatform.googleapis.com' : `${location}-aiplatform.googleapis.com`
-  const url = `https://${host}/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:generateContent`
+  // VERTEX_BASE_URL：走公司代理或本機測試時覆寫
+  const base = (process.env.VERTEX_BASE_URL ?? `https://${host}`).replace(/\/$/, '')
+  const url = `${base}/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:generateContent`
   return {
     name: 'vertex',
     model,
@@ -56,6 +58,7 @@ export function createVertex(): LlmProvider {
 export function createGemini(): LlmProvider {
   const key = env('GEMINI_API_KEY')
   const model = env('LLM_MODEL', 'gemini-2.5-flash')
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
+  const base = (process.env.GEMINI_BASE_URL ?? 'https://generativelanguage.googleapis.com').replace(/\/$/, '')
+  const url = `${base}/v1beta/models/${model}:generateContent`
   return { name: 'gemini', model, complete: (req) => call(url, { 'x-goog-api-key': key }, req) }
 }

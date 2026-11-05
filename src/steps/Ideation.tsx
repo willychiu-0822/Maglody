@@ -39,7 +39,7 @@ function IdeationStep({ p, update, notify }: StepProps) {
     const abs = countHits(idea.story, ABSTRACT_WORDS)
     const con = countHits(idea.story + idea.image, CONCRETE_HINTS)
     if (story.length < 15) fb.push({ level: 'bad', text: '故事太短，還看不見畫面。', tip: '試著回答：誰？在哪裡？發生什麼事？之後怎麼了？' })
-    else if (abs > con + 1) fb.push({ level: 'warn', text: `抽象詞（${abs} 個）比具體畫面多。`, tip: '「我很想你」→「你的外套還掛在門後」。讓聽眾自己感受，不要直接告訴他。' })
+    else if (abs > con + 1) fb.push({ level: 'warn', text: `抽象詞（${abs} 個）比具體畫面多。`, tip: '「我很想你」→「你的外套還掛在門後」。讓聽眾自己感受，不要直接說破。' })
     else fb.push({ level: 'good', text: '故事有具體的人事物，聽眾容易代入。' })
   }
   if (idea.image) fb.push(cleanLine(idea.image).length >= 6 ? { level: 'good', text: '有一個核心畫面，等一下寫歌詞時可以一直回來看它。' } : { level: 'warn', text: '核心畫面再具體一點。', tip: '加上顏色、天氣、時間或物品。' })
@@ -52,7 +52,7 @@ function IdeationStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach>
+      <Coach short={'這首歌想帶著什麼感覺？先點一個情緒聽聽看。'}>
         有了旋律的種子，現在決定這首歌要「說什麼」。寫歌最常見的失敗不是技術，而是不知道自己要說什麼。
         我們用一句話的故事、一個畫面、一句記憶點，替整首歌定好方向。
       </Coach>
@@ -98,7 +98,7 @@ function IdeationStep({ p, update, notify }: StepProps) {
           <span>參考的歌、場景、聲音、顏色（隨意寫，像在跟朋友形容）</span>
           <input value={idea.vibe} placeholder="例如：深夜騎車、街燈、像老 City Pop、帶點雨聲" onChange={(e) => set('vibe', e.target.value)} />
         </label>
-        <p className="muted small">Vibe 不用專業術語。後面每一章，大師都會回來對照它：「這個和弦像不像你說的深夜？」</p>
+        <p className="muted small">Vibe 不用專業術語。之後每一檯，大師都會回來對照它：「這個和弦像不像你說的深夜？」</p>
       </Card>
 
       <Card title="3. 一句話的故事">

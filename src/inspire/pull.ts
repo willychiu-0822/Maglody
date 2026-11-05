@@ -3,7 +3,8 @@
 import { summarizeNotes } from '../lib/pitch'
 import type { Project, Update } from '../lib/store'
 import { KIND_ZH } from '../steps/Lyrics'
-import type { Inspiration } from './store'
+import type { Inspiration, InspoApi } from './store'
+import { uid } from '../lib/store'
 
 export interface PullOption {
   label: string
@@ -72,4 +73,65 @@ export function pullOptions(x: Inspiration, step: string, p: Project): { here: P
     },
   }
   return { here, start }
+}
+
+/**
+ * 拼貼：把多則碎片重組成新的東西。只做「排列與接合」，內容全部來自學生自己的素材。
+ */
+export function collageOptions(items: Inspiration[], p: Project): { label: string; how: string; apply: (p: Project, u: Update, api: InspoApi) => string | void }[] {
+  const texts = items.map(words).filter(Boolean)
+  const hums = items.filter((x) => x.hum && x.hum.notes.length)
+  const opts: { label: string; how: string; apply: (p: Project, u: Update, api: InspoApi) => string | void }[] = []
+  if (texts.length >= 2) {
+    opts.push({
+      label: `拼成一段新歌詞（${texts.length} 句）`,
+      how: 'collage.lyrics',
+      apply: (pp, update) => {
+        const kind = pp.lyrics.some((s) => s.kind === 'verse' && !s.text.trim()) ? null : 'verse'
+        const empty = pp.lyrics.find((s) => !s.text.trim())
+        if (empty) update('lyrics', pp.lyrics.map((s) => (s.id === empty.id ? { ...s, text: texts.join('\n') } : s)))
+        else update('lyrics', [...pp.lyrics, { id: uid(), kind: kind ?? 'verse', text: texts.join('\n') }])
+        return 'lyrics'
+      },
+    })
+  }
+  if (hums.length >= 2) {
+    opts.push({
+      label: `把 ${hums.length} 段哼唱接成一條旋律種子`,
+      how: 'collage.hum',
+      apply: (_pp, update, api) => {
+        let offset = 0
+        const notes = hums.flatMap((x) => {
+          const first = x.hum!.notes[0].start
+          const shifted = x.hum!.notes.map((n) => ({ ...n, start: n.start - first + offset }))
+          const last = shifted[shifted.length - 1]
+          offset = last.start + last.dur + 0.4
+          return shifted
+        })
+        const merged: Inspiration = { id: 'tmp', createdAt: 0, text: '', tags: ['melody'], images: [], fromStep: '', used: [], hum: { notes, durationSec: offset, keyRoot: hums[0].hum!.keyRoot, keyMode: hums[0].hum!.keyMode, rangeLow: Math.min(...notes.map((n) => n.midi)), rangeHigh: Math.max(...notes.map((n) => n.midi)) } }
+        const a = summarizeNotes(notes, offset)
+        merged.hum!.keyRoot = a.keys[0].root
+        merged.hum!.keyMode = a.keys[0].mode
+        humSeed(merged, update)
+        api.add({ text: '（拼貼的哼唱）', tags: ['melody'], images: [], hum: merged.hum, fromStep: 'hum' })
+        return 'melody'
+      },
+    })
+  }
+  opts.push({
+    label: '合成一則新靈感',
+    how: 'collage.new',
+    apply: (_pp, _u, api) => {
+      api.add({
+        text: texts.join(' ／ '),
+        tags: [...new Set(items.flatMap((x) => x.tags))],
+        images: items.flatMap((x) => x.images),
+        voice: items.find((x) => x.voice)?.voice,
+        hum: items.find((x) => x.hum)?.hum,
+        fromStep: 'collage',
+      })
+    },
+  })
+  void p
+  return opts
 }

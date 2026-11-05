@@ -26,7 +26,7 @@ const FINAL_CHECKS = [
   { id: 'sing', label: '跟著伴奏從頭到尾大聲唱一遍', why: '紙上寫得再好，唱出來才知道哪個字卡、哪裡換不了氣。' },
   { id: 'tone', label: '檢查倒字：每個字的聲調跟旋律走向不衝突', why: '中文是聲調語言，倒字會讓聽眾聽錯詞。' },
   { id: 'sleep', label: '隔一天再聽一次', why: '剛寫完時大腦會自動美化。新鮮的耳朵最誠實。' },
-  { id: 'friend', label: '給一個朋友聽，只問「哪一句你記得？」', why: '他記得的，就是你真正的 Hook。' },
+  { id: 'friend', label: '給一個朋友聽，只問「哪一句你記得？」', why: '對方記得的，就是你真正的 Hook。' },
   { id: 'demo', label: '用手機錄下一版 Demo', why: '有錄音才有作品，也才能比較下一版有沒有更好。' },
   { id: 'three', label: '寫下下一版要改的 3 件事', why: '好歌是改出來的，不是一次寫出來的。' },
 ]
@@ -89,7 +89,7 @@ function ReviewStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach title="老師最後的話">
+      <Coach title="老師最後的話" short="從頭聽一次你的歌。這次換你當老師。">
         你從一段哼唱走到這裡，已經完成了一首歌的骨架。我不會替你打分數——<strong>好不好，由你判斷</strong>。
         但我會把一路上的觀察攤開給你看，你再一題一題誠實地評分自己。評分低的地方，就是下一版要改的地方。
       </Coach>

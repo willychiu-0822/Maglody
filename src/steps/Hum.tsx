@@ -131,9 +131,9 @@ function HumStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach>
+      <Coach short={'哼一段腦中的旋律給我聽，不用好聽，有就好。'}>
         每首歌都從一個「哼出來的念頭」開始。別擔心唱得好不好——先把腦中那段旋律哼給我聽，我幫你看見它：它在哪個調、喜歡哪些和弦。
-        之後的每一章，我們都會回頭用到這段哼唱。
+        之後不管你在哪一檯，都可以回頭用到這段哼唱，也可以拿別的靈感來拼。
       </Coach>
 
       <Card title="錄一段哼唱（8–20 秒）">
@@ -197,6 +197,9 @@ function HumStep({ p, update, notify }: StepProps) {
           )}
 
           <div className="explain">
+            <p className="spark">你最常回去的音是 <strong>{NOTE_NAMES[hum.keyRoot]}</strong>——它就是這首歌的「家」。</p>
+            <details className="quiet">
+            <summary>我怎麼聽出來的？</summary>
             <p>
               <strong>白話解釋：</strong>我把你唱的每個音「唱了多久」加總起來（上面的長條圖）。
               你停留最久、最常回去的音，通常就是這首歌的「家」——主音 <strong>{NOTE_NAMES[hum.keyRoot]}</strong>。
@@ -213,6 +216,7 @@ function HumStep({ p, update, notify }: StepProps) {
                 ))}
               </ol>
             )}
+            </details>
             {ana && (
               <div className="row wrap small">
                 <span className="muted">不像嗎？試試其他候選：</span>
@@ -246,7 +250,7 @@ function HumStep({ p, update, notify }: StepProps) {
         <p>聲音是空氣的振動。唱 A 音時，每秒振動 440 次。程式把聲波跟「往後挪一點的自己」比較（自相關），重疊最好的位移量就是一次振動的長度，換算成頻率就得到音高。</p>
       </Why>
       <Why ready={!!hum} listen={{ label: '只聽主音（家）', play: () => hum && playNote(60 + hum.keyRoot, 1.5) }} title="什麼是「調」？為什麼重要？" apply="選翻唱的 Key、跟樂手溝通、即興伴奏都要先知道調。">
-        <p>調就是一首歌的「家」和它常用的 7 個音。知道調，就知道哪些和弦一定好聽（下一章會用到），也知道哪些音會製造張力。</p>
+        <p>調就是一首歌的「家」和它常用的 7 個音。知道調，就知道哪些和弦一定好聽（和聲那一檯會用到），也知道哪些音會製造張力。</p>
       </Why>
     </>
   )

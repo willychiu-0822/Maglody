@@ -65,7 +65,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
         mix: '我故意把混音弄亂了：主旋律太小、貝斯偏一邊。播放，用耳朵把它們放回該在的位置。',
         review: '從頭聽一次你的歌。這次我不回饋規則，換你當老師。',
       }
-      return { text: bridge[step] ?? '', next: prev ? `（上一章：${STEP_ZH[prev]}，隨時可以回去改）` : undefined }
+      return { text: bridge[step] ?? '', next: prev ? `（上一檯：${STEP_ZH[prev]}，隨時可以回去改）` : undefined }
     }
     case 'hum.analyzed': {
       if (!p.hum) return { text: '我沒有聽清楚，再哼一次？' }
@@ -150,7 +150,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
     case 'step.complete': {
       const i = STEP_ORDER.indexOf(step)
       const nxt = STEP_ORDER[i + 1]
-      return { text: `「${STEP_ZH[step]}」完成。`, learned: learnedFor(step, p), next: nxt ? `下一章「${STEP_ZH[nxt]}」會直接用到你剛做的東西。` : '你完成了第一首歌。下一版會更好。', suggestions: [{ label: '▶ 聽聽目前的成果', action: { type: 'playResult' } }] }
+      return { text: `「${STEP_ZH[step]}」完成。`, learned: learnedFor(step, p), next: nxt ? `下一檯「${STEP_ZH[nxt]}」會直接用到你剛做的東西。` : '你完成了第一首歌。下一版會更好。', suggestions: [{ label: '▶ 聽聽目前的成果', action: { type: 'playResult' } }] }
     }
     default:
       return { text: '我聽到了。' }
@@ -215,7 +215,7 @@ function questionReply(p: Project, step: string, q: string): AgentReply {
   const energyNote = p.arrangement.length ? `（目前結構最高能量 ${Math.max(...p.arrangement.map(energy))}）` : ''
   return {
     text: `好問題。我目前的離線模式只會回答幾類問題${energyNote}：為什麼這個和弦、換更哀傷／更明亮的走向、押韻、旋律怎麼改、音域太高、下一步。接上 LLM 後可以自由問。`,
-    next: `這一章是「${STEP_ZH[step]}」——先動手，我會在你做完時解釋。`,
+    next: `這一檯是「${STEP_ZH[step]}」——先動手，我會在你做完時解釋。`,
   }
 }
 

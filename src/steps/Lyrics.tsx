@@ -63,7 +63,7 @@ function LyricsStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach>
+      <Coach short={<>讓字住進旋律裡。一行一句，想到什麼先寫下來。{melodyOnsets(p, 'chorus') > 0 && <> 副歌旋律有 {melodyOnsets(p, 'chorus')} 個音，前兩句大約就這麼多字。</>}</>}>
         旋律已經在等你的字了。歌詞不是作文，是要「被唱出來」的句子：主歌演故事、副歌說結論。
         {melodyOnsets(p, 'chorus') > 0 && <> 你的副歌旋律有 <strong>{melodyOnsets(p, 'chorus')} 個音</strong>，所以副歌前兩句加起來大約 {melodyOnsets(p, 'chorus')} 個字（一字一音）。</>}
         {melodyOnsets(p, 'verse') > 0 && <> 主歌旋律有 {melodyOnsets(p, 'verse')} 個音。</>}
@@ -118,7 +118,8 @@ function LyricsStep({ p, update, notify }: StepProps) {
         {LYRIC_KINDS.map((k) => <button key={k} className="btn btn-ghost" onClick={() => add(k)}>＋ {KIND_ZH[k]}</button>)}
       </div>
 
-      <Card title="韻腳小抄（十三轍簡化版）">
+      <details className="card cheat">
+        <summary className="card-title">想找押韻的字？翻翻韻腳小抄</summary>
         <div className="rhyme-table">
           {RHYME_GROUPS.map((g, i) => (
             <div key={g.group} className="rhyme-row">
@@ -128,7 +129,7 @@ function LyricsStep({ p, update, notify }: StepProps) {
             </div>
           ))}
         </div>
-      </Card>
+      </details>
 
       <Why ready={secs.some((s) => lines(s.text).length >= 2)} hint="先寫兩句。" listen={{ label: '聽副歌旋律＋你的詞', play: () => RESULTS_SPEAK(p) }} title="為什麼主歌和副歌分工？" apply="簡報也是：先給案例和數據（主歌），再下結論（副歌）。">
         <p>主歌像電影的鏡頭，帶聽眾進入場景；副歌是情緒的爆發點和結論，會重複出現。如果主歌就把話說完，副歌就沒有力量。</p>

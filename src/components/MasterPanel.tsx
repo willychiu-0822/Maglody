@@ -86,7 +86,7 @@ export function MasterPanel({ step, messages, busy, onAsk, onAction, onPlayResul
       )}
       {!open && (
         <div className="master-bar-wrap">
-        {onPlayResult && <button className="master-play" onClick={onPlayResult} aria-label="聽本章成果">▶</button>}
+        {onPlayResult && <button className="master-play" onClick={onPlayResult} aria-label="聽目前為止的 Demo">▶</button>}
         <button className="master-bar" onClick={() => setOpen(true)}>
           <span className="msg-avatar" aria-hidden>師</span>
           <span className="master-bar-text">

@@ -95,7 +95,7 @@ function HarmonyStep({ p, update, notify }: StepProps) {
   if (!h.verse.includes(null) && !h.chorus.includes(null))
     fb.push(vd !== cd ? { level: 'good', text: '主歌和副歌的和弦不同，副歌出現時會有「換場景」的感覺。' } : { level: 'warn', text: '主歌和副歌和弦一模一樣。', tip: '這可以，但副歌就要靠旋律變高、編曲變滿來拉開差距。或試著讓副歌從 IV 開始。' })
   if (p.hum && (p.hum.keyRoot !== h.root || p.hum.keyMode !== h.mode))
-    fb.push({ level: 'warn', text: `你換了調（哼唱是 ${keyName(p.hum.keyRoot, p.hum.keyMode)}）。`, tip: '換調沒問題，但下一章旋律要用新調來寫，記得唱唱看音域是否舒服。' })
+    fb.push({ level: 'warn', text: `你換了調（哼唱是 ${keyName(p.hum.keyRoot, p.hum.keyMode)}）。`, tip: '換調沒問題，但之後寫旋律要用新調來寫，記得唱唱看音域是否舒服。' })
 
   const Slot = ({ part, i }: { part: 'verse' | 'chorus'; i: number }) => {
     const d = h[part][i]
@@ -110,7 +110,7 @@ function HarmonyStep({ p, update, notify }: StepProps) {
 
   return (
     <>
-      <Coach>
+      <Coach short={'點點看這些和弦，挑 4 個你喜歡的，排成一圈。'}>
         和弦是旋律腳下的地板。每個調都有 7 個「保證不會錯」的和弦，它們各有個性：有的像家、有的像出門、有的想回家。
         {p.hum && <> 我已經依你的哼唱把調設成 <strong>{keyName(p.hum.keyRoot, p.hum.keyMode)}</strong>，你也可以換。</>}
         先點每個和弦聽聽它的個性，再選 4 個排成主歌、4 個排成副歌。
