@@ -50,9 +50,9 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
     } else holdRef.current = 0
   }, [mic.midi]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const startLevel = async () => { setMode('level'); mic.resetPeak(); if (!mic.running) await mic.start() }
+  const startLevel = async () => { mic.resetPeak(); const ok = mic.running || await mic.start(); setMode(ok ? 'level' : null) }
   const endLevel = () => { update('recording', { ...r, levelPeakDb: Math.round(mic.peakDb) }); mic.stop(); setMode(null); notify('record.level', '') }
-  const startPitch = async (m: number) => { setTarget(m); setMode('pitch'); playNote(m, 1.2, { type: 'sine', gain: 0.3 }); holdRef.current = 0; if (!mic.running) await mic.start() }
+  const startPitch = async (m: number) => { setTarget(m); holdRef.current = 0; const ok = mic.running || await mic.start(); setMode(ok ? 'pitch' : null); if (ok) playNote(m, 1.2, { type: 'sine', gain: 0.3 }) }
 
   useEffect(() => {
     if (metro == null) return
@@ -78,7 +78,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
 
   return (
     <>
-      <Coach short={mode === 'level' ? '唱你這首歌最大聲的那一句。' : r.levelPeakDb != null ? (r.levelPeakDb > -3 ? `最大聲到 ${r.levelPeakDb} dB，太滿了，退後一點再試。` : `最大聲 ${r.levelPeakDb} dB，安全。`) : '錄之前，先確定最大聲時不會破音。'} />
+      <Coach short={mode === 'level' ? '唱你這首歌最大聲的那一句。' : r.levelPeakDb != null ? (r.levelPeakDb <= -60 ? '還沒收到聲音，靠近麥克風再試；也可以先跳過。' : r.levelPeakDb > -3 ? `最大聲到 ${r.levelPeakDb} dB，太滿了，退後一點再試。` : `最大聲 ${r.levelPeakDb} dB，安全。`) : '錄之前，先確定最大聲時不會破音。'} />
 
       <div className="stage">
         {mode === 'level' ? (
@@ -95,7 +95,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
       ) : recordingStep.requirements(p).every((x) => x.ok) && next ? (
         <DeskActions primary={{ label: <>準備好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '再測一次', onClick: startLevel }} />
       ) : (
-        <DeskActions primary={{ label: '● 測音量', onClick: startLevel }} secondary={{ label: '沒有麥克風，先跳過', onClick: () => update('recording', { ...r, checks: { ...r.checks, nomic: true } }) }} />
+        <DeskActions primary={{ label: mic.pending ? '等麥克風許可…' : '● 測音量', onClick: startLevel, disabled: mic.pending }} secondary={{ label: '沒有麥克風，先跳過', onClick: () => update('recording', { ...r, checks: { ...r.checks, nomic: true } }) }} />
       )}
 
       <Toolbox>
@@ -171,6 +171,6 @@ export const recordingStep: StepDef = {
   glyph: '錄',
   Component: RecordingStep,
   requirements: (p) => [
-    { label: '測過音量且沒有破音（或先跳過）', ok: (p.recording.levelPeakDb != null && p.recording.levelPeakDb <= -3) || !!p.recording.checks.nomic },
+    { label: '測過音量且沒有破音（或先跳過）', ok: (p.recording.levelPeakDb != null && p.recording.levelPeakDb > -60 && p.recording.levelPeakDb <= -3) || !!p.recording.checks.nomic },
   ],
 }

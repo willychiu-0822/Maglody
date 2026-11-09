@@ -143,7 +143,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
 
   const play = () => {
     player?.stop()
-    const bars = prog.map((d) => (d != null ? chordVoicing(chords[d]) : [0]))
+    const bars = prog.map((d) => (d != null ? chordVoicing(chords[d]) : []))
     setPlayer(playLoop({ bpm: p.idea.bpm, bars, melody: cells, loop: true, layers: { drums: false, bass: true, keys: true, pad: false, melody: true }, onStep: setCol }))
     notify('melody.play', part)
   }
@@ -180,7 +180,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
 
   return (
     <>
-      <Coach short={empty && p.hum ? '先把你的哼唱倒進格子裡，再一格一格修。' : missingChords ? '先回和聲那一檯，把這段的 4 個和弦排好。' : notes < 4 ? '點格子放音。綠色的最穩。' : '播放，哪裡聽起來怪就改哪裡。'} />
+      <Coach short={empty && p.hum ? '先把你的哼唱倒進格子裡，再一格一格修。' : missingChords ? '先點格子寫旋律；和弦之後再補也可以。' : notes < 4 ? '點格子放音。綠色的最穩。' : '播放，哪裡聽起來怪就改哪裡。'} />
       <div className="seg seg-quiet">
         <button className={part === 'verse' ? 'on' : ''} onClick={() => { stop(); setPart('verse') }}>主歌</button>
         <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setPart('chorus') }}>副歌</button>
@@ -237,7 +237,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
       ) : bothReady && next ? (
         <DeskActions primary={{ label: <>旋律有了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 循環聽', onClick: play }} />
       ) : (
-        <DeskActions primary={{ label: '▶ 循環聽', onClick: play, disabled: missingChords || notes === 0 }}
+        <DeskActions primary={{ label: '▶ 循環聽', onClick: play, disabled: notes === 0 }}
           secondary={part === 'verse' && notes >= 4 && p.melody.chorus.every((m) => m == null) ? { label: '換副歌 →', onClick: () => setPart('chorus') } : undefined} />
       )}
 

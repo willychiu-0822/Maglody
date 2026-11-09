@@ -1,5 +1,5 @@
 // 靈感庫：獨立於「目前這首歌」的專案資料，重新開始一首歌也不會遺失。
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { HumNote } from '../lib/pitch'
 import type { Mode } from '../lib/theory'
 import { deleteBlob } from '../lib/media'
@@ -60,20 +60,27 @@ export function useInspirations() {
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(list)) } catch { /* 空間不足時忽略 */ }
   }, [list])
+  const listRef = useRef(list)
+  const persist = useCallback((next: Inspiration[]) => {
+    localStorage.setItem(KEY, JSON.stringify(next))
+    listRef.current = next
+    setList(next)
+  }, [])
   const add = useCallback((x: Omit<Inspiration, 'id' | 'createdAt' | 'used'>) => {
     const item: Inspiration = { ...x, id: uid(), createdAt: Date.now(), used: [] }
-    setList((l) => [item, ...l])
+    persist([item, ...listRef.current])
     return item
-  }, [])
-  const patch = useCallback((id: string, p: Partial<Inspiration>) => setList((l) => l.map((x) => (x.id === id ? { ...x, ...p } : x))), [])
-  const markUsed = useCallback((id: string, step: string, how: string) => setList((l) => l.map((x) => (x.id === id ? { ...x, used: [...x.used, { step, how, at: Date.now() }] } : x))), [])
+  }, [persist])
+  const patch = useCallback((id: string, p: Partial<Inspiration>) => persist(listRef.current.map(x => x.id === id ? {...x, ...p} : x)), [persist])
+  const markUsed = useCallback((id: string, step: string, how: string) => persist(listRef.current.map(x => x.id === id ? {...x, used: [...x.used, {step,how,at:Date.now()}]} : x)), [persist])
   const remove = useCallback((id: string) => {
-    setList((l) => {
-      const x = l.find((i) => i.id === id)
-      if (x) [x.voice?.assetId, x.hum?.assetId, ...x.images.map((i) => i.assetId)].forEach((a) => a && void deleteBlob(a).catch(() => {}))
-      return l.filter((i) => i.id !== id)
-    })
-  }, [])
+    const removed = listRef.current.find(x => x.id === id)
+    const remaining = listRef.current.filter(x => x.id !== id)
+    persist(remaining)
+    const assets = (x: Inspiration) => [x.voice?.assetId, x.hum?.assetId, ...x.images.map(i => i.assetId)].filter((a): a is string => !!a)
+    const used = new Set(remaining.flatMap(assets))
+    if (removed) assets(removed).filter(a => !used.has(a)).forEach(a => { void deleteBlob(a).catch(() => {}) })
+  }, [persist])
   return { list, add, patch, markUsed, remove }
 }
 

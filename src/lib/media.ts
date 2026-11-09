@@ -14,9 +14,13 @@ function open(): Promise<IDBDatabase> {
 async function tx<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
   const db = await open()
   return new Promise((resolve, reject) => {
-    const r = fn(db.transaction(STORE, mode).objectStore(STORE))
-    r.onsuccess = () => resolve(r.result)
-    r.onerror = () => reject(r.error)
+    const transaction = db.transaction(STORE, mode)
+    let r: IDBRequest<T>
+    try { r = fn(transaction.objectStore(STORE)) }
+    catch (error) { transaction.abort(); db.close(); reject(error); return }
+    transaction.oncomplete = () => { db.close(); resolve(r.result) }
+    transaction.onabort = transaction.onerror = () => { db.close(); reject(transaction.error ?? r.error) }
+    r.onerror = () => { /* transaction reports failure; never resolve before commit */ }
   })
 }
 

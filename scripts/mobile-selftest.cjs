@@ -1,4 +1,4 @@
-// 用法：npm run build && npx vite preview --port 4173，另開終端機執行 node scripts/mobile-selftest.cjs
+// 用法：npm run build && npx vite preview --port 4101，另開終端機執行 node scripts/mobile-selftest.cjs
 // 斷言式手機自測：每屏 ≤1 主動作、≤1 次要；靈感多模態；角色自由聊；全流程到總檢討
 const { chromium, devices } = require('playwright')
 const results = []
@@ -22,13 +22,14 @@ async function screen(page, label) {
 const P = (page) => page.locator('main.desk .primary-action').first()
 const pclick = async (page, re) => { const b = P(page); const t = await b.textContent(); if (re && !re.test(t)) throw new Error(`主動作是「${t}」，預期 ${re}`); await b.click() }
 ;(async () => {
-  const browser = await chromium.launch({ args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required'] })
+  const browser = await chromium.launch({ channel: 'chrome', args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required'] })
+  try {
   const ctx = await browser.newContext({ ...devices['iPhone 13'], permissions: ['microphone'] })
   const page = await ctx.newPage()
   const errs = []
   page.on('pageerror', (e) => errs.push(e.message))
   page.on('dialog', (d) => d.type() === 'prompt' ? d.accept('測試版') : d.accept())
-  await page.goto('http://localhost:4173/'); await page.waitForTimeout(700)
+  await page.goto(process.env.SELFTEST_URL || 'http://127.0.0.1:4101/'); await page.waitForTimeout(700)
   try {
     // 哼唱：真（假）麥克風錄音
     await screen(page, '哼唱 首屏')
@@ -169,5 +170,6 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
   check('沒有 JS 錯誤', errs.length === 0, errs.join(' | '))
   const failed = results.filter((r) => !r.ok)
   console.log(`\n總計 ${results.length} 項，PASS ${results.length - failed.length}，FAIL ${failed.length}`)
-  await browser.close()
-})()
+  if (failed.length) process.exitCode = 1
+  } finally { await browser.close() }
+})().catch((e) => { console.error(e.message); process.exitCode = 1 })

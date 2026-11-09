@@ -1,5 +1,5 @@
 // Demo 版本：改稿前先存一版，改壞了可以回去（真實創作者的 demo 1、demo 2…）
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { Project } from './store'
 import { uid } from './store'
 
@@ -10,16 +10,19 @@ const load = (): DemoVersion[] => { try { return JSON.parse(localStorage.getItem
 
 export function useVersions() {
   const [list, setList] = useState<DemoVersion[]>(load)
-  useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 20))) } catch { /* 空間不足時忽略 */ } }, [list])
-  const save = useCallback((p: Project, note: string) => {
-    let name = ''
-    setList((l) => {
-      name = `Demo v${l.length + 1}`
-      return [{ id: uid(), name, note, at: Date.now(), project: structuredClone(p) }, ...l]
-    })
-    return name
+  const listRef = useRef(list)
+  const persist = useCallback((next: DemoVersion[]) => {
+    localStorage.setItem(KEY, JSON.stringify(next.slice(0, 20)))
+    listRef.current = next.slice(0, 20)
+    setList(listRef.current)
   }, [])
-  const remove = useCallback((id: string) => setList((l) => l.filter((v) => v.id !== id)), [])
+  const save = useCallback((p: Project, note: string) => {
+    const number = Math.max(0, ...listRef.current.map(v => Number(v.name.match(/v(\d+)/)?.[1]) || 0)) + 1
+    const name = `Demo v${number}`
+    persist([{ id: uid(), name, note, at: Date.now(), project: structuredClone(p) }, ...listRef.current])
+    return name
+  }, [persist])
+  const remove = useCallback((id: string) => persist(listRef.current.filter(v => v.id !== id)), [persist])
   return { list, save, remove }
 }
 export type VersionsApi = ReturnType<typeof useVersions>

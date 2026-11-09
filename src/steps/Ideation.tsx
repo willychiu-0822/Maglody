@@ -1,5 +1,5 @@
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
-import { playChord, ac, click } from '../lib/audio'
+import { playChord, ac, afterSound, click, stopAll } from '../lib/audio'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, cleanLine, countHits } from '../lib/rhyme'
 import { chordVoicing, diatonicChord, keyName } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
@@ -19,12 +19,13 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
   const mood = MOODS.find((m) => m.id === idea.mood)
 
   const preview = (mode: 'major' | 'minor', bpm: number) => {
-    const root = p.hum?.keyRoot ?? 0
+    stopAll()
+    const root = p.harmony.root
     const c = ac()
     const beat = 60 / bpm
     for (let i = 0; i < 8; i++) click(c.currentTime + 0.05 + i * beat, i % 4 === 0)
     playChord(chordVoicing(diatonicChord(root, mode, 0)), beat * 4)
-    setTimeout(() => playChord(chordVoicing(diatonicChord(root, mode, mode === 'major' ? 3 : 5)), beat * 4), beat * 4000)
+    afterSound(() => playChord(chordVoicing(diatonicChord(root, mode, mode === 'major' ? 3 : 5)), beat * 4), beat * 4000)
   }
 
   const fb: Feedback[] = []
@@ -55,7 +56,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
     update('idea', { ...idea, mood: m.id, bpm })
     if (!p.hum) update('harmony', (h) => ({ ...h, mode: m.mode }))
     notify('idea.mood', m.id)
-    preview(p.hum?.keyMode ?? m.mode, bpm)
+    preview(p.hum ? p.harmony.mode : m.mode, bpm)
   }
   const ready = !!idea.mood && !!idea.hook.trim()
   return (
@@ -64,18 +65,18 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
 
       <div className={`mood-grid ${!idea.mood ? 'nudge' : ''}`}>
         {MOODS.map((m) => (
-          <button key={m.id} className={`mood ${idea.mood === m.id ? 'on' : ''}`} onClick={() => pickMood(m)}>{m.name}</button>
+          <button key={m.id} className={`mood ${idea.mood === m.id ? 'on' : ''}`} aria-pressed={idea.mood === m.id} onClick={() => pickMood(m)}>{m.name}</button>
         ))}
       </div>
 
       {idea.mood && (
-        <input className="one-line" value={idea.hook} placeholder="一句話就好……" onChange={(e) => update('idea', { ...idea, hook: e.target.value, title: idea.title && idea.title !== idea.hook ? idea.title : e.target.value })} />
+        <input aria-label="這首歌的一句話" className="one-line" value={idea.hook} placeholder="一句話就好……" onChange={(e) => update('idea', { ...idea, hook: e.target.value, title: idea.title && idea.title !== idea.hook ? idea.title : e.target.value })} />
       )}
 
       {ready && next ? (
-        <DeskActions primary={{ label: <>帶著這句話，去{next.label} →</>, onClick: next.go }} secondary={mood ? { label: '▶ 再聽一次這個感覺', onClick: () => preview(mood.mode, idea.bpm) } : undefined} />
+        <DeskActions primary={{ label: <>帶著這句話，去{next.label} →</>, onClick: next.go }} secondary={mood ? { label: '▶ 再聽一次這個感覺', onClick: () => preview(p.harmony.mode, idea.bpm) } : undefined} />
       ) : mood ? (
-        <DeskActions secondary={{ label: '▶ 再聽一次這個感覺', onClick: () => preview(mood.mode, idea.bpm) }} />
+        <DeskActions secondary={{ label: '▶ 再聽一次這個感覺', onClick: () => preview(p.harmony.mode, idea.bpm) }} />
       ) : null}
 
       <Toolbox label="多寫一點（選填）">
@@ -87,7 +88,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
           <span>速度：<strong>{idea.bpm}</strong> BPM</span>
           <input type="range" min={55} max={170} value={idea.bpm} onChange={(e) => set('bpm', +e.target.value)} />
         </label>
-        {mood && <button className="btn small" onClick={() => preview(mood.mode === 'major' ? 'minor' : 'major', idea.bpm)}>▶ 對照：換成{mood.mode === 'major' ? '小' : '大'}調</button>}
+        {mood && <button className="btn small" onClick={() => preview(p.harmony.mode === 'major' ? 'minor' : 'major', idea.bpm)}>▶ 對照：換成{mood.mode === 'major' ? '小' : '大'}調</button>}
         {p.hum && <p className="muted small">你的哼唱在 {keyName(p.hum.keyRoot, p.hum.keyMode)}。</p>}
         <FeedbackList items={fb} empty="寫一點之後，這裡會有幾句觀察。" />
         <Why ready={!!idea.mood} title="為什麼情緒會改變和弦和速度？">

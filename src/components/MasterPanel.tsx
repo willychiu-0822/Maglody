@@ -1,3 +1,4 @@
+import { Modal } from './Modal'
 import { useEffect, useRef, useState } from 'react'
 import type { AgentAction, AgentMessage } from '../agent/types'
 import { agentMode } from '../agent/client'
@@ -15,6 +16,7 @@ interface Props {
   open: boolean
   roleId: RoleId
   setRoleId: (r: RoleId) => void
+  onCapture: () => void
   onClose: () => void
   step: string
   messages: AgentMessage[]
@@ -24,7 +26,7 @@ interface Props {
 }
 
 /** 跟工作室夥伴聊天：點誰就跟誰聊，不限目前的工作檯 */
-export function MasterPanel({ open, roleId, setRoleId, onClose, messages, busy, onAsk, onAction }: Props) {
+export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messages, busy, onAsk, onAction }: Props) {
   const [q, setQ] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight }) }, [messages, open])
@@ -33,14 +35,14 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, messages, busy, 
   const send = (text: string) => { if (!text.trim()) return; onAsk(text.trim(), roleId); setQ('') }
 
   return (
-    <div className="inspo-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="inspo-sheet chat-sheet" role="dialog" aria-label={`跟${role.name}聊`}>
+    <Modal label={`跟${role.name}聊`} className="chat-sheet" onClose={onClose}>
         <div className="row between">
           <div className="role-switch" role="tablist" aria-label="選擇夥伴">
             {ROLE_ORDER.map((id) => (
-              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name}>{ROLES[id].glyph}</button>
+              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name} aria-label={ROLES[id].name}>{ROLES[id].glyph}</button>
             ))}
           </div>
+          <button className="link-btn modal-capture" onClick={onCapture}>✎ 記一下</button>
           <button className="icon-btn" onClick={onClose} aria-label="關閉">✕</button>
         </div>
         <div className="small muted">{role.name}　·　{role.focus}{agentMode() === 'mock' ? '（離線）' : ''}</div>
@@ -83,10 +85,9 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, messages, busy, 
           {QUICK[roleId].map((t) => <button key={t} className="chip" onClick={() => send(t)}>{t}</button>)}
         </div>
         <form className="master-input" onSubmit={(e) => { e.preventDefault(); send(q) }}>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`跟${role.name}說……`} />
-          <button className="btn" type="submit">送出</button>
+          <input aria-label="跟夥伴說的話" value={q} onChange={(e) => setQ(e.target.value)} placeholder={`跟${role.name}說……`} />
+          <button className="primary-action" disabled={busy || !q.trim()} type="submit">送出</button>
         </form>
-      </div>
-    </div>
+    </Modal>
   )
 }

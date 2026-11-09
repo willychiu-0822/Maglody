@@ -1,12 +1,13 @@
+import { Modal } from '../components/Modal'
 import { useEffect, useRef, useState } from 'react'
-import { ac, tone } from '../lib/audio'
+import { ac, audioGeneration, playMedia, tone } from '../lib/audio'
 import { getBlob, putBlob, shrinkImage } from '../lib/media'
 import { analyzeBuffer, toMono } from '../lib/pitch'
 import type { Project, Update } from '../lib/store'
 import { uid } from '../lib/store'
 import { keyName } from '../lib/theory'
 import { pullOptions, collageOptions } from './pull'
-import { useRecorder } from './recorder'
+import { useRecorder, type Recording } from './recorder'
 import { DeskActions } from '../components/ui'
 import { TAG_ZH, type InspoApi, type InspoTag, type Inspiration } from './store'
 
@@ -37,10 +38,10 @@ function Thumb({ id }: { id: string }) {
 
 async function playAsset(id?: string) {
   if (!id) return
+  const generation = audioGeneration()
   const b = await getBlob(id)
-  if (!b) return
-  const a = new Audio(URL.createObjectURL(b))
-  void a.play()
+  if (!b || generation !== audioGeneration()) return
+  playMedia(b)
 }
 
 function playHumNotes(h: NonNullable<Inspiration['hum']>) {
@@ -69,7 +70,15 @@ interface Props {
  * 一則靈感可以同時有 文字 + 語音（自動聽寫）+ 哼唱（自動分析音高）+ 多張照片。
  */
 export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent, open, setOpen, onRecordingChange }: Props) {
-  const [draft, setDraft] = useState<Draft>(emptyDraft)
+  const [draft, renderDraft] = useState<Draft>(emptyDraft)
+  const draftRef = useRef(draft)
+  const setDraft = (value: Draft | ((d: Draft) => Draft)) => {
+    const next = typeof value === 'function' ? value(draftRef.current) : value
+    draftRef.current = next
+    renderDraft(next)
+  }
+  const operation = useRef(false)
+  const pendingRecording = useRef<{ kind: 'voice' | 'hum'; value: Recording } | null>(null)
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -79,6 +88,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((i) => i !== id) : [...x, id]))
   const rec = useRecorder()
   const fileRef = useRef<HTMLInputElement>(null)
+  useEffect(() => { if (open !== 'capture') rec.cancelPending() }, [open, rec.cancelPending])
   useEffect(() => { onRecordingChange?.(!!rec.recording) }, [rec.recording]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 快捷鍵：Alt + I 隨時記靈感（桌面）
@@ -92,10 +102,12 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const toggleTag = (t: InspoTag) => setDraft((d) => ({ ...d, tags: d.tags.includes(t) ? d.tags.filter((x) => x !== t) : [...d.tags, t] }))
 
   const toggleRec = async (kind: 'voice' | 'hum') => {
-    if (rec.recording === kind) {
+    if (rec.recording === kind || rec.completed === kind || pendingRecording.current?.kind === kind) {
       setBusy(true)
-      const r = await rec.stop()
+      try {
+      const r = (pendingRecording.current?.kind === kind ? pendingRecording.current.value : null) ?? await rec.stop()
       if (r) {
+        pendingRecording.current = {kind, value: r}
         const assetId = uid()
         await putBlob(assetId, r.blob)
         if (kind === 'voice') {
@@ -111,15 +123,22 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
           }
         }
       }
-      setBusy(false)
+        pendingRecording.current = null
+      } catch (e) { flash('錄音還沒收好，請保留這頁，稍後再試。'); throw e }
+      finally { setBusy(false) }
     } else {
+      if (pendingRecording.current) await toggleRec(pendingRecording.current.kind)
+      if (rec.completed) await toggleRec(rec.completed)
       if (rec.recording) await toggleRec(rec.recording)
       await rec.start(kind)
     }
   }
 
   const addImages = async (files: FileList | null) => {
-    if (!files) return
+    if (!files || operation.current) return
+    operation.current = true
+    setBusy(true)
+    try {
     for (const f of Array.from(files).slice(0, 6)) {
       try {
         const { blob, w, h } = await shrinkImage(f)
@@ -128,17 +147,25 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
         setDraft((d) => ({ ...d, images: [...d.images, { assetId, w, h }], tags: d.tags.includes('image') ? d.tags : [...d.tags, 'image'] }))
       } catch { flash('這張照片讀不到，換一張試試。') }
     }
+    } finally { operation.current = false; setBusy(false) }
   }
 
   const hasContent = !!(draft.text.trim() || draft.voice || draft.hum || draft.images.length)
   const save = async () => {
-    if (rec.recording) await toggleRec(rec.recording)
-    if (!hasContent) return
-    const item = api.add({ ...draft, text: draft.text.trim(), fromStep: step })
-    setDraft(emptyDraft())
-    setOpen(null)
-    flash(`收好了。你還在「${stepTitle}」。`)
-    onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
+    if (operation.current || busy || rec.pending) return
+    operation.current = true
+    setBusy(true)
+    try {
+      if (rec.recording || rec.completed || pendingRecording.current) await toggleRec(rec.recording ?? rec.completed ?? pendingRecording.current!.kind)
+      const saved = draftRef.current
+      if (!(saved.text.trim() || saved.voice || saved.hum || saved.images.length)) return
+      const item = api.add({ ...saved, text: saved.text.trim(), fromStep: step })
+      setDraft(emptyDraft())
+      setOpen(null)
+      flash(`收好了。你還在「${stepTitle}」。`)
+      onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
+    } catch { flash('本子還沒存好，草稿留在這裡。請釋出瀏覽器空間後再試。') }
+    finally { operation.current = false; setBusy(false) }
   }
 
   const pull = (x: Inspiration, opt: { label: string; how: string; apply: (p: Project, u: Update) => string | void }) => {
@@ -155,8 +182,23 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
     if (goto && goto !== step) onGo(goto)
   }
 
+  const collageChoices = collageOptions(api.list.filter(x => picked.includes(x.id)), p)
+  const performCollage = (option: ReturnType<typeof collageOptions>[number]) => {
+    try {
+      const items = api.list.filter(x => picked.includes(x.id))
+      const goto = option.apply(p, update, api)
+      items.forEach(x => api.markUsed(x.id, step, option.how))
+      setPicked([])
+      setCollage(false)
+      setOpen(null)
+      flash(`拼好了：${option.label}`)
+      onEvent('inspiration.used', items.map(x => x.text).filter(Boolean).join(' / '))
+      if (goto && goto !== step) onGo(goto)
+    } catch { flash('拼貼還沒全部存好，先留在這頁，釋出瀏覽器空間後再試。') }
+  }
+
   const recBtn = (kind: 'voice' | 'hum', label: string, _sub: string) => (
-    <button className={`inspo-big ${rec.recording === kind ? 'rec' : ''}`} onClick={() => void toggleRec(kind)} disabled={busy}>
+    <button className={`inspo-big ${rec.recording === kind ? 'rec' : ''}`} onClick={() => { void toggleRec(kind).catch(() => {}) }} disabled={busy || rec.pending}>
       <span className="inspo-big-icon">{rec.recording === kind ? '■' : kind === 'voice' ? '說' : '哼'}</span>
       <span className="small">{rec.recording === kind ? fmt(rec.elapsed) : label}</span>
     </button>
@@ -167,8 +209,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       {toast && <div className="toast" role="status">{toast}</div>}
 
       {open && (
-        <div className="inspo-overlay" onClick={(e) => e.target === e.currentTarget && setOpen(null)}>
-          <div className="inspo-sheet" role="dialog" aria-label="靈感">
+        <Modal label="靈感" onClose={() => setOpen(null)}>
             <div className="row between">
               {open === 'capture'
                 ? <button className="link-btn" onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
@@ -178,22 +219,25 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
 
             {open === 'capture' && (
               <div className="inspo-capture">
-                <textarea autoFocus rows={3} value={draft.text} placeholder="幾個字就好……" onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
+                <textarea aria-label="靈感文字" autoFocus rows={3} value={draft.text} placeholder="幾個字就好……" onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
                 {rec.recording === 'voice' && rec.live && <div className="inspo-live">聽寫中：{rec.live}</div>}
                 <div className="inspo-media">
                   {recBtn('voice', '說', '')}
                   {recBtn('hum', '哼', '')}
-                  <button className="inspo-big" onClick={() => fileRef.current?.click()}>
+                  <button className="inspo-big" disabled={busy || rec.pending} onClick={() => fileRef.current?.click()}>
                     <span className="inspo-big-icon">拍</span>
                     <span className="small">拍照</span>
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages(e.target.files); e.target.value = '' }} />
                 </div>
+                {rec.completed && <p className="small muted" role="status">剛才的錄音還在，按「夾進本子」收好。</p>}
+                {rec.pending && <p className="small muted" role="status">等麥克風許可……也可以先寫文字。</p>}
                 {rec.error && <p className="error small">{rec.error}</p>}
                 {(draft.voice || draft.hum || draft.images.length > 0) && (
                   <div className="inspo-attached">
                     {draft.voice && <button className="chip" onClick={() => void playAsset(draft.voice!.assetId)}>▶ 語音 {fmt(draft.voice.durationSec)}</button>}
-                    {draft.hum && <button className="chip" onClick={() => playHumNotes(draft.hum!)}>▶ 哼唱 {draft.hum.notes.length} 音{draft.hum.notes.length ? ` · ${keyName(draft.hum.keyRoot, draft.hum.keyMode)}` : ''}</button>}
+                    {draft.hum?.assetId && <button className="chip" onClick={() => void playAsset(draft.hum!.assetId)}>▶ 原始哼唱</button>}
+                    {!!draft.hum?.notes.length && <button className="chip" onClick={() => playHumNotes(draft.hum!)}>▶ 哼唱 {draft.hum.notes.length} 音 · {keyName(draft.hum.keyRoot, draft.hum.keyMode)}</button>}
                     {draft.images.map((im) => <Thumb key={im.assetId} id={im.assetId} />)}
                   </div>
                 )}
@@ -205,7 +249,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                     ))}
                   </div>
                 </details>
-                <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: !hasContent && !rec.recording }} />
+                <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: busy || rec.pending || (!hasContent && !rec.recording && !rec.completed && !pendingRecording.current) }} />
               </div>
             )}
 
@@ -215,18 +259,8 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                 {picked.length >= 2 && (
                   <div className="collage-bar">
                     <strong className="small">拼貼 {picked.length} 則：</strong>
-                    {collageOptions(api.list.filter((x) => picked.includes(x.id)), p).map((o) => (
-                      <button key={o.how} className="btn small" onClick={() => {
-                        const items = api.list.filter((x) => picked.includes(x.id))
-                        const goto = o.apply(p, update, api)
-                        items.forEach((x) => api.markUsed(x.id, step, o.how))
-                        setPicked([])
-                        setOpen(null)
-                        flash(`拼好了：${o.label}`)
-                        onEvent('inspiration.used', items.map((x) => x.text).filter(Boolean).join(' / '))
-                        if (goto && goto !== step) onGo(goto)
-                      }}>{o.label}</button>
-                    ))}
+                    {collageChoices.filter(o => o.how === 'collage.new').map(o => <button key={o.how} className="btn primary-action" onClick={() => performCollage(o)}>{o.label}</button>)}
+                    {collageChoices.some(o => o.how !== 'collage.new') && <details className="collage-more"><summary>其他拼法</summary>{collageChoices.filter(o => o.how !== 'collage.new').map(o => <button key={o.how} className="link-btn" onClick={() => performCollage(o)}>{o.label}</button>)}</details>}
                   </div>
                 )}
                 {api.list.length === 0 && <p className="muted">本子還是空的。任何時候按右下角那張小紙條就能記。</p>}
@@ -248,6 +282,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                       )}
                       {isOpen && <div className="inspo-attached">
                         {x.voice && <button className="chip" onClick={() => void playAsset(x.voice!.assetId)}>▶ 語音</button>}
+                        {x.hum?.assetId && <button className="chip" onClick={() => void playAsset(x.hum!.assetId)}>▶ 原始哼唱</button>}
                         {x.hum && x.hum.notes.length > 0 && <button className="chip" onClick={() => playHumNotes(x.hum!)}>▶ 哼唱 {x.hum.notes.length} 音</button>}
                         {x.images.map((im) => <Thumb key={im.assetId} id={im.assetId} />)}
                       </div>}
@@ -266,8 +301,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                 })}
               </div>
             )}
-          </div>
-        </div>
+        </Modal>
       )}
     </>
   )

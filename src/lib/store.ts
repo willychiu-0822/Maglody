@@ -80,14 +80,15 @@ function load(): Project {
 
 export function useProject() {
   const [project, setProject] = useState<Project>(load)
+  const [storageError, setStorageError] = useState(false)
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(project)) } catch { /* 儲存空間不足時忽略 */ }
+    try { localStorage.setItem(KEY, JSON.stringify(project)); setStorageError(false) } catch { setStorageError(true) }
   }, [project])
   const update = useCallback(<K extends keyof Project>(key: K, value: Project[K] | ((prev: Project[K]) => Project[K])) => {
     setProject((p) => ({ ...p, [key]: typeof value === 'function' ? (value as (x: Project[K]) => Project[K])(p[key]) : value }))
   }, [])
   const reset = useCallback(() => setProject(defaultProject()), [])
-  return { project, setProject, update, reset }
+  return { project, setProject, update, reset, storageError }
 }
 
 export type Update = ReturnType<typeof useProject>['update']

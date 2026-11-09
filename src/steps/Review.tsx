@@ -1,14 +1,14 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card, Coach, DeskActions, FeedbackList, Light, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { SongSheet } from '../components/SongSheet'
-import { playLoop, type Player } from '../lib/audio'
+import { playSequence, type Player } from '../lib/audio'
 import type { Project } from '../lib/store'
 import { downloadMidi } from '../lib/midi'
 import { diatonicChords, keyName } from '../lib/theory'
 import { analyzeSection, KIND_ZH } from './Lyrics'
 import { progressionFeedback } from './Harmony'
 import { melodyFeedback } from './Melody'
-import { arrangementFeedback, sectionAudio } from './Arrangement'
+import { arrangementFeedback, arrangedAudio } from './Arrangement'
 import { mixFeedback } from './Mix'
 import type { StepDef, StepProps } from './types'
 
@@ -66,40 +66,36 @@ function download(name: string, content: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
 }
 
-function ReviewStep({ p, update, notify, next }: StepProps) {
+function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
   void next
   const r = p.review
+  const hasScore = [...p.harmony.verse, ...p.harmony.chorus].some(d=>d!=null) || [...p.melody.verse, ...p.melody.chorus].some(m=>m!=null && m>=0)
   const [playing, setPlaying] = useState<number>(-1)
   const playerRef = useRef<Player | null>(null)
-  const stopFlag = useRef(false)
-
-  const playSong = (i = 0) => {
-    if (i === 0) stopFlag.current = false
-    if (stopFlag.current || i >= p.arrangement.length) { setPlaying(-1); if (i > 0 && !stopFlag.current) notify('review.play', ''); return }
-    const s = p.arrangement[i]
-    const { bars, melody } = sectionAudio(p, s.kind)
-    const reps = Math.max(1, Math.round(s.bars / 4))
-    const allBars = Array.from({ length: reps }, () => bars).flat().slice(0, Math.max(s.bars, 1))
-    const mel = melody ? Array.from({ length: reps }, () => melody).flat() : undefined
-    setPlaying(i)
-    playerRef.current = playLoop({ bpm: p.idea.bpm, bars: allBars, melody: mel, layers: s.layers, onStep: (x) => { if (x < 0 && !stopFlag.current) playSong(i + 1) } })
+  const stopSong = () => { playerRef.current?.stop(); setPlaying(-1) }
+  useEffect(() => () => { playerRef.current?.stop() }, [])
+  const playSong = () => {
+    playerRef.current?.stop()
+    const plan = p.arrangement.length ? p.arrangement : (['verse','chorus'] as const).map(kind => ({id:kind,kind,bars:4,layers:{drums:false,bass:true,keys:true,pad:false,melody:true}}))
+    playerRef.current = playSequence(plan.map(s => ({bpm:p.idea.bpm, ...arrangedAudio(p,s), layers:s.layers})), setPlaying, () => { setPlaying(-1); notify('review.play','') })
   }
-  const stopSong = () => { stopFlag.current = true; playerRef.current?.stop(); setPlaying(-1) }
 
   const rate = (id: string, v: number) => update('review', { ...r, ratings: { ...r.ratings, [id]: v } })
 
   return (
     <>
-      <Coach short={playing >= 0 ? `正在播：${KIND_ZH[p.arrangement[playing].kind]}` : r.verdict.trim() ? '寫下來了。這是你的歌。' : '從頭聽一次。這次換你當老師：哪一句你最想再聽？'} />
+      <Coach short={!hasScore ? '歌還是一張空白紙。先挑幾個和弦，或去旋律檯寫幾個音。' : playing >= 0 ? `正在播：${KIND_ZH[p.arrangement[playing]?.kind ?? (playing === 0 ? 'verse' : 'chorus')]}` : r.verdict.trim() ? '寫下來了。這是你的歌。' : '從頭聽一次。這次換你當老師：哪一句你最想再聽？'} />
 
       <SongSheet p={p} />
 
-      <textarea className="one-line" rows={3} value={r.verdict} placeholder="這首歌好嗎？最喜歡哪裡？下一版想改什麼？" onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
+      <textarea aria-label="我對這首歌的想法" className="one-line" rows={3} value={r.verdict} placeholder="這首歌好嗎？最喜歡哪裡？下一版想改什麼？" onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
 
-      {playing >= 0 ? (
+      {!hasScore ? (
+        <DeskActions primary={{label:'先去挑幾個和弦',onClick:()=>goTo?.('harmony')}} />
+      ) : playing >= 0 ? (
         <DeskActions primary={{ label: '■ 停', onClick: stopSong }} />
       ) : (
-        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: () => playSong(0), disabled: !p.arrangement.length }} secondary={{ label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
+        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: playSong }} secondary={{ label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
       )}
 
       <Toolbox>
@@ -141,7 +137,7 @@ function ReviewStep({ p, update, notify, next }: StepProps) {
       <Card title="匯出">
         <div className="row wrap">
           <button className="btn" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
-          <button className="btn" onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
+          <button className="btn" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
           <button className="btn btn-ghost" onClick={() => download('music-lab-project.json', JSON.stringify(p, null, 2), 'application/json')}>備份專案（.json）</button>
         </div>
       </Card>

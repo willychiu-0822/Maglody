@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Project } from '../lib/store'
 import { askMaster } from './client'
 import type { AgentMessage } from './types'
@@ -13,6 +13,7 @@ import { DESK_ROLE, ROLES, type RoleId } from './roles'
 export function useMaster(getProject: () => Project) {
   const [messages, setMessages] = useState<AgentMessage[]>([])
   const [busy, setBusy] = useState(false)
+  const pending = useRef(0)
   const last = useRef<Record<string, number>>({})
   const timer = useRef<Record<string, number>>({})
   const msgsRef = useRef(messages)
@@ -26,11 +27,13 @@ export function useMaster(getProject: () => Project) {
   const run = useCallback(async (step: string, input: { event?: { kind: string; detail: string }; question?: string }, roleId?: RoleId) => {
     const rid = roleId ?? DESK_ROLE[step] ?? 'producer'
     const r = ROLES[rid]
+    pending.current++
     setBusy(true)
     // 等一個 tick，讓剛剛的 state 更新寫進專案後再讀
     await new Promise((res) => setTimeout(res, 0))
     const { reply, source } = await askMaster(getProject(), { step, ...input, persona: { name: r.name, focus: r.focus, voice: r.voice }, history: history() })
-    setBusy(false)
+    pending.current--
+    setBusy(pending.current > 0)
     if (reply.text || reply.learned) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
   }, [getProject]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -52,5 +55,6 @@ export function useMaster(getProject: () => Project) {
     void run(step, { question }, roleId)
   }, [run])
 
+  useEffect(() => () => { Object.values(timer.current).forEach(clearTimeout) }, [])
   return { messages, busy, notify, ask }
 }

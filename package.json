@@ -9,13 +9,17 @@
     "preview": "vite preview",
     "server": "node server/index.ts",
     "dev:mobile": "HTTPS=1 vite --host",
-    "selftest": "node scripts/mobile-selftest.cjs"
+    "selftest": "node scripts/mobile-selftest.cjs",
+    "test:e2e": "playwright test",
+    "test:ui": "playwright test -c playwright.a.config.ts",
+    "test:logic": "node scripts/audio-regression.cjs && node scripts/logic-regression.cjs"
   },
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-basic-ssl": "^2.3.0",

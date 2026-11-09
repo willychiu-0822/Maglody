@@ -20,81 +20,117 @@ export interface Recording { blob: Blob; durationSec: number; transcript: string
  */
 export function useRecorder() {
   const [recording, setRecording] = useState<null | 'voice' | 'hum'>(null)
+  const [completed, setCompleted] = useState<null | 'voice' | 'hum'>(null)
+  const [pending, setPending] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [live, setLive] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const r = useRef<{ rec?: MediaRecorder; stream?: MediaStream; chunks: Blob[]; t0: number; sr?: SR | null; text: string; timer?: number; resolve?: (x: Recording) => void }>({ chunks: [], t0: 0, text: '' })
+  const generation = useRef(0)
+  const requesting = useRef(false)
+  const mounted = useRef(true)
+  const stopPromise = useRef<Promise<Recording | null> | null>(null)
+  const r = useRef<{ rec?: MediaRecorder; stream?: MediaStream; result?: Recording; chunks: Blob[]; t0: number; sr?: SR | null; text: string; timer?: number; finishTimer?: number; resolve?: (x: Recording) => void }>({ chunks: [], t0: 0, text: '' })
 
   const start = useCallback(async (kind: 'voice' | 'hum') => {
+    if (requesting.current || r.current.rec || r.current.result || stopPromise.current) return
+    requesting.current = true
+    setPending(true)
+    const token = ++generation.current
     setError(null)
-    ac()
-    setAudioSession('play-and-record')
     try {
-      // 哼唱要保留原始音高：關掉降噪與自動增益
+      ac()
+      setAudioSession('play-and-record')
       const stream = await navigator.mediaDevices.getUserMedia({ audio: kind === 'hum' ? { echoCancellation: false, noiseSuppression: false, autoGainControl: false } : true })
-      const rec = new MediaRecorder(stream)
+      if (token !== generation.current) { stream.getTracks().forEach(t => t.stop()); return }
       const st = r.current
       st.stream = stream
-      st.rec = rec
+      const recorder = new MediaRecorder(stream)
+      st.rec = recorder
       st.chunks = []
       st.text = ''
+      st.sr = null
       st.t0 = Date.now()
-      rec.ondataavailable = (e) => e.data.size && st.chunks.push(e.data)
-      rec.onstop = () => {
-        const blob = new Blob(st.chunks, { type: rec.mimeType || 'audio/webm' })
-        st.resolve?.({ blob, durationSec: (Date.now() - st.t0) / 1000, transcript: st.text.trim() })
+      recorder.ondataavailable = e => { if (e.data.size) st.chunks.push(e.data) }
+      recorder.onstop = () => {
+        const value = { blob: new Blob(st.chunks, {type: recorder.mimeType || 'audio/webm'}), durationSec: (Date.now() - st.t0) / 1000, transcript: st.text.trim() }
+        st.result = value
+        st.rec = undefined
+        st.stream?.getTracks().forEach(t => t.stop())
+        try { st.sr?.stop() } catch { /* recognition may already be stopped */ }
+        clearInterval(st.timer)
+        clearTimeout(st.finishTimer)
+        setAudioSession('playback')
+        if (mounted.current) {
+          setRecording(null)
+          setCompleted(st.resolve ? null : kind)
+        }
+        st.resolve?.(value)
       }
-      rec.start(250)
+      recorder.start(250)
       if (kind === 'voice') {
         const sr = speechRecognition()
         st.sr = sr
         if (sr) {
-          sr.lang = 'zh-TW'
-          sr.continuous = true
-          sr.interimResults = true
+          sr.lang = 'zh-TW'; sr.continuous = true; sr.interimResults = true
           let finals = ''
-          sr.onresult = (e) => {
+          sr.onresult = e => {
             let interim = ''
-            for (let i = e.resultIndex; i < e.results.length; i++) {
-              const res = e.results[i]
-              if (res.isFinal) finals += res[0].transcript
-              else interim += res[0].transcript
+            for (let i=e.resultIndex; i<e.results.length; i++) {
+              if (e.results[i].isFinal) finals += e.results[i][0].transcript
+              else interim += e.results[i][0].transcript
             }
             st.text = finals
-            setLive(finals + interim)
+            if (mounted.current) setLive(finals + interim)
           }
           sr.onerror = () => {}
-          try { sr.start() } catch { /* 部分瀏覽器需使用者手勢，失敗就只存錄音 */ }
+          try { sr.start() } catch { /* audio remains usable without transcription */ }
         }
       }
-      setRecording(kind)
-      setLive('')
-      setElapsed(0)
-      st.timer = window.setInterval(() => setElapsed((Date.now() - st.t0) / 1000), 200)
+      setRecording(kind); setCompleted(null); setLive(''); setElapsed(0)
+      st.timer = window.setInterval(() => setElapsed((Date.now()-st.t0)/1000), 200)
     } catch {
+      if (token !== generation.current) return
+      r.current.stream?.getTracks().forEach(t => t.stop())
       setAudioSession('playback')
-      setError('無法使用麥克風：請在瀏覽器網址列旁允許「麥克風」，並確認是用 https 開啟。')
+      setError('無法使用麥克風：請在瀏覽器網址列旁允許「麥克風」，並確認是用 https 或 localhost 開啟；也可以直接寫文字。')
+    } finally {
+      if (token === generation.current) { requesting.current = false; setPending(false) }
     }
   }, [])
 
   const stop = useCallback((): Promise<Recording | null> => {
     const st = r.current
+    if (stopPromise.current) return stopPromise.current
+    if (st.result) {
+      const result = st.result
+      st.result = undefined
+      setCompleted(null)
+      return Promise.resolve(result)
+    }
     if (!st.rec) return Promise.resolve(null)
-    return new Promise((resolve) => {
-      st.resolve = (x) => { resolve(x); st.resolve = undefined }
-      try { st.sr?.stop() } catch { /* ignore */ }
-      // 給語音辨識一點時間吐出最後一段結果
-      setTimeout(() => {
-        st.rec?.stop()
-        st.stream?.getTracks().forEach((t) => t.stop())
-        st.rec = undefined
-        window.clearInterval(st.timer)
-        setRecording(null)
-        setAudioSession('playback')
+    const recorder = st.rec
+    stopPromise.current = new Promise<Recording | null>(resolve => {
+      st.resolve = value => { st.result = undefined; st.resolve = undefined; resolve(value) }
+      try { st.sr?.stop() } catch { /* already stopped */ }
+      st.finishTimer = window.setTimeout(() => {
+        // inactive means onstop is already queued; its retained result resolves us.
+        if (recorder.state !== 'inactive') recorder.stop()
       }, st.sr ? 400 : 0)
-    })
+    }).finally(() => { stopPromise.current = null })
+    return stopPromise.current
   }, [])
 
-  useEffect(() => () => { r.current.stream?.getTracks().forEach((t) => t.stop()); window.clearInterval(r.current.timer) }, [])
-  return { recording, elapsed, live, error, start, stop }
+  const cancelPending = useCallback(() => { generation.current++; requesting.current = false; setPending(false) }, [])
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+      generation.current++
+      const st = r.current
+      try { st.sr?.stop(); if (st.rec?.state === 'recording') st.rec.stop() } catch { /* already stopped */ }
+      st.stream?.getTracks().forEach(t => t.stop())
+      clearInterval(st.timer); clearTimeout(st.finishTimer)
+    }
+  }, [])
+  return { recording, completed, pending, elapsed, live, error, start, stop, cancelPending }
 }

@@ -1,3 +1,6 @@
+import { Modal } from './components/Modal'
+import { StudioPresence } from './components/StudioPresence'
+import { KnowledgeSpark } from './components/KnowledgeSpark'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useProject } from './lib/store'
 import { playChord, playLoop, stopAll } from './lib/audio'
@@ -33,7 +36,7 @@ const PHASES = [
 ]
 
 export default function App() {
-  const { project: p, setProject, update, reset } = useProject()
+  const { project: p, setProject, update, reset, storageError } = useProject()
   const [cur, setCur] = useState(() => Math.min(p.unlocked, STEPS.length - 1))
   const [menu, setMenu] = useState(false)
   const [chat, setChat] = useState<RoleId | null>(null)
@@ -109,8 +112,8 @@ export default function App() {
   const saveDemo = () => {
     const note = prompt('這一版改了什麼？（可留空）', '')
     if (note === null) return
-    const name = versions.save(p, note)
-    setTimeout(() => alert(`存好了：${name}`), 0)
+    try { const name = versions.save(p, note); setTimeout(() => alert(`存好了：${name}`), 0) }
+    catch { alert('這版還沒存好，作品仍留在這頁。請釋出瀏覽器空間後再試。') }
   }
   const Comp = step.Component
 
@@ -125,24 +128,22 @@ export default function App() {
       </button>
       </header>
 
+      {storageError && <p className="storage-notice" role="status">這首歌還沒存進瀏覽器，請先留在這頁。釋出儲存空間後，再改一個字就會重試。</p>}
       <main className="desk" key={step.key}>
-        <button className="presence" onClick={() => openChat(role.id)} aria-label={`跟${role.name}聊`}>
-          <span className="presence-avatar" aria-hidden>{role.glyph}</span>
-          <span className="presence-name">{whisper ? <span className="aside-line">{speaker.id !== role.id && `${speaker.name}：`}{whisper}</span> : role.name}</span>
-        </button>
+        <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.busy} onChat={() => openChat(role.id)} />
 
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
-            <Comp p={p} update={update} notify={notify} next={next} />
+            <Comp goTo={goKey} p={p} update={update} notify={notify} next={next} />
+            <KnowledgeSpark step={step.key} p={p} />
           </GentleContext.Provider>
         </WhisperContext.Provider>
       </main>
 
 
       {menu && (
-        <div className="inspo-overlay" onClick={(e) => e.target === e.currentTarget && setMenu(false)}>
-          <div className="inspo-sheet menu-sheet" role="dialog" aria-label="工作室">
-            <div className="row between"><strong className="menu-title">工作室</strong><button className="icon-btn" onClick={() => setMenu(false)} aria-label="關閉">✕</button></div>
+        <Modal label="工作室" className="menu-sheet" onClose={() => setMenu(false)}>
+            <div className="row between"><strong className="menu-title">工作室</strong><button className="link-btn modal-capture" onClick={() => setInspoOpen('capture')}>✎ 記一下</button><button className="icon-btn" onClick={() => setMenu(false)} aria-label="關閉">✕</button></div>
             {PHASES.map((ph) => (
               <div key={ph.name} className="menu-phase">
                 <div className="menu-phase-name">{ph.name}</div>
@@ -181,8 +182,7 @@ export default function App() {
                 <button className="btn btn-ghost small" onClick={() => { if (confirm('清掉這首歌、重新開始？（靈感本子會保留）')) { reset(); setCur(0); setMenu(false) } }}>重新開始一首新歌</button>
               </details>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
       <InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
@@ -190,7 +190,7 @@ export default function App() {
         onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
         open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
 
-      <MasterPanel open={!!chat} roleId={chatRole} setRoleId={setChatRole} onClose={() => setChat(null)} step={step.key}
+      <MasterPanel open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
         messages={master.messages} busy={master.busy} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />
     </div>
   )

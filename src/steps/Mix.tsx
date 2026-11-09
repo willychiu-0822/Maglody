@@ -15,9 +15,9 @@ const TRACKS: { id: TrackId; name: string; role: string }[] = [
 export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
   const t = p.mix.tracks
   const fb: Feedback[] = []
-  const others = (['chords', 'bass', 'drums'] as TrackId[]).map((id) => t[id].vol)
+  const others = (['chords', 'bass', 'drums'] as TrackId[]).map((id) => t[id].mute ? 0 : t[id].vol)
   const loudest = Math.max(...others)
-  fb.push(t.melody.vol >= loudest * 0.9 ? { level: 'good', text: '主旋律夠突出，聽眾能跟著唱。' } : { level: 'bad', text: '主旋律被伴奏蓋過了。', tip: '流行歌混音第一原則：人聲（主旋律）最清楚。把伴奏拉低，而不是一直把人聲拉高。' })
+  fb.push(!t.melody.mute && t.melody.vol > 0 && t.melody.vol >= loudest * 0.9 ? { level: 'good', text: '主旋律夠突出，聽眾能跟著唱。' } : { level: 'bad', text: '主旋律被伴奏蓋過了。', tip: '流行歌混音第一原則：人聲（主旋律）最清楚。把伴奏拉低，而不是一直把人聲拉高。' })
   fb.push(Math.abs(t.bass.pan) <= 0.15 ? { level: 'good', text: '貝斯在正中間，低頻穩。' } : { level: 'bad', text: '貝斯偏到一邊了。', tip: '低頻沒有方向感，偏一邊只會讓一個喇叭特別累、耳機聽起來歪。放中間。' })
   fb.push(Math.abs(t.melody.pan) <= 0.15 ? { level: 'good', text: '主旋律在中間，像歌手站在舞台中央。' } : { level: 'warn', text: '主旋律偏離中間。', tip: '主唱幾乎永遠放中間。' })
   fb.push(Math.abs(t.chords.pan) >= 0.2 ? { level: 'good', text: '和弦稍微偏一側，為主旋律讓出中間的空間。' } : { level: 'warn', text: '所有東西都擠在中間。', tip: '把和弦往左或右推一點（20–50%），聲音會變寬，主旋律也更清楚。' })
@@ -27,7 +27,7 @@ export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
   return fb
 }
 
-function MixStep({ p, update, notify, next }: StepProps) {
+function MixStep({ p, update, notify, next, goTo }: StepProps) {
   const [player, setPlayer] = useState<Player | null>(null)
   const [peak, setPeak] = useState<number | null>(null)
   const [level, setLevel] = useState(-60)
@@ -68,6 +68,7 @@ function MixStep({ p, update, notify, next }: StepProps) {
 
   const play = () => {
     player?.stop()
+    setBypass(false)
     if (!graphRef.current) graphRef.current = createMixGraph()
     peakRef.current = -100
     const { bars, melody } = sectionAudio(p, 'chorus')
@@ -75,15 +76,16 @@ function MixStep({ p, update, notify, next }: StepProps) {
     update('mix', { ...p.mix, listened: true })
     notify('mix.play', '')
   }
-  const stop = () => { player?.stop(); setPlayer(null); graphRef.current?.dispose(); graphRef.current = null }
+  const stop = () => { player?.stop(); setPlayer(null); setBypass(false); graphRef.current?.dispose(); graphRef.current = null }
 
   const setT = (id: TrackId, patch: Partial<TrackSettings>) => { update('mix', { ...p.mix, tracks: { ...tracks, [id]: { ...tracks[id], ...patch } } }); notify('mix.change', '') }
   const meterLevel: Level = level > -1 ? 'bad' : level > -6 ? 'warn' : 'good'
   const fb = mixFeedback(p, peak)
+  const hasMelody = p.melody.chorus.some(m => m != null && m >= 0)
 
   return (
     <>
-      <Coach short={!p.mix.listened ? '按播放，聽聽每個聲音在哪。' : '把主旋律推到最清楚，其他往後站。'} />
+      <Coach short={!hasMelody ? '先留下幾個副歌的音，回來就能聽到自己的混音。' : !p.mix.listened ? '按播放，聽聽每個聲音在哪。' : '把主旋律推到最清楚，其他往後站。'} />
 
       <div className="mix-simple">
         {TRACKS.map((tr) => (
@@ -94,7 +96,9 @@ function MixStep({ p, update, notify, next }: StepProps) {
         ))}
       </div>
 
-      {player ? (
+      {!hasMelody ? (
+        <DeskActions primary={{label: '先寫一小句旋律', onClick: () => goTo?.('melody')}} />
+      ) : player ? (
         <DeskActions primary={{ label: '■ 停', onClick: stop }} secondary={{ label: bypass ? '回到我的混音' : '聽聽沒混之前', onClick: () => { setBypass(!bypass); if (!bypass) notify('mix.ab', '') } }} />
       ) : mixStep.requirements(p).every((x) => x.ok) && next ? (
         <DeskActions primary={{ label: <>聽清楚了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 再聽一次', onClick: play }} />
@@ -161,7 +165,7 @@ export const mixStep: StepDef = {
   glyph: '混',
   Component: MixStep,
   requirements: (p) => [
-    { label: '播放並聆聽混音', ok: p.mix.listened },
+    { label: '播放並聆聽混音', ok: p.mix.listened && p.melody.chorus.some(m => m != null && m >= 0) },
     { label: '回饋中沒有紅燈', ok: !mixFeedback(p, null).some((f) => f.level === 'bad') },
   ],
 }

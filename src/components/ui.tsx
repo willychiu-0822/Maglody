@@ -44,7 +44,7 @@ export function Toolbox({ children, label = '工具箱' }: { children: ReactNode
 
 /**
  * 「為什麼」卡片：先做再解釋。
- * ready=false 時只顯示「先動手」提示；ready 後自動展開，並可用剛才的聲音重聽。
+ * ready=false 時不顯示；ready 後只出現一行，主動展開才解釋。
  */
 export function Why({ title, children, apply, ready = true, hint, listen }: {
   title: string

@@ -2,6 +2,18 @@
 import { midiToFreq } from './theory'
 
 let ctx: AudioContext | null = null
+const sources = new Set<AudioScheduledSourceNode>()
+export function trackAudioSource<T extends AudioScheduledSourceNode>(source: T): T {
+  sources.add(source)
+  source.addEventListener('ended', () => sources.delete(source), { once: true })
+  return source
+}
+const delayed = new Set<number>()
+export function afterSound(fn: () => void, ms: number) {
+  const id = window.setTimeout(() => { delayed.delete(id); fn() }, ms)
+  delayed.add(id)
+  return id
+}
 
 /** iOS Safari 16.4+：讓播放不受靜音開關影響；錄音時切成 play-and-record */
 export function setAudioSession(type: 'playback' | 'play-and-record') {
@@ -31,7 +43,7 @@ export interface ToneOpts {
 
 export function tone(midi: number, start: number, dur: number, o: ToneOpts = {}) {
   const c = ac()
-  const osc = c.createOscillator()
+  const osc = trackAudioSource(c.createOscillator())
   const g = c.createGain()
   osc.type = o.type ?? 'triangle'
   osc.frequency.value = midiToFreq(midi)
@@ -72,7 +84,7 @@ function noise(c: AudioContext) {
 
 export function kick(t: number, dest: AudioNode, gain = 0.9) {
   const c = ac()
-  const o = c.createOscillator()
+  const o = trackAudioSource(c.createOscillator())
   const g = c.createGain()
   o.frequency.setValueAtTime(140, t)
   o.frequency.exponentialRampToValueAtTime(45, t + 0.12)
@@ -81,11 +93,12 @@ export function kick(t: number, dest: AudioNode, gain = 0.9) {
   o.connect(g).connect(dest)
   o.start(t)
   o.stop(t + 0.32)
+  return o
 }
 
 export function snare(t: number, dest: AudioNode, gain = 0.4) {
   const c = ac()
-  const s = c.createBufferSource()
+  const s = trackAudioSource(c.createBufferSource())
   s.buffer = noise(c)
   const f = c.createBiquadFilter()
   f.type = 'highpass'
@@ -96,11 +109,12 @@ export function snare(t: number, dest: AudioNode, gain = 0.4) {
   s.connect(f).connect(g).connect(dest)
   s.start(t)
   s.stop(t + 0.2)
+  return s
 }
 
 export function hat(t: number, dest: AudioNode, gain = 0.12) {
   const c = ac()
-  const s = c.createBufferSource()
+  const s = trackAudioSource(c.createBufferSource())
   s.buffer = noise(c)
   const f = c.createBiquadFilter()
   f.type = 'highpass'
@@ -111,11 +125,12 @@ export function hat(t: number, dest: AudioNode, gain = 0.12) {
   s.connect(f).connect(g).connect(dest)
   s.start(t)
   s.stop(t + 0.06)
+  return s
 }
 
 export function click(t: number, accent: boolean, dest?: AudioNode) {
   const c = ac()
-  const o = c.createOscillator()
+  const o = trackAudioSource(c.createOscillator())
   const g = c.createGain()
   o.frequency.value = accent ? 1600 : 1000
   g.gain.setValueAtTime(0.3, t)
@@ -195,10 +210,30 @@ export interface LoopSpec {
 export interface Player { stop: () => void }
 
 const active = new Set<Player>()
+let generation = 0
+export const audioGeneration = () => generation
+/** Original recordings share the same cancellation lifecycle as synthesized audio. */
+export function playMedia(blob: Blob): Player {
+  const url = URL.createObjectURL(blob)
+  const audio = new Audio(url)
+  const player: Player = {stop: () => { audio.pause(); audio.removeAttribute('src'); URL.revokeObjectURL(url); active.delete(player) }}
+  active.add(player)
+  audio.addEventListener('ended', player.stop, {once:true})
+  audio.addEventListener('error', player.stop, {once:true})
+  void audio.play().catch(player.stop)
+  return player
+}
 /** 換章節時停止所有正在播放的循環 */
-export function stopAll() { [...active].forEach((p) => p.stop()) }
+export function stopAll() {
+  generation++
+  delayed.forEach(id => clearTimeout(id)); delayed.clear()
+  ;[...active].forEach(p => p.stop())
+  sources.forEach(source => { try { source.stop() } catch { /* already stopped */ } }); sources.clear()
+  window.speechSynthesis?.cancel()
+}
 
 export function playLoop(spec: LoopSpec): Player {
+  if (!spec.bars.length) return { stop() {} }
   const c = ac()
   const graph = spec.mix
   const dest = (id: TrackId): AudioNode => (graph ? graph.buses[id].input : c.destination)
@@ -228,9 +263,9 @@ export function playLoop(spec: LoopSpec): Player {
       if (spec.layers.drums) {
         for (let s = 0; s < 8; s++) {
           const st = bt + s * eighth
-          if (s === 0 || s === 5) kick(st, dest('drums'))
-          if (s === 2 || s === 6) snare(st, dest('drums'))
-          hat(st, dest('drums'))
+          if (s === 0 || s === 5) scheduled.push(kick(st, dest('drums')))
+          if (s === 2 || s === 6) scheduled.push(snare(st, dest('drums')))
+          scheduled.push(hat(st, dest('drums')))
         }
       }
     })
@@ -238,7 +273,7 @@ export function playLoop(spec: LoopSpec): Player {
       spec.melody.slice(0, totalSteps).forEach((m, i) => {
         if (m == null || m < 0) return
         let len = 1
-        while (spec.melody![i + len] === -1) len++
+        while (i + len < totalSteps && spec.melody![i + len] === -1) len++
         scheduled.push(tone(m, t0 + i * eighth, eighth * len * 0.92, { gain: 0.22, type: 'square', attack: 0.02, release: 0.1, dest: dest('melody') }))
       })
     }
@@ -257,7 +292,7 @@ export function playLoop(spec: LoopSpec): Player {
     if (spec.loop) {
       timers.push(window.setTimeout(() => { startAt = next; cycle() }, (next - c.currentTime - 0.3) * 1000))
     } else {
-      timers.push(window.setTimeout(() => { stopped = true; spec.onStep?.(-1) }, (next - c.currentTime) * 1000))
+      timers.push(window.setTimeout(() => { stopped = true; active.delete(player); spec.onStep?.(-1) }, (next - c.currentTime) * 1000))
     }
   }
   cycle()
@@ -267,9 +302,27 @@ export function playLoop(spec: LoopSpec): Player {
       stopped = true
       timers.forEach((t) => clearTimeout(t))
       scheduled.forEach((n) => { try { n.stop() } catch { /* already stopped */ } })
-      spec.onStep?.(-1)
     },
   }
   active.add(player)
+  return player
+}
+
+
+/** Natural completion advances a sequence; cancelling never starts another section. */
+export function playSequence(specs: LoopSpec[], onSection?: (i: number) => void, onComplete?: () => void): Player {
+  let cancelled = false
+  let current: Player | null = null
+  const player: Player = { stop: () => { cancelled = true; current?.stop(); active.delete(player) } }
+  const next = (i: number) => {
+    if (cancelled) return
+    if (i >= specs.length) { active.delete(player); onComplete?.(); return }
+    const spec = specs[i]
+    if (!spec.bars.length) { next(i + 1); return }
+    onSection?.(i)
+    current = playLoop({ ...spec, loop: false, onStep: step => { spec.onStep?.(step); if (step < 0) next(i + 1) } })
+  }
+  active.add(player)
+  next(0)
   return player
 }

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { PitchCanvas } from '../components/PitchCanvas'
-import { ac, playNote, tone } from '../lib/audio'
+import { ac, playNote, tone, trackAudioSource } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame } from '../lib/pitch'
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
@@ -17,6 +17,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
   const mic = useMic({
     record: true,
     maxSec: 25,
+    onLimit: rec => { if (rec) runAnalysis(rec.data, rec.sampleRate, 'mic') },
     onFrame: (midi, t) => {
       liveRef.current.push({ t, midi })
       if (liveRef.current.length % 3 === 0) setLive([...liveRef.current])
@@ -81,7 +82,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
     const c = ac()
     const b = c.createBuffer(1, r.data.length, r.sampleRate)
     b.getChannelData(0).set(r.data)
-    const s = c.createBufferSource()
+    const s = trackAudioSource(c.createBufferSource())
     s.buffer = b
     s.connect(c.destination)
     s.start()
@@ -148,12 +149,12 @@ function HumStep({ p, update, notify, next }: StepProps) {
       ) : hasResult && next ? (
         <DeskActions primary={{ label: <>用這段繼續：{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 聽聽整理後的音', onClick: () => playNotes(true) }} />
       ) : (
-        <DeskActions primary={{ label: '● 哼一段', onClick: toggleRec }} secondary={{ label: '沒有麥克風？聽示範', onClick: demo }} />
+        <DeskActions primary={{ label: mic.pending ? '等麥克風許可…' : busy ? '在聽剛才那段…' : '● 哼一段', onClick: toggleRec, disabled: busy || mic.pending }} secondary={{ label: '沒有麥克風？聽示範', onClick: () => { mic.stop(); demo() } }} />
       )}
 
       <Toolbox>
         <div className="row wrap">
-          {hum && <button className="btn small" onClick={toggleRec}>● 再哼一次</button>}
+          {hum && <button className="btn small" disabled={busy || mic.pending} onClick={toggleRec}>● 再哼一次</button>}
           <label className="btn small">
             上傳音檔
             <input type="file" accept="audio/*" hidden onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />

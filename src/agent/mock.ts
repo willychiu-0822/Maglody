@@ -62,7 +62,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
         lyrics: `旋律有了，現在讓字「住進」音符裡。副歌旋律有 ${p.melody.chorus.filter((m) => m != null && m >= 0).length} 個音，前兩句大約就是這麼多字。`,
         arrange: '詞曲都在了。現在當導演：哪一段要安靜、哪一段要全員到齊？',
         record: '作品準備要錄成 Demo 了。先測音量、暖嗓，這兩件事做對，錄音就成功一半。',
-        mix: '我故意把混音弄亂了：主旋律太小、貝斯偏一邊。播放，用耳朵把它們放回該在的位置。',
+        mix: '我故意把混音弄亂了：主旋律太小。播放，用耳朵把它們放回該在的位置。',
         review: '從頭聽一次你的歌。這次我不回饋規則，換你當老師。',
       }
       return { text: bridge[step] ?? '', next: prev ? `（上一檯：${STEP_ZH[prev]}，隨時可以回去改）` : undefined }
@@ -204,13 +204,15 @@ function questionReply(p: Project, step: string, q: string): AgentReply {
   if (/(旋律|怎麼寫曲|音符)/.test(q)) {
     return fromFeedback(melodyFeedback(p, part), '動機：一個 2–4 個音的小樂句，重複一次、再變化一次，就是好記的旋律。', '先寫第 1 小節，第 2 小節照抄，第 3 小節只改最後兩個音。')
   }
+  if (/(爆發力|更熱鬧|更滿)/.test(q)) return { text: '先把主歌的鼓拿掉，再讓鼓在副歌進來。到編曲檯點段落，再點「鼓」，逐次試聽差別。', suggestions: [{label:'去編曲試試',action:{type:'goStep',step:'arrange'}}] }
+  if (/(REAPER|帶進|匯出)/i.test(q)) return { text: '先在總檢討下載 MIDI，再拖進 REAPER。MIDI 是音符，需要在 REAPER 選樂器才會發聲；工作室選單的「更多」有操作小抄。', suggestions: [{label:'去總檢討',action:{type:'goStep',step:'review'}}] }
   if (/(下一步|接下來|然後呢|卡住)/.test(q)) {
     return eventReply(p, step, 'step.enter', '')
   }
   if (/(太高|唱不上去|音域)/.test(q)) {
     const notes = [...p.melody.chorus, ...p.melody.verse].filter((m): m is number => m != null && m >= 0)
     const hi = notes.length ? Math.max(...notes) : null
-    return { text: hi != null ? `你旋律最高是 ${noteNameOct(hi)}${p.hum ? `，哼唱時最舒服的上限是 ${noteNameOct(p.hum.rangeHigh)}` : ''}。` : '還沒有旋律。', next: '可以把整首換低 2 個半音（在和聲章節換調），或只把最高那一句往下移。', learned: '移調（換 Key）不會改變旋律的形狀，只改變高低。' }
+    return { text: hi != null ? `你旋律最高是 ${noteNameOct(hi)}${p.hum ? `，哼唱時最舒服的上限是 ${noteNameOct(p.hum.rangeHigh)}` : ''}。` : '還沒有旋律。', next: '改和聲的調性設定不會搬動已寫的旋律。請到旋律格把最高那一句往下點幾格，再跟唱確認音域。', learned: '移調（換 Key）不會改變旋律的形狀，只改變高低。' }
   }
   const energyNote = p.arrangement.length ? `（目前結構最高能量 ${Math.max(...p.arrangement.map(energy))}）` : ''
   return {

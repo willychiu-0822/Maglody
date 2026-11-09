@@ -48,7 +48,7 @@ export function buildMidi(p: Project): Uint8Array {
           const m = cells[base + i]
           if (m == null || m < 0) continue
           let len = 1
-          while (i + len < 8 && cells[base + i + len] === -1) len++
+          while (base + i + len < cells.length && b * 8 + i + len < s.bars * 8 && cells[base + i + len] === -1) len++
           const st = t + i * EIGHTH
           melody.push({ t: st, data: [0x90, m, 100] }, { t: st + len * EIGHTH - 10, data: [0x80, m, 0] })
         }

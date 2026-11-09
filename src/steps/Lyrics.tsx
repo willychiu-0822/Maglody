@@ -1,3 +1,4 @@
+import { speakLyrics } from '../lib/lyricsAudio'
 import { useState } from 'react'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, RHYME_GROUPS, cleanLine, countHits, lastChar, rhymeOf } from '../lib/rhyme'
@@ -8,8 +9,6 @@ export const KIND_ZH: Record<SectionKind, string> = { intro: '前奏', verse: '�
 const LYRIC_KINDS: SectionKind[] = ['verse', 'pre', 'chorus', 'bridge']
 
 const melodyOnsets = (p: Project, part: 'verse' | 'chorus') => p.melody[part].filter((m) => m != null && m >= 0).length
-// 延遲載入避免循環引用（results → Arrangement → Lyrics）
-const RESULTS_SPEAK = (p: Project) => { void import('./results').then((m) => m.RESULTS.lyrics.play(p)) }
 
 const lines = (t: string) => t.split('\n').map((l) => l.trim()).filter(Boolean)
 
@@ -52,7 +51,7 @@ export function analyzeSection(s: LyricSection, hook: string) {
 function LyricsStep({ p, update, notify, next }: StepProps) {
   const secs = p.lyrics
   const setSec = (id: string, patch: Partial<LyricSection>) => update('lyrics', secs.map((s) => (s.id === id ? { ...s, ...patch } : s)))
-  const add = (kind: SectionKind) => update('lyrics', [...secs, { id: uid(), kind, text: '' }])
+  const add = (kind: SectionKind) => { const id = uid(); update('lyrics', [...secs, { id, kind, text: '' }]); setCurId(id) }
   const remove = (id: string) => update('lyrics', secs.filter((s) => s.id !== id))
   const move = (i: number, d: number) => {
     const n = [...secs]
@@ -63,12 +62,13 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   }
 
   const [curId, setCurId] = useState<string | null>(null)
-  const cur = secs.find((s) => s.id === curId) ?? secs.find((s) => s.kind === 'chorus' && !s.text.trim() && secs.some((x) => x.kind === 'verse' && lines(x.text).length >= 2)) ?? secs[0]
+  const cur = secs.find((s) => s.id === curId) ?? secs[0]
   const ci = cur ? secs.indexOf(cur) : -1
   const a = cur ? analyzeSection(cur, p.idea.hook) : null
   const target = cur ? melodyOnsets(p, cur.kind === 'chorus' ? 'chorus' : 'verse') : 0
   const ready = lyricsStep.requirements(p).every((r) => r.ok)
-  const say = !cur ? '' : !cur.text.trim()
+  const missingHook = !!p.idea.hook.trim() && secs.some(s => s.kind === 'chorus' && lines(s.text).length >= 2) && !lyricsStep.requirements(p)[2].ok
+  const say = missingHook ? `副歌再放進「${p.idea.hook}」，就能繼續。` : !cur ? '' : !cur.text.trim()
     ? cur.kind === 'chorus' ? `副歌。把「${p.idea.hook || '你那句話'}」放進來。${target ? `大約 ${target} 個字。` : ''}` : `${KIND_ZH[cur.kind]}。先寫你看到的畫面。${target ? `大約 ${target} 個字。` : ''}`
     : '寫下來就好，之後還能改。'
   return (
@@ -84,7 +84,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
       {cur && (
         <div className={`lyric-wrap paper ${!cur.text.trim() ? 'nudge' : ''}`}>
           <textarea
-            className="lyric-input"
+            className="lyric-input" aria-label={`${KIND_ZH[cur.kind]}歌詞`}
             rows={Math.max(4, cur.text.split('\n').length + 1)}
             value={cur.text}
             placeholder="一行一句……"
@@ -108,9 +108,9 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
       )}
 
       {ready && next ? (
-        <DeskActions primary={{ label: <>詞有了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 聽詞配旋律', onClick: () => RESULTS_SPEAK(p) }} />
+        <DeskActions primary={{ label: <>詞有了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 聽詞配旋律', onClick: () => speakLyrics(p, cur?.id) }} />
       ) : cur && lines(cur.text).length >= 2 ? (
-        <DeskActions primary={{ label: '▶ 聽詞配旋律', onClick: () => RESULTS_SPEAK(p) }}
+        <DeskActions primary={{ label: '▶ 聽詞配旋律', onClick: () => speakLyrics(p, cur?.id) }}
           secondary={cur.kind === 'verse' && !secs.some((s) => s.kind === 'chorus' && s.text.trim()) ? { label: '換副歌 →', onClick: () => setCurId(secs.find((s) => s.kind === 'chorus')?.id ?? null) } : undefined} />
       ) : null}
 
@@ -158,7 +158,7 @@ export const lyricsStep: StepDef = {
   requirements: (p) => [
     { label: '至少一段主歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'verse' && lines(s.text).length >= 2) },
     { label: '至少一段副歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'chorus' && lines(s.text).length >= 2) },
-    { label: '副歌包含記憶點', ok: p.lyrics.some((s) => s.kind === 'chorus' && !!cleanLine(p.idea.hook) && cleanLine(s.text).includes(cleanLine(p.idea.hook))) },
+    { label: '副歌包含記憶點', ok: !cleanLine(p.idea.hook) || p.lyrics.some((s) => s.kind === 'chorus' && !!cleanLine(p.idea.hook) && cleanLine(s.text).includes(cleanLine(p.idea.hook))) },
   ],
 }
 

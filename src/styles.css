@@ -751,3 +751,52 @@ textarea.one-line { border: 1px solid var(--line) !important; border-radius: 12p
 .nudge { animation: nudge 2.6s ease-in-out 1.2s 2; border-radius: 16px; }
 @keyframes nudge { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent-soft) 70%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .nudge { animation: none; } }
+
+/* R1: translucent watercolor on a textured sheet; ink remains above the grain. */
+body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 100; background-image: url('/paper-fibers.svg'); opacity: .085; mix-blend-mode: multiply; }
+body { background-image: radial-gradient(ellipse at 8% 15%, #d5dfce66, transparent 48%), radial-gradient(ellipse at 95% 65%, #e6c6ae55, transparent 48%); }
+.app.studio { min-height: 100dvh; }
+.top-min { background: var(--bg); border-bottom: 1px solid var(--line); }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (prefers-color-scheme: dark) { body::before { mix-blend-mode: screen; opacity: .04; } body { background-image: radial-gradient(ellipse at 10% 20%, #49513e22, transparent 55%); } }
+/* R3/R4: a watercolor studio vignette, with one musician actually in the room. */
+.studio-presence { position: relative; min-height: 172px; isolation: isolate; }
+.studio-scene { position: absolute; inset: 0; z-index: -1; border-radius: 48% 20% 24% 16%; background: radial-gradient(ellipse at 30% 30%, var(--wash-ochre), transparent 72%); }
+.studio-scene > img { width: 100%; height: 172px; object-fit: cover; opacity: .72; }
+.studio-presence .presence { min-height: 172px; padding: 0 10px; align-items: flex-end; gap: 16px; }
+.studio-character { width: 104px; height: 166px; flex: none; object-fit: contain; transform-origin: 50% 96%; animation: musician-breathe 5s ease-in-out infinite; }
+.presence-avatar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); animation: none; }
+.presence-name { min-width: 0; padding: 8px 10px; margin-bottom: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px 16px 10px 14px; letter-spacing: .02em; }
+.presence-name strong { font-family: var(--font-title); font-weight: 500; color: var(--ink); }
+.presence-state { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .83rem; }
+.presence-invite { display: block; font-size: .72rem; margin-top: 4px; color: var(--muted); }
+.studio-presence[data-state="listening"] .studio-character { transform: rotate(-2deg); animation: none; }
+.studio-presence[data-state="responding"] .presence-name { border-color: var(--accent); }
+@keyframes musician-breathe { 0%,100% { transform: rotate(-.5deg) translateY(0); } 50% { transform: rotate(.5deg) translateY(-2px); } }
+/* Native dialog has its own top layer, retaining focus even during nested capture. */
+dialog.inspo-overlay { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; color: var(--ink); }
+dialog.inspo-overlay:not([open]) { display: none; }
+dialog.inspo-overlay::backdrop { background: transparent; }
+.inspo-sheet { min-width: 0; overflow-wrap: anywhere; }
+.chat-sheet .row.between { flex-wrap: wrap; }
+.master-input { align-items: center; }
+.master-input .primary-action { width: auto; min-height: 44px; padding: 8px 14px; font-size: 1rem; letter-spacing: 0; }
+.master-input input { min-width: 0; }
+.modal-capture { font-size: .8rem; margin-left: auto; }
+.role-switch { gap: 4px; }
+.role-dot { width: 40px; height: 40px; }
+.knowledge-spark { order: 2; color: var(--muted); border-left: 2px solid var(--grid-strong); padding: 4px 12px; font-size: .88rem; }
+.knowledge-spark > summary { cursor: pointer; list-style: none; }
+.spark-invite { display: block; color: var(--accent); font-size: .8rem; margin-top: 4px; }
+.spark-body { color: var(--ink); margin-top: 10px; line-height: 1.9; }
+.spark-body details { font-size: .85rem; color: var(--muted); }
+.desk > .toolbox { order: 3; }
+.desk, .top-min { min-width: 0; overflow-wrap: anywhere; }
+.seg-quiet { max-width: 100%; overflow-x: auto; flex-shrink: 0; }
+.seg-quiet button { flex: none; }
+.energy { max-width: 100%; overflow-x: auto; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+.storage-notice { max-width: 600px; margin: 12px auto; padding: 8px 16px; background: var(--warn-bg); border-left: 2px solid var(--warn); font-size: .85rem; }
+.collage-more { width: 100%; font-size: .85rem; color: var(--muted); }
+.collage-more > summary { cursor: pointer; padding: 8px 0; }
+.collage-more .link-btn { display: block; text-align: left; }

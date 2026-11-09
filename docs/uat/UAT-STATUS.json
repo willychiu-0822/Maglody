@@ -1,0 +1,10 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-10 00:02",
+  "cases": 50,
+  "pass": 50,
+  "fail": 0,
+  "blocked": 0,
+  "ready_for_user_test": true,
+  "notes": "本機 Chrome 雙尺寸 UAT；離線 mock、假麥克風。真機/真 LLM 尚未驗證；Git worktree metadata 唯讀未能 commit。無部署。"
+}

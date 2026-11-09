@@ -32,9 +32,18 @@ export function sectionAudio(p: Project, kind: SectionKind) {
   const chords = diatonicChords(p.harmony.root, p.harmony.mode)
   const useChorus = ['chorus', 'intro', 'inter', 'outro'].includes(kind)
   const prog = p.harmony[useChorus ? 'chorus' : 'verse']
-  const bars = prog.map((d) => (d != null ? chordVoicing(chords[d]) : chordVoicing(chords[0])))
+  const bars = prog.map((d) => (d != null ? chordVoicing(chords[d]) : []))
   const melody = kind === 'chorus' ? p.melody.chorus : ['verse', 'pre', 'bridge'].includes(kind) ? p.melody.verse : undefined
   return { bars, melody }
+}
+
+/** Repeat the four-bar sketch to exactly the section length, including partial repeats. */
+export function arrangedAudio(p: Project, section: ArrSection) {
+  const { bars, melody } = sectionAudio(p, section.kind)
+  return {
+    bars: Array.from({length: section.bars}, (_,i) => bars[i % bars.length]),
+    melody: melody ? Array.from({length: section.bars * 8}, (_,i) => melody[i % melody.length]) : undefined,
+  }
 }
 
 export function arrangementFeedback(p: Project): Feedback[] {
@@ -79,7 +88,7 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
   }
   const preview = (s: ArrSection) => {
     player?.stop()
-    const { bars, melody } = sectionAudio(p, s.kind)
+    const { bars, melody } = arrangedAudio(p, s)
     setPlayer(playLoop({ bpm: p.idea.bpm, bars, melody, layers: s.layers, onStep: (x) => x < 0 && setPlayer(null) }))
     notify('arrange.preview', s.kind)
   }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
-import { playChord, playLoop, type Player } from '../lib/audio'
+import { afterSound, playChord, playLoop, type Player } from '../lib/audio'
 import { CHORD_ROLE, chordVoicing, diatonicChord, diatonicChords, keyName, NOTE_NAMES, type Mode } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
 
@@ -68,7 +68,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
     const degs = h[part]
     if (degs.some((d) => d == null)) return
     const bars = degs.map((d) => chordVoicing(chords[d!]))
-    const pl = playLoop({ bpm: p.idea.bpm, bars, layers: { drums: true, bass: true, keys: true, pad: false, melody: false }, onStep: (s) => setStep(s < 0 ? -1 : Math.floor(s / 8) + (part === 'chorus' ? 4 : 0)) })
+    const pl = playLoop({ bpm: p.idea.bpm, bars, layers: { drums: true, bass: true, keys: true, pad: false, melody: false }, loop: true, onStep: (s) => setStep(s < 0 ? -1 : Math.floor(s / 8) + (part === 'chorus' ? 4 : 0)) })
     setPlayer(pl)
   }
   const stop = () => { player?.stop(); setPlayer(null) }
@@ -77,7 +77,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
     const q = makeQuiz(h.root)
     setQuiz(q)
     setQuizRes(null)
-    setTimeout(q.play, 50)
+    afterSound(q.play, 50)
   }
   const answer = (a: 'a' | 'b') => {
     if (!quiz || quizRes) return
@@ -191,7 +191,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
             </div>
           )}
         </details>
-        <Why ready={full} title="為什麼這幾個和弦放在一起都好聽？" listen={{ label: '聽「想回家 → 到家」', play: () => { playChord(chordVoicing(chords[4]), 1); setTimeout(() => playChord(chordVoicing(chords[0]), 1.4), 1000) } }}>
+        <Why ready={full} title="為什麼這幾個和弦放在一起都好聽？" listen={{ label: '聽「想回家 → 到家」', play: () => { playChord(chordVoicing(chords[4]), 1); afterSound(() => playChord(chordVoicing(chords[0]), 1.4), 1000) } }}>
           <p>它們都是從同一組 7 個音堆出來的，說同一種語言。每個和弦有自己的角色：「家」最穩，「想回家」最緊，耳朵聽到它就會等著回家。</p>
         </Why>
       </Toolbox>

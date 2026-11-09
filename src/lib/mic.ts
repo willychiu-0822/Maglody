@@ -4,6 +4,7 @@ import { decimate, detectPitch } from './pitch'
 import { freqToMidi } from './theory'
 
 export interface LiveState {
+  pending: boolean
   running: boolean
   midi: number | null
   levelDb: number
@@ -15,13 +16,17 @@ export interface LiveState {
  * 開麥克風並即時回報音高與音量。
  * record=true 時會同時把原始取樣收起來，stop() 回傳完整錄音。
  */
-export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (midi: number | null, t: number) => void } = {}) {
-  const [state, setState] = useState<LiveState>({ running: false, midi: null, levelDb: -100, peakDb: -100, error: null })
+export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (midi: number | null, t: number) => void; onLimit?: (data: {data: Float32Array; sampleRate: number} | null) => void } = {}) {
+  const [state, setState] = useState<LiveState>({ pending: false, running: false, midi: null, levelDb: -100, peakDb: -100, error: null })
   const refs = useRef<{ stream?: MediaStream; raf?: number; chunks: Float32Array[]; proc?: ScriptProcessorNode; src?: MediaStreamAudioSourceNode; t0: number; peak: number }>({ chunks: [], t0: 0, peak: -100 })
+  const generation = useRef(0)
+  const requesting = useRef(false)
   const optsRef = useRef(opts)
   optsRef.current = opts
 
   const stop = useCallback((): { data: Float32Array; sampleRate: number } | null => {
+    generation.current++
+    requesting.current = false
     const r = refs.current
     if (r.raf) cancelAnimationFrame(r.raf)
     r.proc?.disconnect()
@@ -29,7 +34,7 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
     r.stream?.getTracks().forEach((t) => t.stop())
     r.stream = undefined
     setAudioSession('playback')
-    setState((s) => ({ ...s, running: false, midi: null }))
+    setState((s) => ({ ...s, pending: false, running: false, midi: null }))
     if (!optsRef.current.record || !r.chunks.length) return null
     const len = r.chunks.reduce((a, c) => a + c.length, 0)
     const data = new Float32Array(len)
@@ -40,10 +45,15 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
   }, [])
 
   const start = useCallback(async () => {
+    if (requesting.current || refs.current.stream) return false
+    requesting.current = true
+    const token = ++generation.current
+    setState(s => ({...s,pending:true,error:null}))
     const c = ac()
     setAudioSession('play-and-record')
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
+      if (token !== generation.current) { stream.getTracks().forEach(t => t.stop()); return false }
       const r = refs.current
       r.stream = stream
       r.chunks = []
@@ -65,7 +75,7 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
         r.proc = proc
       }
       const buf = new Float32Array(analyser.fftSize)
-      setState({ running: true, midi: null, levelDb: -100, peakDb: -100, error: null })
+      setState({ pending: false, running: true, midi: null, levelDb: -100, peakDb: -100, error: null })
       const tick = () => {
         analyser.getFloatTimeDomainData(buf)
         let pk = 0
@@ -78,15 +88,18 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
         const t = c.currentTime - r.t0
         optsRef.current.onFrame?.(midi, t)
         setState((s) => ({ ...s, midi, levelDb: db, peakDb: r.peak }))
-        if (optsRef.current.maxSec && t > optsRef.current.maxSec) return
+        if (optsRef.current.maxSec && t >= optsRef.current.maxSec) { const rec = stop(); optsRef.current.onLimit?.(rec); return }
         r.raf = requestAnimationFrame(tick)
       }
       r.raf = requestAnimationFrame(tick)
-    } catch (e) {
-      setState((s) => ({ ...s, running: false, error: '無法使用麥克風：請確認瀏覽器已允許麥克風權限，並使用 https 或 localhost 開啟。' }))
-      console.warn(e)
-    }
-  }, [])
+      return true
+    } catch {
+      if (token !== generation.current) return false
+      setAudioSession('playback')
+      setState((s) => ({ ...s, pending: false, running: false, error: '無法使用麥克風：請確認瀏覽器已允許麥克風權限，並使用 https 或 localhost 開啟。' }))
+      return false
+    } finally { if (token === generation.current) requesting.current = false }
+  }, [stop])
 
   const resetPeak = useCallback(() => { refs.current.peak = -100; setState((s) => ({ ...s, peakDb: -100 })) }, [])
 

@@ -1,5 +1,13 @@
 # UX 自測紀錄：完全新手、手機直向
 
+## 本輪 UAT 接續（2026-11-09）
+
+R1–R6 的可驗收標準、舊問題修正與審查記錄在 [codex-fixlist-a.md](codex-fixlist-a.md)。雙尺寸 E2E 最新結果見 [UAT-RESULTS.md](uat/UAT-RESULTS.md)，機器狀態見 [UAT-STATUS.json](uat/UAT-STATUS.json)；截圖在 `uat/evidence/A-*.png` 與 `UAT-*.png`。
+
+已補：紙纖維/淡彩工作室、五位人物、待機與回應、視窗鍵盤焦點、隨時捕捉、工具箱外的學習火花。修過錄音/儲存/播放/歌詞切段/共享媒體/MIDI 等資料流程；正常路徑與故障注入分開驗。`npm run test:e2e` 自動用 4102 preview 跑完關閉，不需金鑰。真機、真 LLM 和主觀音樂品質仍未在本輪實測。
+
+本輪 Git worktree metadata 仍為唯讀，無成功 commit。下列內容保留為較早輪次的歷史測試。
+
 ## 第 3 輪（極簡改版）：「一屏一個主動作」
 
 **觸發**：使用者回饋「介面太複雜、每頁沒有主次、按鈕太多、多重點，看了就不想用」。
