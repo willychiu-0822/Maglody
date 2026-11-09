@@ -1,3 +1,6 @@
 node_modules
 dist
 *.tsbuildinfo
+.uat-git/
+test-results/
+playwright-report/
