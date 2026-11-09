@@ -24,8 +24,10 @@ function useBlobUrl(id?: string) {
   useEffect(() => {
     if (!id) return
     let u: string | null = null
-    void getBlob(id).then((b) => { if (b) { u = URL.createObjectURL(b); setUrl(u) } })
-    return () => { if (u) URL.revokeObjectURL(u) }
+    let cancelled = false
+    setUrl(null)
+    void getBlob(id).then((b) => { if (b && !cancelled) { u = URL.createObjectURL(b); setUrl(u) } }).catch(() => {})
+    return () => { cancelled = true; if (u) URL.revokeObjectURL(u) }
   }, [id])
   return url
 }
@@ -37,10 +39,16 @@ function Thumb({ id }: { id: string }) {
 
 async function playAsset(id?: string) {
   if (!id) return
-  const b = await getBlob(id)
-  if (!b) return
-  const a = new Audio(URL.createObjectURL(b))
-  void a.play()
+  try {
+    const b = await getBlob(id)
+    if (!b) return
+    const url = URL.createObjectURL(b)
+    const a = new Audio(url)
+    const release = () => URL.revokeObjectURL(url)
+    a.addEventListener('ended', release, { once: true })
+    a.addEventListener('error', release, { once: true })
+    try { await a.play() } catch { release() }
+  } catch { /* Missing or unavailable media must not break the notebook. */ }
 }
 
 function playHumNotes(h: NonNullable<Inspiration['hum']>) {
@@ -123,6 +131,9 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
         draftRef.current = next
         setDraft(next)
         return true
+      } catch {
+        flash('錄音儲存失敗，請確認儲存空間；文字已保留，可以重錄或先存文字。')
+        return false
       } finally {
         setBusy(false)
       }
