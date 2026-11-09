@@ -67,7 +67,7 @@ export default function App() {
   // 這一檯的夥伴最近說的一句話（只取進入這一檯之後的）
   // 夥伴的話只停留 14 秒，之後讓位給這一檯當下該做的事
   const [, tick] = useState(0)
-  const latestRaw = master.messages.slice(enteredAt.current).filter((m) => m.role === 'master').pop()
+  const latestRaw = master.messages.slice(enteredAt.current).filter((m) => m.role === 'master' && m.step === step.key && m.role_id === role.id).pop()
   const latest = latestRaw && Date.now() - (latestRaw.at ?? 0) < 14000 ? latestRaw : undefined
   useEffect(() => {
     if (!latest) return
