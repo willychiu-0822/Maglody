@@ -1,5 +1,5 @@
 // Demo 版本：改稿前先存一版，改壞了可以回去（真實創作者的 demo 1、demo 2…）
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Project } from './store'
 import { uid, defaultProject } from './store'
 import { record, restoreProject } from './restore'
@@ -21,13 +21,15 @@ const load = (): DemoVersion[] => {
 
 export function useVersions() {
   const [list, setList] = useState<DemoVersion[]>(load)
+  const listRef = useRef(list)
+  listRef.current = list
   useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 20))) } catch { /* 空間不足時忽略 */ } }, [list])
   const save = useCallback((p: Project, note: string) => {
-    let name = ''
-    setList((l) => {
-      name = `Demo v${l.length + 1}`
-      return [{ id: uid(), name, note, at: Date.now(), project: structuredClone(p) }, ...l]
-    })
+    const number = Math.max(0, ...listRef.current.map(v => Number(/^Demo v(\d+)$/.exec(v.name)?.[1] ?? 0))) + 1
+    const name = `Demo v${number}`
+    const next = [{ id: uid(), name, note, at: Date.now(), project: structuredClone(p) }, ...listRef.current].slice(0, 20)
+    listRef.current = next
+    setList(next)
     return name
   }, [])
   const remove = useCallback((id: string) => setList((l) => l.filter((v) => v.id !== id)), [])
