@@ -3,6 +3,8 @@ import { songContext } from './context'
 import { mockReply } from './mock'
 import { MASTER_SYSTEM_PROMPT, buildUserTurn } from './prompts'
 import type { AgentReply } from './types'
+import { sanitizeReply } from './reply'
+import { fetchJson } from '../lib/request'
 
 /** 離線時讓五位夥伴有自己的口吻（只加開場與收尾，不改變「不代寫」的內容） */
 const FLAVOR: Record<string, { open: string[]; close: string; idle: string }> = {
@@ -30,7 +32,7 @@ function flavor(reply: AgentReply, persona?: { name: string }, question?: string
  *   API 金鑰只放在後端，前端永遠拿不到。
  * - LLM 失敗時自動退回 mock，學習流程不中斷。
  */
-const ENDPOINT = (import.meta.env.VITE_AGENT_URL as string | undefined) ?? ''
+const ENDPOINT = (import.meta.env?.VITE_AGENT_URL as string | undefined) ?? ''
 
 export const agentMode = (): 'llm' | 'mock' => (ENDPOINT ? 'llm' : 'mock')
 
@@ -42,27 +44,22 @@ export interface AskInput {
   history?: { role: 'user' | 'assistant'; content: string }[]
 }
 
-function isReply(x: unknown): x is AgentReply {
-  return !!x && typeof (x as AgentReply).text === 'string'
-}
-
-export async function askMaster(p: Project, input: AskInput): Promise<{ reply: AgentReply; source: 'mock' | 'llm' }> {
-  if (!ENDPOINT) return { reply: flavor(mockReply(p, input), input.persona, input.question), source: 'mock' }
+export async function askMaster(p: Project, input: AskInput, options: { endpoint?: string; signal?: AbortSignal; timeoutMs?: number } = {}): Promise<{ reply: AgentReply; source: 'mock' | 'llm' }> {
+  const endpoint = options.endpoint ?? ENDPOINT
+  if (!endpoint) return { reply: flavor(mockReply(p, input), input.persona, input.question), source: 'mock' }
   try {
     const user = buildUserTurn({ step: input.step, persona: input.persona, songContext: songContext(p), event: input.event, question: input.question })
-    const res = await fetch(ENDPOINT, {
+    const data = await fetchJson(endpoint, {
+      signal: options.signal,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ system: MASTER_SYSTEM_PROMPT, messages: [...(input.history ?? []).slice(-8), { role: 'user', content: user }] }),
-    })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const data = await res.json()
-    if (!isReply(data)) throw new Error('bad reply')
-    // 前端再保險一次：只接受已知的 action 類型
-    data.suggestions = (data.suggestions ?? []).filter((s) => !s.action || ['tryProgression', 'goStep', 'playResult'].includes(s.action.type)).slice(0, 3)
-    return { reply: data, source: 'llm' }
+    }, options.timeoutMs ?? 15_000)
+    const reply = sanitizeReply(data)
+    return { reply, source: 'llm' }
   } catch (e) {
-    console.warn('[master] LLM 失敗，改用離線模式', e)
+    if (options.signal?.aborted) throw e
+    console.warn('[master] LLM 失敗，改用離線模式')
     return { reply: flavor(mockReply(p, input), input.persona, input.question), source: 'mock' }
   }
 }

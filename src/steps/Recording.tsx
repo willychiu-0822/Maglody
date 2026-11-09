@@ -27,7 +27,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
   const mic = useMic()
   const [mode, setMode] = useState<'level' | 'pitch' | null>(null)
   const [target, setTarget] = useState<number | null>(null)
-  const holdRef = useRef(0)
+  const holdRef = useRef<number | null>(null)
   const [hits, setHits] = useState(0)
   const [metro, setMetro] = useState<number | null>(null)
 
@@ -41,18 +41,19 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
   const pitchLevel: Level | null = cents == null ? null : Math.abs(cents) <= 25 ? 'good' : Math.abs(cents) <= 50 ? 'warn' : 'bad'
   useEffect(() => {
     if (pitchLevel === 'good') {
-      holdRef.current++
-      if (holdRef.current === 36) {
+      holdRef.current ??= performance.now()
+      if (performance.now() - holdRef.current >= 600) {
+        holdRef.current = Infinity
         setHits((h) => h + 1)
         notify('record.pitch', target != null ? noteNameOct(target) : '')
         update('recording', (x) => ({ ...x, pitchHits: x.pitchHits + 1 }))
       }
-    } else holdRef.current = 0
+    } else holdRef.current = null
   }, [mic.midi]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const startLevel = async () => { setMode('level'); mic.resetPeak(); if (!mic.running) await mic.start() }
   const endLevel = () => { update('recording', { ...r, levelPeakDb: Math.round(mic.peakDb) }); mic.stop(); setMode(null); notify('record.level', '') }
-  const startPitch = async (m: number) => { setTarget(m); setMode('pitch'); playNote(m, 1.2, { type: 'sine', gain: 0.3 }); holdRef.current = 0; if (!mic.running) await mic.start() }
+  const startPitch = async (m: number) => { setTarget(m); setMode('pitch'); playNote(m, 1.2, { type: 'sine', gain: 0.3 }); holdRef.current = null; if (!mic.running) await mic.start() }
 
   useEffect(() => {
     if (metro == null) return

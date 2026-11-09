@@ -17,6 +17,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
   const mic = useMic({
     record: true,
     maxSec: 25,
+    onLimit: (recording) => { if (recording) runAnalysis(recording.data, recording.sampleRate, 'mic') },
     onFrame: (midi, t) => {
       liveRef.current.push({ t, midi })
       if (liveRef.current.length % 3 === 0) setLive([...liveRef.current])

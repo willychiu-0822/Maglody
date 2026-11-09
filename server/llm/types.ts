@@ -6,6 +6,7 @@ export interface LlmRequest {
   messages: ChatTurn[]
   /** 要求供應商只回 JSON（各家 API 的 JSON mode） */
   json: true
+  signal?: AbortSignal
 }
 
 export interface LlmProvider {

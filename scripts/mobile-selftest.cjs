@@ -170,4 +170,5 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
   const failed = results.filter((r) => !r.ok)
   console.log(`\n總計 ${results.length} 項，PASS ${results.length - failed.length}，FAIL ${failed.length}`)
   await browser.close()
-})()
+  if (failed.length) process.exitCode = 1
+})().catch((error) => { console.error(error); process.exitCode = 1 })
