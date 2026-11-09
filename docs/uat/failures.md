@@ -1,10 +1,12 @@
 # UAT 缺失與 A / B 交接
 
-## 第 3 輪交付尚未放行 — 完整執行逾時
+## 完整執行逾時 — 第 3/4 輪追蹤
 
 狀態：OPEN；負責：session A；分類：驗收執行待確認。這些案例不能因曾在其他輪通過而視為本輪全綠。
 
-最新完整 run：`2026-11-09T22-07-25-143Z`（台北 2026-11-10 06:28）。62 旅程 × 2 尺寸，120 pass／4 fail／0 blocked，ready=false。所有 124 個案例都有非空截圖。
+第 4 輪第一次完整 run `2026-11-09T23-25-26-107Z`：122/124；本次 UAT-14/40 mobile 同時出現約 221.5 秒 trace 空窗，其他案例包含前輪四個失敗均通過，仍不能放行。舊結果和本次 traces 均保留，待完整無逾時重跑。
+
+第 3 輪完整 run：`2026-11-09T22-07-25-143Z`（台北 2026-11-10 06:28）。62 旅程 × 2 尺寸，120 pass／4 fail／0 blocked，ready=false。所有 124 個案例都有非空截圖。
 
 | 案例 | 尺寸 | 本輪失敗 | trace 觀察 |
 |---|---|---|---|
@@ -16,6 +18,16 @@
 證據在 [完整 results.json](evidence/2026-11-09T22-07-25-143Z/results.json)、[UAT-12 trace](evidence/2026-11-09T22-07-25-143Z/desktop/UAT-12-trace.zip)、[UAT-39 trace](evidence/2026-11-09T22-07-25-143Z/desktop/UAT-39-trace.zip)、[UAT-03 trace](evidence/2026-11-09T22-07-25-143Z/mobile/UAT-03-trace.zip)、[UAT-62 trace](evidence/2026-11-09T22-07-25-143Z/mobile/UAT-62-trace.zip)。
 
 本輪多次完整重跑仍有不同案例的同時停頓；單 worker 和 Chrome 軟體繪圖亦未取得全綠，軟體繪圖設定已撤回。未增加 timeout、跳過案例或合併多輪 pass。此現象與執行環境停頓一致，但尚不能單憑 trace 排除其他原因。下輪需先確認執行穩定，再關閉本項並完整重跑；不得只定向補過四案便設 ready=true。
+
+## 第 4 輪探索修復
+
+### UAT-63 — 新歌仍沿用舊對話與等待狀態
+
+狀態：CLOSED；負責：session A；需求：R3、P0、A-N11。
+
+重新開始同一檯的新歌，仍顯示「正側耳聽你說」，舊聊天和未送出問題保留；晚到的舊回覆也會進入新歌。UAT-63 雙尺寸先紅燈，再以歌曲世代隔離非同步回覆、清理通知 timer/歷史/等待狀態，並重建聊天輸入。保留靈感本子與 Demo 版本的原行為。UAT-22/59/61/62/63 雙尺寸 10/10 通過。
+
+證據：[修前手機](evidence/A-UAT63-before-mobile.png)、[修後手機](evidence/A-UAT63-after-mobile.png)、[修後桌面](evidence/A-UAT63-after-desktop.png)。定向通過不代表完整矩陣放行。
 
 ## 第 3 輪探索修復
 

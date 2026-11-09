@@ -15,6 +15,7 @@ export function useMaster(getProject: () => Project) {
   const [pending, setPending] = useState<{ id: string; step: string; roleId: RoleId }[]>([])
   const last = useRef<Record<string, number>>({})
   const timer = useRef<Record<string, number>>({})
+  const generation = useRef(0)
   const msgsRef = useRef(messages)
   msgsRef.current = messages
 
@@ -24,6 +25,7 @@ export function useMaster(getProject: () => Project) {
   const push = (m: AgentMessage) => setMessages((xs) => [...xs.slice(-40), m])
 
   const run = useCallback(async (step: string, input: { event?: { kind: string; detail: string }; question?: string }, roleId?: RoleId) => {
+    const song = generation.current
     const rid = roleId ?? DESK_ROLE[step] ?? 'producer'
     const r = ROLES[rid]
     const id = uid()
@@ -31,8 +33,9 @@ export function useMaster(getProject: () => Project) {
     try {
       // 等一個 tick，讓剛剛的 state 更新寫進專案後再讀
       await new Promise((res) => setTimeout(res, 0))
+      if (song !== generation.current) return
       const { reply, source } = await askMaster(getProject(), { step, ...input, persona: { name: r.name, focus: r.focus, voice: r.voice }, history: history() })
-      if (reply.text || reply.learned) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
+      if (song === generation.current && (reply.text || reply.learned)) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
     } finally { setPending(xs => xs.filter(request => request.id !== id)) }
   }, [getProject]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -54,7 +57,17 @@ export function useMaster(getProject: () => Project) {
     void run(step, { question }, roleId)
   }, [run])
 
+  const clear = useCallback(() => {
+    generation.current++
+    Object.values(timer.current).forEach(clearTimeout)
+    timer.current = {}
+    last.current = {}
+    msgsRef.current = []
+    setMessages([])
+    setPending([])
+  }, [])
+
   useEffect(() => () => { Object.values(timer.current).forEach(clearTimeout) }, [])
   const isBusy = (step: string, roleId: RoleId) => pending.some(request => request.step === step && request.roleId === roleId)
-  return { messages, isBusy, notify, ask }
+  return { messages, isBusy, notify, ask, clear, session: generation.current }
 }

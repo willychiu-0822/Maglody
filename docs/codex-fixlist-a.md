@@ -82,9 +82,9 @@ fatal: Unable to create '/workspace/Maglody/.git/worktrees/wt-a/index.lock': Rea
 | 需求 | 可驗收標準 | 實作與驗證 | 狀態 |
 |---|---|---|---|
 | R1 | 390×844、1280×800 均有可見紙纖維、水彩暈染、墨線與低彩度；明暗模式文字可讀、無水平溢出 | styles.css 紙面與場景，A-R1 截圖 | 本機 Chrome 已驗 |
-| R2 | 九檯、選單、捕捉與聊天每個活動畫面最多一個主要動作；背景在 modal 開啟時不可操作；進階預設收起 | 共用 modal、主動作層級；九檯巡覽與鍵盤驗證 | 本機 Chrome 已驗 |
+| R2 | 九檯含空白狀態各恰有一個主要動作；情緒/和弦各有一個推薦材料；次要控制降階、進階預設收起；modal 背景不可操作 | UAT-24/31/56；九檯巡覽、推薦情緒/和弦、鍵盤驗證 | 本機 Chrome 已驗 |
 | R3 | 各檯有一位全身夥伴在對應工作室角落，待機有細微呼吸；點人物可聊、切換五位均有回應；減少動畫時停止 | StudioPresence、角色狀態與離線對話，A-R3 | 本機 Chrome 已驗 |
-| R4 | 五位人物以真實錄音室樂手的日常穿著、髮型、配件區分，public 角色圖與文件逐項一致；沒有以字形當人物 | public/characters SVG 與 docs/design.md，五位截圖 | 本機 Chrome 已驗 |
+| R4 | 五位人物使用核可 idle-v2，依錄音室樂手的穿著、髮型、配件區分；與 character-design-brief.md 一致，不以字形當人物；兩尺寸可見、首屏素材小於 150KB | public/studio/roles/*.webp、studio-assets.json；UAT-25/29/57、五位截圖與人工檢視 | 本機 Chrome 已驗 |
 | R5 | 九檯與所有 modal 都能低干擾開啟捕捉，文字/哼唱可保存；原工作草稿和檯位不變，重整後可取回；權限拒絕可改文字 | 捕捉入口、錄音序列與儲存；A-R5 | 本機 Chrome 已驗 |
 | R6 | 動手前無術語說明；動手後一行火花在工具箱外可發現，預設收起；主動展開才有原理，再深入另收起 | KnowledgeSpark、Why；A-R6 | 本機 Chrome 已驗 |
 
@@ -232,3 +232,11 @@ A-N10：完整重跑中 UAT-52 反覆失敗，進一步確認產品的到時停�
 - 最後完整 run `2026-11-09T22-07-25-143Z`：**120/124 pass，4 fail，ready=false**。失敗 UAT-03/mobile、12/desktop、39/desktop、62/mobile 均為互動／截圖逾時；trace 細節與下輪條件見 failures.md 的 OPEN 項。
 - build pass；修後 selftest 50/50、unit 15/15、logic 10/10；124 個非空案例截圖逐一驗證存在。沒有用多輪通過拼出全綠。
 - 自己啟動的 4101／4102 已關閉。無 push、remote 修改、部署或 tunnel；依禁止更動 deploy 目錄的規則，公開網址只在本目錄 DEPLOY-STATUS-HANDOFF.md 留運維交接。
+
+
+## 第 4 輪探索（2026-11-10）
+
+- 起始透過 scripts/git-local.sh merge codex/burn-b：Already up to date。現有產品索引乾淨，核可六份原素材與六份 WebP 雜湊全部符合。
+- 第一輪完整 122/124：UAT-14/40 mobile 同時約 221.5 秒無事件；保留證據、不增加 timeout、不更改播放/操作斷言。前輪四個失敗均通過，但不以跨輪結果拼全綠。
+- A-N11 / UAT-63 驗收：重新開始新歌後無舊對話、未送出文字及錯誤等待狀態；晚到舊回覆不能進新歷史或場景；可正常問新問題。兩尺寸先紅→綠；與 UAT-22/59/61/62 合計 10/10。證據 A-UAT63-before/after-{desktop,mobile}.png。
+- 修法：歌曲世代辨別非同步回覆；新歌清除 debounce timer、舊歷史與 pending，聊天視窗隨世代重新建立。靈感本子仍保留，版本還原案例持續通過。

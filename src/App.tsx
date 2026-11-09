@@ -180,7 +180,7 @@ export default function App() {
                   ))}
                 </div>
                 <ReaperGuide step={['arrange', 'record', 'mix'].includes(step.key) ? step.key : 'arrange'} p={p} />
-                <button className="btn btn-ghost small" onClick={() => { if (confirm('清掉這首歌、重新開始？（靈感本子會保留）')) { reset(); setCur(0); setMenu(false) } }}>重新開始一首新歌</button>
+                <button className="btn btn-ghost small" onClick={() => { if (confirm('清掉這首歌、重新開始？（靈感本子會保留）')) { master.clear(); reset(); setCur(0); setMenu(false) } }}>重新開始一首新歌</button>
               </details>
             </div>
         </Modal>
@@ -191,7 +191,7 @@ export default function App() {
         onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
         open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
 
-      <MasterPanel open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
+      <MasterPanel key={master.session} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
         messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />
     </div>
   )
