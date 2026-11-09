@@ -15,12 +15,12 @@ Repo：<https://github.com/willychiu-0822/Maglody>
 
 ## 目前驗證範圍
 
-本輪已補紙墨場景、五位工作室夥伴、隨時捕捉與漸進知識提示，並修正錄音保存、播放停止、歌詞編輯、版本還原與 MIDI 延音等流程。
+本輪已換上核可的 v2 水彩人物與工作室底圖、補齊每檯推薦主動作、歌曲脈絡教練與有聲示範，並整合 A/B 的錄音保存、離線、資料復原與完整旅程驗收。
 
 - 本機 Chrome 的手機 390×844／桌面 1280×800 驗收：[UAT 計畫](docs/uat/UAT-PLAN.md)、[最新結果與截圖](docs/uat/UAT-RESULTS.md)、[機器狀態](docs/uat/UAT-STATUS.json)。
 - `npm run build`、`npm run selftest`、`npm run test:logic` 是補充檢查；範圍與修正記錄見 [Session A 清單](docs/codex-fixlist-a.md)。
 - 尚未驗證：實體手機、iOS Safari 的麥克風/靜音鍵/聽寫/PWA 安裝，以及真實 OpenAI/Gemini/Vertex 金鑰。預設使用離線 mock，測試不需要金鑰。
-- 本輪沒有部署或 tunnel；Git worktree metadata 唯讀，無法完成本機 commit。這不代表已做完 session B 的獨立 UAT 審核。
+- 已接手並合併 session B，兩邊案例合併編為 UAT-01～58。原 worktree metadata 唯讀，本機提交使用 `scripts/git-local.sh`（HEAD/index 留在本目錄 `.uat-git`，沿用原 shared refs/objects，未改 remote）。無 push、部署或 tunnel。
 
 本機完整驗收（自動 build，在 4102 啟動 preview，跑完關閉）：
 
@@ -46,8 +46,8 @@ Maglody 以手機直向為主要設計。主流程在手機上可以從頭走到
 
 ```bash
 npm install
-npm run dev          # http://localhost:5173（桌面瀏覽器）
-npm run dev:mobile   # 自簽 https + 區網開放，用手機開 https://<電腦IP>:5173（第一次要接受憑證警告）
+npm run dev -- --port 4101 --strictPort # 本機 http://localhost:4101
+npm run dev:mobile -- --port 4101 --strictPort # 自簽 https；手機開 https://<電腦IP>:4101
 npm run build        # 產生 dist/，部署到任何靜態主機（需 https）即可在手機使用
 ```
 
@@ -108,4 +108,4 @@ REAPER 選擇原因：輕量、跨平台、可完整試用 60 天。試用期結
 
 ## 技術
 
-Vite、React 19、TypeScript。音高偵測自行實作 normalized autocorrelation（McLeod 簡化版）；所有聲音都由 Web Audio 即時合成，不需要外部音源檔。
+Vite、React 19、TypeScript。音高偵測自行實作 normalized autocorrelation（McLeod 簡化版）；聲音由 Web Audio 即時合成，不需要音源服務。核可插畫為本機 WebP，角色與服裝對照見 [設計說明](docs/design.md)。
