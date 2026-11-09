@@ -4,10 +4,17 @@ import path from 'node:path'
 export default class UatReporter implements Reporter {
   rows: { case: string; viewport: string; status: string; reason: string; evidence: string }[] = []
   onTestEnd(test: TestCase, result: TestResult) {
+    const trace = result.attachments.find(a => a.name === 'trace' && a.path)
+    if (trace?.path && fs.existsSync(trace.path)) {
+      const target = `docs/uat/evidence/${process.env.UAT_RUN_ID}/${test.parent.project()?.name}/${test.title.match(/UAT-\d+/)?.[0]}-trace.zip`
+      fs.mkdirSync(path.dirname(target), { recursive: true })
+      fs.copyFileSync(trace.path, target)
+    }
     const id = test.title.match(/UAT-\d+/)?.[0] ?? test.title
+    const evidence = `docs/uat/evidence/${process.env.UAT_RUN_ID}/${test.parent.project()?.name}/${id}.png`
     this.rows.push({ case: id, viewport: test.parent.project()?.name ?? '', status: result.status === 'passed' ? 'pass' : result.status === 'skipped' ? 'blocked' : 'fail',
       reason: (result.errors.map(e => (e.message ?? '').replace(/\u001b\[[0-9;]*m/g, '')).join(' | ') || '').slice(0, 2500),
-      evidence: result.attachments.find(a => a.name === 'uat-screenshot')?.path?.replace(process.cwd() + '/', '') ?? '',
+      evidence: fs.existsSync(evidence) ? evidence : '',
     })
   }
   onEnd(result: FullResult) {
@@ -17,7 +24,10 @@ export default class UatReporter implements Reporter {
     const fail = rows.filter(r => r.status === 'fail').length
     const blocked = rows.filter(r => r.status === 'blocked').length
     const pass = rows.filter(r => r.status === 'pass').length
-    const fullMatrix = rows.length >= 50 && new Set(rows.map(r => r.case)).size * 2 === rows.length
+    const expectedCases = new Set(fs.readdirSync('e2e').filter(file => file.endsWith('.spec.ts')).flatMap(file =>
+      [...fs.readFileSync(`e2e/${file}`, 'utf8').matchAll(/test\(['"](UAT-\d+)/g)].map(match => match[1])))
+    const fullMatrix = rows.length === expectedCases.size * 2 && [...expectedCases].every(id =>
+      ['desktop','mobile'].every(viewport => rows.some(row => row.case === id && row.viewport === viewport)))
     const visualOpen = fs.existsSync('docs/uat/failures.md') && fs.readFileSync('docs/uat/failures.md','utf8').includes('狀態：OPEN')
     const status = { project: 'Maglody', updated, cases: rows.length, pass, fail, blocked,
       ready_for_user_test: result.status === 'passed' && fullMatrix && !fail && !blocked && !visualOpen,
