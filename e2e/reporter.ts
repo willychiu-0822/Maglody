@@ -41,6 +41,10 @@ export default class UatReporter implements Reporter {
     fs.mkdirSync(`docs/uat/evidence/${run}`, { recursive: true })
     fs.writeFileSync(`docs/uat/evidence/${run}/results.json`, JSON.stringify({ ...status, rows }, null, 2)+'\n')
     fs.writeFileSync('docs/uat/UAT-STATUS.json', JSON.stringify(status,null,2)+'\n')
+    const historyPath='docs/uat/UAT-RUNS.json'
+    const history=fs.existsSync(historyPath)?JSON.parse(fs.readFileSync(historyPath,'utf8')):[]
+    history.push({updated,run,cases:rows.length,pass,fail,blocked,ready_for_user_test:status.ready_for_user_test})
+    fs.writeFileSync(historyPath,JSON.stringify(history,null,2)+'\n')
     const clean = (s: string) => s.replaceAll('|', '\\|').replaceAll('\n','<br>')
     fs.writeFileSync('docs/uat/UAT-RESULTS.md', `# Maglody UAT 執行結果\n\n台北時間：${updated}；run：${run}。\n\n${rows.length} 次執行：PASS ${pass}／FAIL ${fail}／BLOCKED ${blocked}。ready_for_user_test=${status.ready_for_user_test}。\n\n${status.notes}。各次歷史見 [evidence](evidence/)，功能修復與視覺交接見 [failures.md](failures.md)。每次執行有獨立 results.json，不覆蓋舊證據。\n\n| 案例 | Viewport | 結果 | 失敗原因 | 截圖 |\n|---|---|---|---|---|\n` + rows.map(r => `| ${r.case} | ${r.viewport} | ${r.status} | ${clean(r.reason)} | ${r.evidence ? `[截圖](${path.relative('docs/uat',r.evidence)})` : '未產生'} |`).join('\n')+'\n')
   }
