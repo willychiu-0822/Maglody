@@ -42,12 +42,12 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
   const start = useCallback(async () => {
     const r = refs.current
     const generation = r.gate.begin()
-    if (generation === null) return
+    if (generation === null) return false
     try {
       const c = ac()
       setAudioSession('play-and-record')
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
-      if (!r.gate.accept(generation, stream)) return
+      if (!r.gate.accept(generation, stream)) return false
       r.chunks = []; r.peak = -100; r.t0 = c.currentTime; r.sampleRate = c.sampleRate
       const src = r.src = c.createMediaStreamSource(stream)
       const analyser = r.analyser = c.createAnalyser()
@@ -83,10 +83,12 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
         r.raf = requestAnimationFrame(tick)
       }
       r.raf = requestAnimationFrame(tick)
+      return true
     } catch {
-      if (!r.gate.current(generation)) return
+      if (!r.gate.current(generation)) return false
       stop()
       setState((s) => ({ ...s, error: '無法使用麥克風：請確認瀏覽器已允許麥克風權限，並使用 https 或 localhost 開啟。' }))
+      return false
     }
   }, [stop])
 
