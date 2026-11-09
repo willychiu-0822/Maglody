@@ -1,0 +1,982 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-10 02:41",
+  "cases": 124,
+  "pass": 120,
+  "fail": 4,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "requirements": {
+    "R1": {
+      "status": "pass",
+      "cases": [
+        "UAT-28",
+        "UAT-57"
+      ]
+    },
+    "R2": {
+      "status": "pass",
+      "cases": [
+        "UAT-24",
+        "UAT-56"
+      ]
+    },
+    "R3": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-25",
+        "UAT-30",
+        "UAT-53",
+        "UAT-59",
+        "UAT-61",
+        "UAT-62"
+      ]
+    },
+    "R4": {
+      "status": "pass",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "R5": {
+      "status": "pass",
+      "cases": [
+        "UAT-13",
+        "UAT-14",
+        "UAT-15",
+        "UAT-16",
+        "UAT-49",
+        "UAT-60"
+      ]
+    },
+    "R6": {
+      "status": "pass",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "novice_feedback": {
+    "P0_context_coaching": {
+      "status": "pass",
+      "cases": [
+        "UAT-53"
+      ]
+    },
+    "P1_complete_demo": {
+      "status": "pass",
+      "cases": [
+        "UAT-54"
+      ]
+    },
+    "P1_denied_mic_demo": {
+      "status": "pass",
+      "cases": [
+        "UAT-55"
+      ]
+    },
+    "P1_one_primary": {
+      "status": "pass",
+      "cases": [
+        "UAT-24",
+        "UAT-56"
+      ]
+    },
+    "P1_approved_characters": {
+      "status": "pass",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "P2_watercolor": {
+      "status": "pass",
+      "cases": [
+        "UAT-28",
+        "UAT-57"
+      ]
+    },
+    "P2_knowledge_sparks": {
+      "status": "pass",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T18-22-16-895Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；有案例缺少截圖證據",
+  "rows": [
+    {
+      "case": "UAT-01",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-01.png"
+    },
+    {
+      "case": "UAT-01",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-01.png"
+    },
+    {
+      "case": "UAT-02",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-02.png"
+    },
+    {
+      "case": "UAT-02",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-02.png"
+    },
+    {
+      "case": "UAT-03",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-03.png"
+    },
+    {
+      "case": "UAT-03",
+      "viewport": "mobile",
+      "status": "fail",
+      "reason": "TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('main .primary-action')\n    - locator resolved to <button class=\"primary-action\">用我的哼唱當草稿</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-03.png"
+    },
+    {
+      "case": "UAT-04",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-04.png"
+    },
+    {
+      "case": "UAT-04",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-04.png"
+    },
+    {
+      "case": "UAT-05",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-05.png"
+    },
+    {
+      "case": "UAT-05",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-05.png"
+    },
+    {
+      "case": "UAT-06",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-06.png"
+    },
+    {
+      "case": "UAT-06",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-06.png"
+    },
+    {
+      "case": "UAT-07",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-07.png"
+    },
+    {
+      "case": "UAT-07",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-07.png"
+    },
+    {
+      "case": "UAT-08",
+      "viewport": "desktop",
+      "status": "fail",
+      "reason": "Tearing down \"errors\" exceeded the test timeout of 45000ms. | TimeoutError: page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-08",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-08.png"
+    },
+    {
+      "case": "UAT-09",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-09.png"
+    },
+    {
+      "case": "UAT-09",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-09.png"
+    },
+    {
+      "case": "UAT-10",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-10.png"
+    },
+    {
+      "case": "UAT-10",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-10.png"
+    },
+    {
+      "case": "UAT-11",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-11.png"
+    },
+    {
+      "case": "UAT-11",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-11.png"
+    },
+    {
+      "case": "UAT-12",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-12.png"
+    },
+    {
+      "case": "UAT-12",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-12.png"
+    },
+    {
+      "case": "UAT-13",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-13.png"
+    },
+    {
+      "case": "UAT-13",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-13.png"
+    },
+    {
+      "case": "UAT-14",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-14.png"
+    },
+    {
+      "case": "UAT-14",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-14.png"
+    },
+    {
+      "case": "UAT-15",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-15.png"
+    },
+    {
+      "case": "UAT-15",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-15.png"
+    },
+    {
+      "case": "UAT-16",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-16.png"
+    },
+    {
+      "case": "UAT-16",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-16.png"
+    },
+    {
+      "case": "UAT-17",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-17.png"
+    },
+    {
+      "case": "UAT-17",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-17.png"
+    },
+    {
+      "case": "UAT-18",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-18.png"
+    },
+    {
+      "case": "UAT-18",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-18.png"
+    },
+    {
+      "case": "UAT-19",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-19.png"
+    },
+    {
+      "case": "UAT-19",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-19.png"
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-20.png"
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-20.png"
+    },
+    {
+      "case": "UAT-21",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-21.png"
+    },
+    {
+      "case": "UAT-21",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-21.png"
+    },
+    {
+      "case": "UAT-22",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-22.png"
+    },
+    {
+      "case": "UAT-22",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-22.png"
+    },
+    {
+      "case": "UAT-23",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-23.png"
+    },
+    {
+      "case": "UAT-23",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-23.png"
+    },
+    {
+      "case": "UAT-24",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-24.png"
+    },
+    {
+      "case": "UAT-24",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-24.png"
+    },
+    {
+      "case": "UAT-25",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-25.png"
+    },
+    {
+      "case": "UAT-25",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-25.png"
+    },
+    {
+      "case": "UAT-26",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-26.png"
+    },
+    {
+      "case": "UAT-26",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-26.png"
+    },
+    {
+      "case": "UAT-27",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-27.png"
+    },
+    {
+      "case": "UAT-27",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-27.png"
+    },
+    {
+      "case": "UAT-28",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-28.png"
+    },
+    {
+      "case": "UAT-28",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-28.png"
+    },
+    {
+      "case": "UAT-29",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-29.png"
+    },
+    {
+      "case": "UAT-29",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-29.png"
+    },
+    {
+      "case": "UAT-30",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-30.png"
+    },
+    {
+      "case": "UAT-30",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-30.png"
+    },
+    {
+      "case": "UAT-31",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-31.png"
+    },
+    {
+      "case": "UAT-31",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-31.png"
+    },
+    {
+      "case": "UAT-32",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-32.png"
+    },
+    {
+      "case": "UAT-32",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-32.png"
+    },
+    {
+      "case": "UAT-33",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-33.png"
+    },
+    {
+      "case": "UAT-33",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-33.png"
+    },
+    {
+      "case": "UAT-34",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-34.png"
+    },
+    {
+      "case": "UAT-34",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-34.png"
+    },
+    {
+      "case": "UAT-35",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-35.png"
+    },
+    {
+      "case": "UAT-35",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-35.png"
+    },
+    {
+      "case": "UAT-36",
+      "viewport": "desktop",
+      "status": "fail",
+      "reason": "Test timeout of 45000ms exceeded. | TimeoutError: page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-36.png"
+    },
+    {
+      "case": "UAT-36",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-36.png"
+    },
+    {
+      "case": "UAT-37",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-37.png"
+    },
+    {
+      "case": "UAT-37",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-37.png"
+    },
+    {
+      "case": "UAT-38",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-38.png"
+    },
+    {
+      "case": "UAT-38",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-38.png"
+    },
+    {
+      "case": "UAT-39",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-39.png"
+    },
+    {
+      "case": "UAT-39",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-39.png"
+    },
+    {
+      "case": "UAT-40",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-40.png"
+    },
+    {
+      "case": "UAT-40",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-40.png"
+    },
+    {
+      "case": "UAT-41",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-41.png"
+    },
+    {
+      "case": "UAT-41",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-41.png"
+    },
+    {
+      "case": "UAT-42",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-42.png"
+    },
+    {
+      "case": "UAT-42",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-42.png"
+    },
+    {
+      "case": "UAT-43",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-43.png"
+    },
+    {
+      "case": "UAT-43",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-43.png"
+    },
+    {
+      "case": "UAT-44",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-44.png"
+    },
+    {
+      "case": "UAT-44",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-44.png"
+    },
+    {
+      "case": "UAT-45",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-45.png"
+    },
+    {
+      "case": "UAT-45",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-45.png"
+    },
+    {
+      "case": "UAT-46",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-46.png"
+    },
+    {
+      "case": "UAT-46",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-46.png"
+    },
+    {
+      "case": "UAT-47",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-47.png"
+    },
+    {
+      "case": "UAT-47",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-47.png"
+    },
+    {
+      "case": "UAT-48",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-48.png"
+    },
+    {
+      "case": "UAT-48",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-48.png"
+    },
+    {
+      "case": "UAT-49",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-49.png"
+    },
+    {
+      "case": "UAT-49",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-49.png"
+    },
+    {
+      "case": "UAT-50",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-50.png"
+    },
+    {
+      "case": "UAT-50",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-50.png"
+    },
+    {
+      "case": "UAT-51",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-51.png"
+    },
+    {
+      "case": "UAT-51",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-51.png"
+    },
+    {
+      "case": "UAT-52",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-52.png"
+    },
+    {
+      "case": "UAT-52",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-52.png"
+    },
+    {
+      "case": "UAT-53",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-53.png"
+    },
+    {
+      "case": "UAT-53",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-53.png"
+    },
+    {
+      "case": "UAT-54",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-54.png"
+    },
+    {
+      "case": "UAT-54",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-54.png"
+    },
+    {
+      "case": "UAT-55",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-55.png"
+    },
+    {
+      "case": "UAT-55",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-55.png"
+    },
+    {
+      "case": "UAT-56",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-56.png"
+    },
+    {
+      "case": "UAT-56",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-56.png"
+    },
+    {
+      "case": "UAT-57",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-57.png"
+    },
+    {
+      "case": "UAT-57",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-57.png"
+    },
+    {
+      "case": "UAT-58",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-58.png"
+    },
+    {
+      "case": "UAT-58",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-58.png"
+    },
+    {
+      "case": "UAT-59",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-59.png"
+    },
+    {
+      "case": "UAT-59",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-59.png"
+    },
+    {
+      "case": "UAT-60",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-60.png"
+    },
+    {
+      "case": "UAT-60",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-60.png"
+    },
+    {
+      "case": "UAT-61",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-61.png"
+    },
+    {
+      "case": "UAT-61",
+      "viewport": "mobile",
+      "status": "fail",
+      "reason": "TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: '送出', exact: true })\n",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-61.png"
+    },
+    {
+      "case": "UAT-62",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/desktop/UAT-62.png"
+    },
+    {
+      "case": "UAT-62",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T18-22-16-895Z/mobile/UAT-62.png"
+    }
+  ]
+}

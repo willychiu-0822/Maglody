@@ -1,5 +1,16 @@
 # Session B 接續紀錄
 
+## Session A 第 3 輪接續（2026-11-10）
+
+- 已以 scripts/git-local.sh 合併 codex/burn-b（Already up to date），正確 index 開始為乾淨；普通 git 的 index 仍是唯讀舊資料，不可 reset。
+- 沿用 R1–R6／新手 P0→P2，六份核可素材來源與 WebP 雜湊相符。新增 UAT-61/62，修長對話場景回應與各角色獨立等待；再以暫停動畫畫格重現並修 UAT-52 自動收麥。三項產品修復均獨立提交、定向雙尺寸紅→綠。
+- 完整驗收反覆有同時逾時；最後 run 2026-11-09T22-07-25-143Z：120/124，4 fail，ready=false。UAT-12/39 桌面 trace 同時約 165.5 秒空窗，UAT-03/62 手機截圖逾時。詳見 failures.md 的 OPEN 項，沒有放寬 timeout。
+- 修後 build pass，selftest 50/50、unit 15/15、logic 10/10。每次原結果與 traces 均保留；最後 124 截圖皆非空。4101/4102 已關閉。
+- 下一輪：先 merge B、看最新 OPEN 與機器狀態，檢查執行穩定後關閉已確認的執行缺失，再跑完整 npm run test:e2e。不能只補四案後設 ready=true。
+- 未 push、未改 remote、未動 deploy 或 tunnel；新公開網址在本目錄 DEPLOY-STATUS-HANDOFF.md 留交接。
+
+以下保留 B 第 1 輪歷史。
+
 2026-11-10 00:00 台北時間，第 1 輪結束。
 
 - 起始合併 A：f4c7153，當時兩分支相同，merge 回報 Already up to date。保留起始未提交修正為 b42f3d8。

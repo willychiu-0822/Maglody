@@ -1,0 +1,126 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-10 02:13",
+  "cases": 2,
+  "pass": 0,
+  "fail": 2,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "requirements": {
+    "R1": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-28",
+        "UAT-57"
+      ]
+    },
+    "R2": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-24",
+        "UAT-56"
+      ]
+    },
+    "R3": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-25",
+        "UAT-30",
+        "UAT-53",
+        "UAT-59"
+      ]
+    },
+    "R4": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "R5": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-13",
+        "UAT-14",
+        "UAT-15",
+        "UAT-16",
+        "UAT-49",
+        "UAT-60"
+      ]
+    },
+    "R6": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "novice_feedback": {
+    "P0_context_coaching": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-53"
+      ]
+    },
+    "P1_complete_demo": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-54"
+      ]
+    },
+    "P1_denied_mic_demo": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-55"
+      ]
+    },
+    "P1_one_primary": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-24",
+        "UAT-56"
+      ]
+    },
+    "P1_approved_characters": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "P2_watercolor": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-28",
+        "UAT-57"
+      ]
+    },
+    "P2_knowledge_sparks": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T18-13-06-580Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證",
+  "rows": [
+    {
+      "case": "UAT-62",
+      "viewport": "desktop",
+      "status": "fail",
+      "reason": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  locator('.typing')\nExpected: 0\nReceived: 1\nTimeout:  7000ms\n\nCall log:\n  - Expect \"toHaveCount\" locator('.typing') with timeout 7000ms\n  - waiting for locator('.typing')\n    18 × locator resolved to 1 element\n       - unexpected value \"1\"\n",
+      "evidence": "docs/uat/evidence/2026-11-09T18-13-06-580Z/desktop/UAT-62.png"
+    },
+    {
+      "case": "UAT-62",
+      "viewport": "mobile",
+      "status": "fail",
+      "reason": "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  locator('.typing')\nExpected: 0\nReceived: 1\nTimeout:  7000ms\n\nCall log:\n  - Expect \"toHaveCount\" locator('.typing') with timeout 7000ms\n  - waiting for locator('.typing')\n    18 × locator resolved to 1 element\n       - unexpected value \"1\"\n",
+      "evidence": "docs/uat/evidence/2026-11-09T18-13-06-580Z/mobile/UAT-62.png"
+    }
+  ]
+}

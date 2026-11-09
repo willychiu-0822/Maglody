@@ -224,3 +224,11 @@ A-N08：UAT-61 手機／桌面均已紅→綠，並與 UAT-59 延遲回覆隔離
 A-N09：UAT-62 兩尺寸紅→綠；以 request ID、角色、工作檯追蹤等待狀態，finally 逐筆清除。擴充實際並行提問（作曲家未回覆時，作詞人可先回），與 UAT-23/59/61 共 8/8 通過。另一次定向執行有兩案同時約 7 分鐘逾時，保留原 traces；未改 timeout，之後同樣 8 案完整重跑通過。A-UAT62-before-desktop.png、A-UAT62-after-desktop.png、A-UAT62-after-mobile.png 顯示前後差異。
 
 A-N10：完整重跑中 UAT-52 反覆失敗，進一步確認產品的到時停止依賴 requestAnimationFrame 與 AudioContext 時間。新增「錄音開始後停止畫格」的故障注入，兩尺寸穩定紅燈；修為獨立 setTimeout 加原音訊時間檢查，stop 統一清 timer，世代與 stream 檢查防止舊 timer 影響新錄音。原 32 秒關 track／至少 24 秒保存斷言不變。UAT-52/43/29 合計 6/6 通過；核可人物載入改為等待完整載入，未降低圖像驗收條件。軟體繪圖實驗無改善，已撤回，使用原 Chrome 設定。
+
+### 第 3 輪交付狀態（不是 UAT-ready）
+
+- 新手 P0→P2、核可五角色與房間素材沿用；本輪來源與壓縮雜湊六份再次核對。人工檢視桌面首頁、手機作詞人、A-UAT61/62-after-mobile 與 A-UAT52-after-mobile，文字可讀、核可造型一致。
+- 新修復：3edcc13（UAT-61 長對話）、d193412（UAT-62 角色等待）、dd2fd4a（UAT-52 畫格停止仍收麥）；98db208 修 UAT-29 非同步載入判定。每項有獨立 commit，紅→綠證據保留。
+- 最後完整 run `2026-11-09T22-07-25-143Z`：**120/124 pass，4 fail，ready=false**。失敗 UAT-03/mobile、12/desktop、39/desktop、62/mobile 均為互動／截圖逾時；trace 細節與下輪條件見 failures.md 的 OPEN 項。
+- build pass；修後 selftest 50/50、unit 15/15、logic 10/10；124 個非空案例截圖逐一驗證存在。沒有用多輪通過拼出全綠。
+- 自己啟動的 4101／4102 已關閉。無 push、remote 修改、部署或 tunnel；依禁止更動 deploy 目錄的規則，公開網址只在本目錄 DEPLOY-STATUS-HANDOFF.md 留運維交接。
