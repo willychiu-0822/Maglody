@@ -1,5 +1,5 @@
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
-import { playChord, ac, click } from '../lib/audio'
+import { scheduleAudio, playChord, ac, click } from '../lib/audio'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, cleanLine, countHits } from '../lib/rhyme'
 import { chordVoicing, diatonicChord, keyName } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
@@ -24,7 +24,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
     const beat = 60 / bpm
     for (let i = 0; i < 8; i++) click(c.currentTime + 0.05 + i * beat, i % 4 === 0)
     playChord(chordVoicing(diatonicChord(root, mode, 0)), beat * 4)
-    setTimeout(() => playChord(chordVoicing(diatonicChord(root, mode, mode === 'major' ? 3 : 5)), beat * 4), beat * 4000)
+    scheduleAudio(() => playChord(chordVoicing(diatonicChord(root, mode, mode === 'major' ? 3 : 5)), beat * 4), beat * 4000)
   }
 
   const fb: Feedback[] = []

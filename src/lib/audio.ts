@@ -3,6 +3,26 @@ import { midiToFreq } from './theory'
 
 let ctx: AudioContext | null = null
 
+const audioSources = new Set<AudioScheduledSourceNode>()
+const audioTimers = new Set<number>()
+
+export function trackAudioSource<T extends AudioScheduledSourceNode>(source: T, nodes: AudioNode[] = []): T {
+  audioSources.add(source)
+  source.addEventListener('ended', () => {
+    audioSources.delete(source)
+    source.disconnect()
+    nodes.forEach(node => node.disconnect())
+  }, { once: true })
+  return source
+}
+
+/** Delayed previews share the same cancellation boundary as active playback. */
+export function scheduleAudio(play: () => void, delay: number) {
+  const timer = window.setTimeout(() => { audioTimers.delete(timer); play() }, delay)
+  audioTimers.add(timer)
+  return timer
+}
+
 /** iOS Safari 16.4+：讓播放不受靜音開關影響；錄音時切成 play-and-record */
 export function setAudioSession(type: 'playback' | 'play-and-record') {
   const s = (navigator as unknown as { audioSession?: { type: string } }).audioSession
@@ -46,7 +66,7 @@ export function tone(midi: number, start: number, dur: number, o: ToneOpts = {})
   osc.connect(g).connect(o.dest ?? c.destination)
   osc.start(start)
   osc.stop(start + dur + r + 0.05)
-  return osc
+  return trackAudioSource(osc, [g])
 }
 
 export function playNote(midi: number, dur = 0.5, o: ToneOpts = {}) {
@@ -81,6 +101,7 @@ export function kick(t: number, dest: AudioNode, gain = 0.9) {
   o.connect(g).connect(dest)
   o.start(t)
   o.stop(t + 0.32)
+  return trackAudioSource(o, [g])
 }
 
 export function snare(t: number, dest: AudioNode, gain = 0.4) {
@@ -96,6 +117,7 @@ export function snare(t: number, dest: AudioNode, gain = 0.4) {
   s.connect(f).connect(g).connect(dest)
   s.start(t)
   s.stop(t + 0.2)
+  return trackAudioSource(s, [f, g])
 }
 
 export function hat(t: number, dest: AudioNode, gain = 0.12) {
@@ -111,6 +133,7 @@ export function hat(t: number, dest: AudioNode, gain = 0.12) {
   s.connect(f).connect(g).connect(dest)
   s.start(t)
   s.stop(t + 0.06)
+  return trackAudioSource(s, [f, g])
 }
 
 export function click(t: number, accent: boolean, dest?: AudioNode) {
@@ -123,6 +146,7 @@ export function click(t: number, accent: boolean, dest?: AudioNode) {
   o.connect(g).connect(dest ?? c.destination)
   o.start(t)
   o.stop(t + 0.06)
+  return trackAudioSource(o, [g])
 }
 
 // ---------- 混音匯流排 ----------
@@ -168,7 +192,9 @@ export function createMixGraph(): MixGraph {
     master,
     analyser,
     dispose: () => {
-      try { master.disconnect(); analyser.disconnect() } catch { /* ignore */ }
+      for (const node of [master, analyser, ...Object.values(buses).flatMap(bus => [bus.input, bus.hp, bus.pan, bus.out])]) {
+        try { node.disconnect() } catch { /* already disconnected */ }
+      }
     },
   }
 }
@@ -192,11 +218,18 @@ export interface LoopSpec {
   loop?: boolean
 }
 
-export interface Player { stop: () => void }
+export interface Player { stop: (notify?: boolean) => void }
 
 const active = new Set<Player>()
 /** 換章節時停止所有正在播放的循環 */
-export function stopAll() { [...active].forEach((p) => p.stop()) }
+export function stopAll() {
+  audioTimers.forEach(timer => clearTimeout(timer))
+  audioTimers.clear()
+  // Navigation must not signal natural completion and start the next song section.
+  ;[...active].forEach(player => player.stop(false))
+  ;[...audioSources].forEach(source => { try { source.stop() } catch { /* ended */ } })
+  audioSources.clear()
+}
 
 export function playLoop(spec: LoopSpec): Player {
   const c = ac()
@@ -207,30 +240,38 @@ export function playLoop(spec: LoopSpec): Player {
   const totalSteps = spec.bars.length * 8
   let stopped = false
   let startAt = c.currentTime + 0.1
-  const timers: number[] = []
-  const scheduled: AudioScheduledSourceNode[] = []
+  const timers = new Set<number>()
+  const scheduled = new Set<AudioScheduledSourceNode>()
+  const remember = (source: AudioScheduledSourceNode) => {
+    scheduled.add(source)
+    source.addEventListener('ended', () => scheduled.delete(source), { once: true })
+  }
+  const later = (fn: () => void, delay: number) => {
+    const timer = window.setTimeout(() => { timers.delete(timer); if (!stopped) fn() }, Math.max(0, delay))
+    timers.add(timer)
+  }
 
   const scheduleCycle = (t0: number) => {
     spec.bars.forEach((voicing, b) => {
       const bt = t0 + b * barDur
       if (spec.layers.keys) {
         for (let k = 0; k < 4; k++) {
-          voicing.slice(0, 3).forEach((m) => scheduled.push(tone(m, bt + k * eighth * 2, eighth * 1.6, { gain: 0.07, type: 'triangle', dest: dest('chords') })))
+          voicing.slice(0, 3).forEach((m) => remember(tone(m, bt + k * eighth * 2, eighth * 1.6, { gain: 0.07, type: 'triangle', dest: dest('chords') })))
         }
       }
       if (spec.layers.pad) {
-        voicing.slice(0, 3).forEach((m) => scheduled.push(tone(m + 12, bt, barDur * 0.95, { gain: 0.035, type: 'sawtooth', attack: 0.3, release: 0.4, dest: dest('chords') })))
+        voicing.slice(0, 3).forEach((m) => remember(tone(m + 12, bt, barDur * 0.95, { gain: 0.035, type: 'sawtooth', attack: 0.3, release: 0.4, dest: dest('chords') })))
       }
       if (spec.layers.bass && voicing.length) {
         const root = voicing[voicing.length - 1] - 12
-        ;[0, 3, 4, 6].forEach((s) => scheduled.push(tone(root, bt + s * eighth, eighth * 0.9, { gain: 0.3, type: 'sine', dest: dest('bass') })))
+        ;[0, 3, 4, 6].forEach((s) => remember(tone(root, bt + s * eighth, eighth * 0.9, { gain: 0.3, type: 'sine', dest: dest('bass') })))
       }
       if (spec.layers.drums) {
         for (let s = 0; s < 8; s++) {
           const st = bt + s * eighth
-          if (s === 0 || s === 5) kick(st, dest('drums'))
-          if (s === 2 || s === 6) snare(st, dest('drums'))
-          hat(st, dest('drums'))
+          if (s === 0 || s === 5) remember(kick(st, dest('drums')))
+          if (s === 2 || s === 6) remember(snare(st, dest('drums')))
+          remember(hat(st, dest('drums')))
         }
       }
     })
@@ -239,13 +280,13 @@ export function playLoop(spec: LoopSpec): Player {
         if (m == null || m < 0) return
         let len = 1
         while (spec.melody![i + len] === -1) len++
-        scheduled.push(tone(m, t0 + i * eighth, eighth * len * 0.92, { gain: 0.22, type: 'square', attack: 0.02, release: 0.1, dest: dest('melody') }))
+        remember(tone(m, t0 + i * eighth, eighth * len * 0.92, { gain: 0.22, type: 'square', attack: 0.02, release: 0.1, dest: dest('melody') }))
       })
     }
     if (spec.onStep) {
       for (let s = 0; s < totalSteps; s++) {
         const delay = (t0 + s * eighth - c.currentTime) * 1000
-        timers.push(window.setTimeout(() => !stopped && spec.onStep!(s), Math.max(0, delay)))
+        later(() => spec.onStep!(s), delay)
       }
     }
   }
@@ -255,21 +296,24 @@ export function playLoop(spec: LoopSpec): Player {
     scheduleCycle(startAt)
     const next = startAt + totalSteps * eighth
     if (spec.loop) {
-      timers.push(window.setTimeout(() => { startAt = next; cycle() }, (next - c.currentTime - 0.3) * 1000))
+      later(() => { startAt = next; cycle() }, (next - c.currentTime - 0.3) * 1000)
     } else {
-      timers.push(window.setTimeout(() => { stopped = true; spec.onStep?.(-1) }, (next - c.currentTime) * 1000))
+      later(() => { stopped = true; active.delete(player); spec.onStep?.(-1) }, (next - c.currentTime) * 1000)
     }
   }
-  cycle()
   const player: Player = {
-    stop: () => {
+    stop: (notify = true) => {
+      if (stopped) return
       active.delete(player)
       stopped = true
       timers.forEach((t) => clearTimeout(t))
+      timers.clear()
       scheduled.forEach((n) => { try { n.stop() } catch { /* already stopped */ } })
-      spec.onStep?.(-1)
+      scheduled.clear()
+      if (notify) spec.onStep?.(-1)
     },
   }
   active.add(player)
+  cycle()
   return player
 }

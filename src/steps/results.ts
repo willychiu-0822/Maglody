@@ -1,5 +1,5 @@
 // 每章「可聽見的成果」：完成一小步就能聽到自己的歌長出來，而不是只有勾勾。
-import { ac, click, playChord, playLoop, tone } from '../lib/audio'
+import { scheduleAudio, ac, click, playChord, playLoop, tone } from '../lib/audio'
 import type { Project } from '../lib/store'
 import { chordVoicing, diatonicChord, diatonicChords } from '../lib/theory'
 import { sectionAudio } from './Arrangement'
@@ -21,7 +21,7 @@ function playVibe(p: Project) {
   const mode = p.harmony.mode
   for (let i = 0; i < 8; i++) click(c.currentTime + 0.05 + i * beat, i % 4 === 0)
   playChord(chordVoicing(diatonicChord(p.harmony.root, mode, 0)), beat * 4)
-  setTimeout(() => playChord(chordVoicing(diatonicChord(p.harmony.root, mode, mode === 'major' ? 3 : 5)), beat * 4), beat * 4000)
+  scheduleAudio(() => playChord(chordVoicing(diatonicChord(p.harmony.root, mode, mode === 'major' ? 3 : 5)), beat * 4), beat * 4000)
 }
 
 function playProgressions(p: Project) {
@@ -54,7 +54,7 @@ function playSong(p: Project) {
   let t = 0
   secs.forEach((s) => {
     const { bars, melody } = sectionAudio(p, s.kind)
-    setTimeout(() => playLoop({ bpm: p.idea.bpm, bars, melody, layers: s.layers }), t)
+    scheduleAudio(() => playLoop({ bpm: p.idea.bpm, bars, melody, layers: s.layers }), t)
     t += bars.length * 4 * (60 / p.idea.bpm) * 1000
   })
 }

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
 import { PitchCanvas } from '../components/PitchCanvas'
-import { ac, playNote, tone } from '../lib/audio'
+import { ac, playNote, tone, trackAudioSource } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame } from '../lib/pitch'
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
@@ -85,6 +85,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
     const s = c.createBufferSource()
     s.buffer = b
     s.connect(c.destination)
+    trackAudioSource(s)
     s.start()
   }
 
