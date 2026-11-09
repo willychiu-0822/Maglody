@@ -70,6 +70,14 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
   void next
   const r = p.review
   const hasScore = [...p.harmony.verse, ...p.harmony.chorus].some(d=>d!=null) || [...p.melody.verse, ...p.melody.chorus].some(m=>m!=null && m>=0)
+  const missing = [
+    {label:'主歌和弦', step:'harmony', ok:!p.harmony.verse.includes(null)},
+    {label:'副歌和弦', step:'harmony', ok:!p.harmony.chorus.includes(null)},
+    {label:'主歌旋律', step:'melody', ok:p.melody.verse.some(n=>n!=null&&n>=0)},
+    {label:'副歌旋律', step:'melody', ok:p.melody.chorus.some(n=>n!=null&&n>=0)},
+    {label:'主歌歌詞', step:'lyrics', ok:p.lyrics.some(s=>s.kind==='verse'&&s.text.trim())},
+    {label:'副歌歌詞', step:'lyrics', ok:p.lyrics.some(s=>s.kind==='chorus'&&s.text.trim())},
+  ].filter(item=>!item.ok)
   const [playing, setPlaying] = useState<number>(-1)
   const playerRef = useRef<Player | null>(null)
   const stopSong = () => { playerRef.current?.stop(); setPlaying(-1) }
@@ -87,6 +95,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
       <Coach short={!hasScore ? '歌還是一張空白紙。先挑幾個和弦，或去旋律檯寫幾個音。' : playing >= 0 ? `正在播：${KIND_ZH[p.arrangement[playing]?.kind ?? (playing === 0 ? 'verse' : 'chorus')]}` : r.verdict.trim() ? '寫下來了。這是你的歌。' : '從頭聽一次。這次換你當老師：哪一句你最想再聽？'} />
 
       <SongSheet p={p} />
+      {missing.length > 0 && <p className="demo-missing small muted">草稿還缺：{missing.map(item=>item.label).join('、')}。{hasScore ? '可以先聽已有的部分。' : '先留下一點聲音。'}</p>}
 
       <textarea aria-label="我對這首歌的想法" className="one-line" rows={3} value={r.verdict} placeholder="這首歌好嗎？最喜歡哪裡？下一版想改什麼？" onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
 
@@ -95,7 +104,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
       ) : playing >= 0 ? (
         <DeskActions primary={{ label: '■ 停', onClick: stopSong }} />
       ) : (
-        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: playSong }} secondary={{ label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
+        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: playSong }} secondary={missing.length ? { label: `去補${missing[0].label} →`, onClick: () => goTo?.(missing[0].step) } : { label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
       )}
 
       <Toolbox>
