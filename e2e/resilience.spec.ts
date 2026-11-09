@@ -13,6 +13,23 @@ test('UAT-13 九檯隨時記靈感、保存留在原地', async ({ page }) => {
 })
 
 test('UAT-14 同一則文字語音哼唱照片保存', async ({ page }) => {
+  await page.addInitScript(()=>{
+    const observed={voiceDurations:[] as number[],humEnded:0}
+    Object.assign(window,{uatPlayback:observed})
+    const NativeAudio=window.Audio
+    window.Audio=class extends NativeAudio {
+      constructor(src?:string) {
+        super(src)
+        this.addEventListener('playing',()=>observed.voiceDurations.push(this.duration))
+      }
+    }
+    const create=AudioContext.prototype.createOscillator
+    AudioContext.prototype.createOscillator=function() {
+      const oscillator=create.call(this)
+      oscillator.addEventListener('ended',()=>observed.humEnded++)
+      return oscillator
+    }
+  })
   await setup(page)
   await page.getByRole('button',{name:'記一下靈感'}).click()
   await page.locator('.inspo-capture textarea').fill('雨中的一首歌')
@@ -36,6 +53,9 @@ test('UAT-14 同一則文字語音哼唱照片保存', async ({ page }) => {
   await card.locator('.inspo-card-head').click()
   await expect(card.locator('img')).toBeVisible()
   await card.getByRole('button',{name:'▶ 語音',exact:true}).click()
+  await expect.poll(()=>page.evaluate(()=>(window as unknown as {uatPlayback:{voiceDurations:number[]}}).uatPlayback.voiceDurations.some(duration=>duration>0))).toBe(true)
+  await card.getByRole('button',{name:/▶ 哼唱/}).click()
+  await expect.poll(()=>page.evaluate(()=>(window as unknown as {uatPlayback:{humEnded:number}}).uatPlayback.humEnded)).toBeGreaterThan(0)
 })
 
 test('UAT-15 錄音中直接保存不遺失最後附件', async ({ page }) => {
@@ -128,18 +148,28 @@ test('UAT-19 本子空白仍能新增', async ({ page }) => {
 test('UAT-20 破損資料可恢復、不白屏', async ({ page },info) => {
   await setup(page)
   const corruptions: [string,unknown][] = [
-    ['music-lab-project-v2',{unlocked:-2,lyrics:null,harmony:{verse:null},mix:{tracks:{melody:null}}}],
+    ['music-lab-project-v2',{unlocked:-2,idea:{hook:'可恢復的句子'},lyrics:null,harmony:{verse:null},mix:{tracks:{melody:null}}}],
     ['maglody-inspirations-v1',{not:'an array'}],
     ['maglody-versions-v1',{not:'an array'}],
+    ['maglody-inspirations-v1',[null,{id:'broken',text:'還能讀的靈感',tags:null,images:[null],used:null}]],
+    ['maglody-versions-v1',[null,{id:'v',name:'Demo v1',project:{lyrics:null}}]],
+    ['maglody-inspirations-v1',[{id:'voice-bad',text:'',voice:{assetId:'missing',transcript:{}},tags:[],images:[],used:[]}]],
+    ['music-lab-project-v2',null],
   ]
   for(const [key,value] of corruptions) {
     await page.evaluate(({key,value})=>{localStorage.clear();localStorage.setItem(key,JSON.stringify(value))},{key,value})
     await page.reload()
     await expect(page.locator('.desk-name')).toBeVisible()
+    if(key==='music-lab-project-v2' && value!==null) expect((await readProject(page)).idea.hook).toBe('可恢復的句子')
     await page.getByRole('button',{name:'打開工作室選單'}).click()
     await expect(page.getByRole('dialog',{name:'工作室',exact:true})).toBeVisible()
     await shot(page,info,key)
     await page.getByRole('button',{name:'關閉',exact:true}).click()
+    if(key==='maglody-inspirations-v1') {
+      await library(page)
+      await expect(page.locator('.inspo-list')).toBeVisible()
+      await page.getByRole('button',{name:'關閉',exact:true}).click()
+    }
   }
 })
 
@@ -229,7 +259,7 @@ test('UAT-25 R3夥伴在場與R4人物外觀', async ({ page },info) => {
   for(let i=0;i<5;i++) {
     await page.getByRole('tab').nth(i).click()
     await shot(page,info,`role-${i+1}`)
-    const portrait=page.locator('.chat-sheet img, .chat-sheet svg[role="img"], .chat-sheet canvas, .chat-sheet [data-character-portrait]')
+    const portrait=page.locator('.chat-sheet .role-dot[aria-selected="true"] img, .chat-sheet .role-dot[aria-selected="true"] svg, .chat-sheet [data-character-portrait]')
     await expect.soft(portrait.filter({visible:true}),'角色應有可見人物外觀，不是單字字形').not.toHaveCount(0,{timeout:500})
   }
 })

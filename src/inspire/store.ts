@@ -49,15 +49,33 @@ function load(): Inspiration[] {
     const list: Inspiration[] = Array.isArray(parsed) ? parsed.flatMap(value => {
       const x = record(value)
       if (typeof x.id !== 'string' || typeof x.text !== 'string') return []
-      const humNotes = record(x.hum).notes
-      const validAsset = (v: unknown) => typeof record(v).assetId === 'string'
+      const finite = (value: unknown, fallback: number, min = 0, max = 3600) =>
+        typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max ? value : fallback
+      const validAsset = (value: unknown) => typeof record(value).assetId === 'string' && !!record(value).assetId
+      const voice = record(x.voice)
+      const hum = record(x.hum)
+      const notes = Array.isArray(hum.notes) ? hum.notes.flatMap(value => {
+        const n = record(value)
+        const midi = finite(n.midi, -1, 0, 127)
+        const start = finite(n.start, -1, 0, 60)
+        const dur = finite(n.dur, -1, 0.001, 60)
+        return midi >= 0 && start >= 0 && dur > 0 ? [{ midi, start, dur }] : []
+      }).slice(0, 200) : null
       return [{
-        id: x.id, text: x.text, createdAt: typeof x.createdAt === 'number' ? x.createdAt : Date.now(),
+        id: x.id, text: x.text, createdAt: finite(x.createdAt, Date.now(), 0, 8640000000000000),
         note: typeof x.note === 'string' ? x.note : undefined,
-        tags: Array.isArray(x.tags) ? x.tags.filter((t): t is InspoTag => typeof t === 'string' && t in TAG_ZH) : [],
-        images: Array.isArray(x.images) ? x.images.filter(validAsset) as Inspiration['images'] : [],
-        voice: validAsset(x.voice) ? x.voice as Inspiration['voice'] : undefined,
-        hum: Array.isArray(humNotes) && humNotes.every(n => typeof record(n).midi === 'number' && typeof record(n).start === 'number' && typeof record(n).dur === 'number') ? x.hum as Inspiration['hum'] : undefined,
+        tags: Array.isArray(x.tags) ? x.tags.filter((t): t is InspoTag => typeof t === 'string' && Object.hasOwn(TAG_ZH, t)) : [],
+        images: Array.isArray(x.images) ? x.images.filter(validAsset).map(value => {
+          const image = record(value)
+          return { assetId: image.assetId as string, w: finite(image.w, 1, 1, 100000), h: finite(image.h, 1, 1, 100000) }
+        }) : [],
+        voice: validAsset(voice) ? { assetId: voice.assetId as string, durationSec: finite(voice.durationSec, 0), transcript: typeof voice.transcript === 'string' ? voice.transcript : undefined } : undefined,
+        hum: notes ? {
+          assetId: validAsset(hum) ? hum.assetId as string : undefined, notes,
+          durationSec: finite(hum.durationSec, 0, 0, 60),
+          keyRoot: Math.floor(finite(hum.keyRoot, 0, 0, 11)), keyMode: hum.keyMode === 'minor' ? 'minor' : 'major',
+          rangeLow: finite(hum.rangeLow, 60, 0, 127), rangeHigh: finite(hum.rangeHigh, 72, 0, 127),
+        } : undefined,
         fromStep: typeof x.fromStep === 'string' ? x.fromStep : 'idea',
         used: Array.isArray(x.used) ? x.used.filter(v => typeof record(v).step === 'string' && typeof record(v).how === 'string') as Inspiration['used'] : [],
       }]
