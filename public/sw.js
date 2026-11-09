@@ -1,25 +1,42 @@
-// Maglody service worker：App 外殼離線可用（網路優先，失敗時讀快取）
-const CACHE = 'maglody-v1'
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './manifest.webmanifest'])))
-  self.skipWaiting()
+// The build script injects hashed asset URLs and a build-specific cache name.
+const CACHE = 'maglody-shell-dev'
+const BUILD_ASSETS = []
+const SHELL = ['./', './index.html', './manifest.webmanifest', ...BUILD_ASSETS]
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE)
+    await cache.addAll(SHELL)
+    await self.skipWaiting()
+  })())
 })
-self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))))
-  self.clients.claim()
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const names = await caches.keys()
+    await Promise.all(names.filter(name => name !== CACHE && (name.startsWith('maglody-shell-') || name === 'maglody-v1')).map(name => caches.delete(name)))
+    await self.clients.claim()
+  })())
 })
-self.addEventListener('fetch', (e) => {
-  const req = e.request
-  const url = new URL(req.url)
-  // 只處理同源 GET；大師 Agent 的 API 呼叫不快取
-  if (req.method !== 'GET' || url.origin !== location.origin || url.pathname.includes('/api/')) return
-  e.respondWith(
-    fetch(req)
-      .then((res) => {
-        const copy = res.clone()
-        caches.open(CACHE).then((c) => c.put(req, copy))
-        return res
-      })
-      .catch(() => caches.match(req).then((r) => r || caches.match('./index.html')))
-  )
+self.addEventListener('fetch', event => {
+  const request = event.request
+  const url = new URL(request.url)
+  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.includes('/api/')) return
+  event.respondWith((async () => {
+    try {
+      const response = await fetch(request)
+      if (response.ok) {
+        const copy = response.clone()
+        event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, copy)).catch(() => {}))
+      }
+      return response
+    } catch {
+      const cache = await caches.open(CACHE)
+      const buildAsset = BUILD_ASSETS.some(asset => new URL(asset, self.registration.scope).href === url.href)
+      // Immutable same-origin build files are identical for module and precache requests.
+      const cached = await cache.match(request, { ignoreVary: buildAsset })
+      if (cached) return cached
+      // An unavailable script/image must never receive HTML in its place.
+      if (request.mode === 'navigate') return (await cache.match('./index.html')) || Response.error()
+      return Response.error()
+    }
+  })())
 })

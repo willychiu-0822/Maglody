@@ -36,3 +36,23 @@ test('UAT-26 離開工作檯立即停止鼓與延遲預聽', async ({page}) => {
   await page.waitForTimeout(3500)
   expect(await pending(),'換頁之後延遲的第二個和弦不能復活').toBe(0)
 })
+
+test('UAT-27 首次進入後即可離線重開且保留同源其他快取', async ({page,context}) => {
+  await page.goto('/manifest.webmanifest')
+  await page.evaluate(async()=>{
+    const cache=await caches.open('unrelated-app-uat')
+    await cache.put('/unrelated-uat',new Response('keep me'))
+  })
+  await setup(page)
+  await page.evaluate(async()=>{
+    await navigator.serviceWorker.ready
+    if(!navigator.serviceWorker.controller) await new Promise<void>(resolve=>navigator.serviceWorker.addEventListener('controllerchange',()=>resolve(),{once:true}))
+  })
+  await context.setOffline(true)
+  try {
+    await page.reload()
+    await expect(page.locator('.desk-name')).toBeVisible()
+    await expect(page.locator('main .primary-action')).toHaveText(/哼一段/)
+    expect(await page.evaluate(async()=>!!await (await caches.open('unrelated-app-uat')).match('/unrelated-uat')),'不能刪除同源其他應用快取').toBe(true)
+  } finally { await context.setOffline(false) }
+})

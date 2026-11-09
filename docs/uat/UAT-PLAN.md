@@ -46,6 +46,8 @@
 |---|---|---|---|---|
 | UAT-26 | 完成歌曲；觀察真 Web Audio 排程（不替換聲音） | 混音播放後離檯；選情緒預聽後立即離檯並等待第二和弦 | 鼓、音符及延遲播放全部停止，不在別檯突然出聲 | 新手探索、播放控制 |
 
+| UAT-27 | 全新瀏覽器、先放同源其他應用 cache | 首次進入、等待 SW ready，立即離線重載 | 第一次就可離線開 App；同源其他應用 cache 保留 | 離線、資料保護 |
+
 ## 實作順序與追蹤
 
 - [x] 保留前輪修改；合併 A（同一基準，無新 commit）。原 worktree Git metadata 唯讀，scripts/git-local.sh 使用目前目錄 .uat-git 的 HEAD/index，共用既有 objects/refs；不改 remote。
