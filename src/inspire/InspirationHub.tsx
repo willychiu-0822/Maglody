@@ -70,6 +70,9 @@ interface Props {
  */
 export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent, open, setOpen, onRecordingChange }: Props) {
   const [draft, setDraft] = useState<Draft>(emptyDraft)
+  const draftRef = useRef(draft)
+  draftRef.current = draft
+  const savingRef = useRef(false)
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
@@ -91,31 +94,42 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const flash = (t: string) => { setToast(t); window.setTimeout(() => setToast(null), 2600) }
   const toggleTag = (t: InspoTag) => setDraft((d) => ({ ...d, tags: d.tags.includes(t) ? d.tags.filter((x) => x !== t) : [...d.tags, t] }))
 
-  const toggleRec = async (kind: 'voice' | 'hum') => {
+  const toggleRec = async (kind: 'voice' | 'hum'): Promise<boolean> => {
     if (rec.recording === kind) {
       setBusy(true)
-      const r = await rec.stop()
-      if (r) {
+      try {
+        const r = await rec.stop()
+        if (!r) return false
         const assetId = uid()
         await putBlob(assetId, r.blob)
+        let next: Draft
+        const current = draftRef.current
         if (kind === 'voice') {
-          setDraft((d) => ({ ...d, voice: { assetId, durationSec: r.durationSec, transcript: r.transcript }, text: d.text || r.transcript }))
+          next = { ...current, voice: { assetId, durationSec: r.durationSec, transcript: r.transcript }, text: current.text || r.transcript }
         } else {
+          let hum: NonNullable<Draft['hum']>
           try {
             const buf = await ac().decodeAudioData(await r.blob.arrayBuffer())
             const a = analyzeBuffer(toMono(buf), buf.sampleRate)
             const k = a.keys[0]
-            setDraft((d) => ({ ...d, tags: d.tags.includes('melody') ? d.tags : [...d.tags, 'melody'], hum: { assetId, notes: a.notes.slice(0, 200), durationSec: a.duration, keyRoot: k.root, keyMode: k.mode, rangeLow: a.rangeLow, rangeHigh: a.rangeHigh } }))
+            hum = { assetId, notes: a.notes.slice(0, 200), durationSec: a.duration, keyRoot: k.root, keyMode: k.mode, rangeLow: a.rangeLow, rangeHigh: a.rangeHigh }
           } catch {
-            setDraft((d) => ({ ...d, hum: { assetId, notes: [], durationSec: r.durationSec, keyRoot: 0, keyMode: 'major', rangeLow: 60, rangeHigh: 60 } }))
+            hum = { assetId, notes: [], durationSec: r.durationSec, keyRoot: 0, keyMode: 'major', rangeLow: 60, rangeHigh: 60 }
           }
+          // Read again after audio decoding so edits made while waiting survive.
+          const latest = draftRef.current
+          next = { ...latest, hum, tags: latest.tags.includes('melody') ? latest.tags : [...latest.tags, 'melody'] }
         }
+        draftRef.current = next
+        setDraft(next)
+        return true
+      } finally {
+        setBusy(false)
       }
-      setBusy(false)
-    } else {
-      if (rec.recording) await toggleRec(rec.recording)
-      await rec.start(kind)
     }
+    if (rec.recording && !await toggleRec(rec.recording)) return false
+    await rec.start(kind)
+    return true
   }
 
   const addImages = async (files: FileList | null) => {
@@ -132,13 +146,21 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
 
   const hasContent = !!(draft.text.trim() || draft.voice || draft.hum || draft.images.length)
   const save = async () => {
-    if (rec.recording) await toggleRec(rec.recording)
-    if (!hasContent) return
-    const item = api.add({ ...draft, text: draft.text.trim(), fromStep: step })
-    setDraft(emptyDraft())
-    setOpen(null)
-    flash(`收好了。你還在「${stepTitle}」。`)
-    onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
+    if (savingRef.current || busy) return
+    savingRef.current = true
+    try {
+      if (rec.recording && !await toggleRec(rec.recording)) return
+      const latest = draftRef.current
+      if (!(latest.text.trim() || latest.voice || latest.hum || latest.images.length)) return
+      const item = api.add({ ...latest, text: latest.text.trim(), fromStep: step })
+      draftRef.current = emptyDraft()
+      setDraft(draftRef.current)
+      setOpen(null)
+      flash(`收好了。你還在「${stepTitle}」。`)
+      onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
+    } finally {
+      savingRef.current = false
+    }
   }
 
   const pull = (x: Inspiration, opt: { label: string; how: string; apply: (p: Project, u: Update) => string | void }) => {
@@ -205,7 +227,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                     ))}
                   </div>
                 </details>
-                <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: !hasContent && !rec.recording }} />
+                <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: busy || (!hasContent && !rec.recording) }} />
               </div>
             )}
 
