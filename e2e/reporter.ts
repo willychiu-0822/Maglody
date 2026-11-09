@@ -31,7 +31,7 @@ export default class UatReporter implements Reporter {
     const allEvidence = rows.every(row => row.evidence && fs.existsSync(row.evidence))
     const visualOpen = fs.existsSync('docs/uat/failures.md') && fs.readFileSync('docs/uat/failures.md','utf8').includes('狀態：OPEN')
     const passed = (ids: string[]) => ids.every(id=>['desktop','mobile'].every(viewport=>rows.some(r=>r.case===id&&r.viewport===viewport&&r.status==='pass')))
-    const checks = {R1:['UAT-28','UAT-57'],R2:['UAT-24','UAT-56'],R3:['UAT-25','UAT-30','UAT-53'],R4:['UAT-25','UAT-29','UAT-57'],R5:['UAT-13','UAT-14','UAT-15','UAT-16','UAT-49'],R6:['UAT-33','UAT-58']}
+    const checks = {R1:['UAT-28','UAT-57'],R2:['UAT-24','UAT-56'],R3:['UAT-25','UAT-30','UAT-53','UAT-59'],R4:['UAT-25','UAT-29','UAT-57'],R5:['UAT-13','UAT-14','UAT-15','UAT-16','UAT-49','UAT-60'],R6:['UAT-33','UAT-58']}
     const novice = {P0_context_coaching:['UAT-53'],P1_complete_demo:['UAT-54'],P1_denied_mic_demo:['UAT-55'],P1_one_primary:['UAT-24','UAT-56'],P1_approved_characters:['UAT-25','UAT-29','UAT-57'],P2_watercolor:['UAT-28','UAT-57'],P2_knowledge_sparks:['UAT-33','UAT-58']}
     const outcomes = (mapping:Record<string,string[]>)=>Object.fromEntries(Object.entries(mapping).map(([key,ids])=>[key,{status:passed(ids)?'pass':'not_verified',cases:ids}]))
     const status = { project: 'Maglody', updated, cases: rows.length, pass, fail, blocked,

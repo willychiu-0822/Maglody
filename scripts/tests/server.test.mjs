@@ -40,3 +40,9 @@ test('reply sanitizer drops invalid actions and caps fields', () => {
   assert.equal(reply.suggestions[1].action, undefined)
   assert.deepEqual(reply.suggestions[2].action.degs, [0, 4, 5, 3])
 })
+test('backend mock delegates to the contextual local coach without setup text', async () => {
+  const res = await request(valid, { name: 'mock', complete() { assert.fail('mock provider must not emit generic configuration text') } })
+  assert.equal(res.status, 200)
+  assert.deepEqual(res.body, { offline: true })
+  assert.ok(!/LLM_PROVIDER|後端 mock/.test(JSON.stringify(res.body)))
+})

@@ -146,3 +146,63 @@ test('UAT-58 R6 火花先一行、額外觀察一次一則',async({page})=>{
   await more.click()
   await expect(page.locator('.fb-list .fb')).toHaveCount(before+1)
 })
+
+test('UAT-59 新手提問後立刻換檯，作詞人不沿用作曲家旁白',async({page})=>{
+  await setup(page,finished)
+  await page.route('**/api/master',async route=>{
+    await new Promise(resolve=>setTimeout(resolve,800))
+    await route.fulfill({json:{offline:true}})
+  })
+  await page.locator('.presence').click()
+  await page.locator('.master-input input').fill('下一步')
+  await page.getByRole('button',{name:'送出',exact:true}).click()
+  await page.getByRole('button',{name:'關閉',exact:true}).click()
+  await go(page,'歌詞')
+  await expect(page.locator('.presence-name strong')).toHaveText('作詞人')
+  await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
+  await page.waitForTimeout(1200)
+  await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
+  await page.locator('.presence').click()
+  await expect(page.locator('.msg-master').last()).toContainText('鑰匙留在門口')
+  await expect(page.locator('.msg-master .msg-avatar').last()).toHaveText('曲')
+})
+
+test('UAT-60 新手先救文字再回草稿救錄音，兩份成果都保留',async({page},info)=>{
+  await page.addInitScript(()=>{
+    const state={fail:true}
+    Object.assign(window,{noviceDisk:state})
+    const put=IDBObjectStore.prototype.put
+    IDBObjectStore.prototype.put=function(...args:Parameters<IDBObjectStore['put']>){
+      if(this.name==='blobs'&&state.fail)throw new DOMException('full','QuotaExceededError')
+      return put.apply(this,args)
+    }
+  })
+  await setup(page)
+  await page.getByRole('button',{name:'記一下靈感'}).click()
+  await page.locator('.inspo-capture textarea').fill('窗外雨聲不要忘記')
+  await page.locator('.inspo-big').filter({hasText:'說'}).click()
+  await expect(page.locator('.inspo-big.rec')).toBeVisible()
+  await page.waitForTimeout(700)
+  await page.locator('.inspo-big.rec').click()
+  await expect(page.locator('.inspo-capture')).toContainText('儲存失敗')
+  await page.getByRole('button',{name:'先另存文字，錄音留著',exact:true}).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await page.evaluate(()=>{(window as unknown as {noviceDisk:{fail:boolean}}).noviceDisk.fail=false})
+  await page.getByRole('button',{name:'記一下靈感'}).click()
+  await expect(page.locator('.inspo-capture textarea')).toHaveValue('窗外雨聲不要忘記')
+  await page.getByRole('button',{name:'夾進本子',exact:true}).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('maglody-inspirations-v1')!).filter((x:{text:string})=>x.text==='窗外雨聲不要忘記'))
+  expect(saved).toHaveLength(2)
+  expect(saved.filter((x:{voice?:unknown})=>!!x.voice)).toHaveLength(1)
+  const id=saved.find((x:{voice?:unknown})=>!!x.voice).voice.assetId
+  expect(await page.evaluate(id=>new Promise<number>((resolve,reject)=>{
+    const open=indexedDB.open('maglody-media',1)
+    open.onerror=()=>reject(open.error)
+    open.onsuccess=()=>{const db=open.result,request=db.transaction('blobs').objectStore('blobs').get(id);request.onsuccess=()=>{resolve(request.result?.size||0);db.close()};request.onerror=()=>reject(request.error)}
+  }),id)).toBeGreaterThan(0)
+  await page.getByRole('button',{name:'記一下靈感'}).click()
+  await page.getByRole('button',{name:/翻翻本子/}).click()
+  await expect(page.locator('.inspo-card').filter({hasText:'窗外雨聲不要忘記'})).toHaveCount(2)
+  await shot(page,info,'recovered')
+})
