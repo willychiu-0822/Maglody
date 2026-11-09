@@ -1,3 +1,5 @@
+import { fetchJson, HttpError } from '../../src/lib/request.ts'
+import { isObject } from '../../src/agent/reply.ts'
 // OpenAI provider：支援 Chat Completions（預設）與 Responses API。
 // env：OPENAI_API_KEY（必填）、LLM_MODEL、OPENAI_API_STYLE=chat|responses、OPENAI_BASE_URL（可接相容端點）
 import { env, ProviderError, type LlmProvider, type LlmRequest } from './types.ts'
@@ -6,17 +8,16 @@ export function createOpenAI(): LlmProvider {
   const key = env('OPENAI_API_KEY')
   const model = env('LLM_MODEL', 'gpt-4o-mini')
   const base = (process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1').replace(/\/$/, '')
-  const style = process.env.OPENAI_API_STYLE === 'responses' ? 'responses' : 'chat'
+  const style = process.env.OPENAI_API_STYLE ?? 'chat'
+  if (style !== 'responses' && style !== 'chat') throw new ProviderError('Invalid OPENAI_API_STYLE', 500)
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }
 
-  async function post(path: string, body: unknown) {
-    const res = await fetch(`${base}${path}`, { method: 'POST', headers, body: JSON.stringify(body) })
-    if (!res.ok) {
-      const body = (await res.text()).slice(0, 300)
-      const hint = res.status === 401 ? 'OPENAI_API_KEY 無效或已撤銷' : res.status === 403 ? '這把金鑰沒有權限（檢查專案／組織設定）' : res.status === 404 ? `找不到模型「${model}」，請檢查 LLM_MODEL` : res.status === 429 ? '額度用完或請求太頻繁（檢查 Billing／Limits）' : '服務暫時錯誤'
-      throw new ProviderError(`OpenAI ${res.status}：${hint}。原始訊息：${body}`, res.status === 429 ? 429 : 502)
+  async function post(path: string, body: unknown, signal?: AbortSignal) {
+    try {
+      return await fetchJson(`${base}${path}`, { method: 'POST', headers, body: JSON.stringify(body), signal })
+    } catch (error) {
+      throw new ProviderError('OpenAI request failed', error instanceof HttpError && error.status === 429 ? 429 : 502)
     }
-    return res.json() as Promise<any> // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 
   return {
@@ -28,18 +29,25 @@ export function createOpenAI(): LlmProvider {
           model,
           messages: [{ role: 'system', content: req.system }, ...req.messages],
           response_format: { type: 'json_object' },
-        })
-        return data.choices?.[0]?.message?.content ?? ''
+        }, req.signal)
+        const choice = isObject(data) && Array.isArray(data.choices) ? data.choices[0] : undefined
+        const message = isObject(choice) ? choice.message : undefined
+        if (!isObject(message) || typeof message.content !== 'string' || !message.content.trim()) throw new ProviderError('Empty OpenAI response')
+        return message.content
       }
       const data = await post('/responses', {
         model,
         instructions: req.system,
         input: req.messages.map((m) => ({ role: m.role, content: m.content })),
         text: { format: { type: 'json_object' } },
-      })
+      }, req.signal)
       // Responses API：output[] 內的 message → content[] 內 type=output_text
       const parts: string[] = []
-      for (const item of data.output ?? []) for (const c of item.content ?? []) if (c.type === 'output_text') parts.push(c.text)
+      if (isObject(data) && Array.isArray(data.output)) for (const item of data.output) {
+        if (!isObject(item) || !Array.isArray(item.content)) continue
+        for (const c of item.content) if (isObject(c) && c.type === 'output_text' && typeof c.text === 'string') parts.push(c.text)
+      }
+      if (!parts.join('').trim()) throw new ProviderError('Empty OpenAI response')
       return parts.join('')
     },
   }

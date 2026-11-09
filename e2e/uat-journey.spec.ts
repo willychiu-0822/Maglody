@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect, type Page } from './helpers'
 import { readFile } from 'node:fs/promises'
 const visit = async (page: Page, name: string) => { await page.getByRole('button',{name:'打開工作室選單'}).click(); await page.locator('.menu-desk').filter({has:page.locator('span',{hasText:new RegExp(`^${name}$`)})}).click() }
 const primary=(page:Page)=>page.locator('main .primary-action')
@@ -7,7 +7,7 @@ const fixture = async(page:Page)=>{
   await page.evaluate(()=>{const key='music-lab-project-v2';const p=JSON.parse(localStorage.getItem(key)!);p.harmony.verse=[0,3,4,0];p.harmony.chorus=[3,4,0,4];p.melody.verse[0]=60;p.melody.chorus[0]=67;p.mix.tracks.melody.vol=1.2;localStorage.setItem(key,JSON.stringify(p))});await page.reload()
 }
 test.beforeEach(async({page})=>{await page.goto('/')})
-test('UAT-13 從示範到自己的第一版 Demo、下載 MIDI 並重整',async({page},info)=>{
+test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async({page},info)=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message))
   await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click()
   await expect(primary(page)).toContainText('構想');await primary(page).click()
@@ -44,9 +44,9 @@ test('UAT-13 從示範到自己的第一版 Demo、下載 MIDI 並重整',async(
   await page.reload()
   await expect(page.getByRole('textbox',{name:'我對這首歌的想法'})).toHaveValue('喜歡副歌，下一版讓主歌短一些。')
   expect(errors).toEqual([])
-  await shot(page,'UAT-13',info.project.name)
+  await shot(page,'UAT-40',info.project.name)
 })
-test('UAT-14 存 Demo 版本可還原且名稱不空白',async({page},info)=>{
+test('UAT-41 存 Demo 版本可還原且名稱不空白',async({page},info)=>{
   await visit(page,'構想');await page.locator('.mood').first().click();await page.getByRole('textbox',{name:'這首歌的一句話'}).fill('第一版的雨')
   const dialogs:string[]=[];page.on('dialog',d=>{dialogs.push(d.message());void d.accept(d.type()==='prompt'?'想保留的版本':undefined)})
   await page.getByRole('button',{name:'打開工作室選單'}).click();await page.locator('.menu-more > summary').click()
@@ -59,9 +59,9 @@ test('UAT-14 存 Demo 版本可還原且名稱不空白',async({page},info)=>{
   await page.getByRole('button',{name:'關閉',exact:true}).click()
   await expect(page.getByRole('textbox',{name:'這首歌的一句話'})).toHaveValue('第一版的雨')
   expect(dialogs.some(t=>t==='存好了：Demo v1')).toBeTruthy()
-  await shot(page,'UAT-14',info.project.name)
+  await shot(page,'UAT-41',info.project.name)
 })
-test('UAT-15 照片拼貼後刪原靈感仍保留媒體',async({page},info)=>{
+test('UAT-42 照片拼貼後刪原靈感仍保留媒體',async({page},info)=>{
   await page.getByRole('button',{name:'記一下靈感',exact:true}).click()
   await page.getByRole('textbox',{name:'靈感文字'}).fill('照片原稿')
   await page.locator('.inspo-capture input[type=file]').setInputFiles('public/icons/icon-192.png')
@@ -85,9 +85,9 @@ test('UAT-15 照片拼貼後刪原靈感仍保留媒體',async({page},info)=>{
   await collage.locator('.inspo-card-head').click()
   const thumb=collage.locator('img.inspo-thumb');await expect(thumb).toBeVisible()
   await expect.poll(()=>thumb.evaluate((e:HTMLImageElement)=>e.naturalWidth>0)).toBeTruthy()
-  await shot(page,'UAT-15',info.project.name)
+  await shot(page,'UAT-42',info.project.name)
 })
-test('UAT-16 權限晚回來時不會偷偷開麥',async({page},info)=>{
+test('UAT-43 權限晚回來時不會偷偷開麥',async({page},info)=>{
   await page.evaluate(()=>{
     const w=window as unknown as {release:()=>void;stopped:number}
     w.stopped=0
@@ -99,9 +99,9 @@ test('UAT-16 權限晚回來時不會偷偷開麥',async({page},info)=>{
   await page.evaluate(()=>(window as unknown as {release:()=>void}).release())
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {stopped:number}).stopped)).toBe(1)
   await expect(page.locator('.desk-name')).toContainText('歌詞')
-  await shot(page,'UAT-16',info.project.name)
+  await shot(page,'UAT-43',info.project.name)
 })
-test('UAT-17 長詞句與多段落仍可操作',async({page},info)=>{
+test('UAT-44 長詞句與多段落仍可操作',async({page},info)=>{
   await visit(page,'歌詞');await page.locator('.toolbox > summary').click()
   for(let i=0;i<12;i++)await page.getByRole('button',{name:'＋ 橋段',exact:true}).click()
   await page.locator('.lyric-input').fill('averylongunbrokenword'.repeat(15))
@@ -109,16 +109,16 @@ test('UAT-17 長詞句與多段落仍可操作',async({page},info)=>{
   await visit(page,'編曲');await page.locator('.toolbox > summary').click()
   for(let i=0;i<15;i++)await page.getByRole('button',{name:'＋ 主歌',exact:true}).click()
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy()
-  await shot(page,'UAT-17',info.project.name)
+  await shot(page,'UAT-44',info.project.name)
 })
-test('UAT-18 試聽的是正在編輯的歌詞段落',async({page},info)=>{
+test('UAT-45 試聽的是正在編輯的歌詞段落',async({page},info)=>{
   await page.evaluate(()=>{const w=window as unknown as {spoken:string};window.speechSynthesis.speak=(utterance)=>{w.spoken=utterance.text}})
   await visit(page,'歌詞');await page.locator('.lyric-input').fill('雨落在門前\n燈亮在窗邊')
   await primary(page).click()
   expect(await page.evaluate(()=>(window as unknown as {spoken:string}).spoken)).toBe('雨落在門前，燈亮在窗邊')
-  await shot(page,'UAT-18',info.project.name)
+  await shot(page,'UAT-45',info.project.name)
 })
-test('UAT-19 情緒第一次和重播使用相同調式',async({page},info)=>{
+test('UAT-46 情緒第一次和重播使用相同調式',async({page},info)=>{
   await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click();await expect(primary(page)).toContainText('構想');await primary(page).click()
   await page.evaluate(()=>{
     const w=window as unknown as {frequencies:number[]};w.frequencies=[]
@@ -131,9 +131,9 @@ test('UAT-19 情緒第一次和重播使用相同調式',async({page},info)=>{
   await page.getByRole('button',{name:'▶ 再聽一次這個感覺',exact:true}).click()
   const replay=await page.evaluate(()=>(window as unknown as {frequencies:number[]}).frequencies.slice(8,11))
   expect(first.length).toBe(3);expect(replay).toEqual(first)
-  await shot(page,'UAT-19',info.project.name)
+  await shot(page,'UAT-46',info.project.name)
 })
-test('UAT-20 靜音不可誤判混好，停止 A/B 後回到自己的混音',async({page},info)=>{
+test('UAT-47 靜音不可誤判混好，停止 A/B 後回到自己的混音',async({page},info)=>{
   await fixture(page);await visit(page,'混音觀念');await primary(page).click()
   await page.getByRole('button',{name:'聽聽沒混之前',exact:true}).click()
   await expect(page.getByRole('button',{name:'回到我的混音',exact:true})).toBeVisible()
@@ -143,16 +143,16 @@ test('UAT-20 靜音不可誤判混好，停止 A/B 後回到自己的混音',asy
   await page.locator('.strip').filter({hasText:'主旋律（代替人聲）'}).getByRole('button',{name:'靜音',exact:true}).click()
   await page.locator('.toolbox > summary').click()
   await expect(primary(page)).toHaveText('▶ 播放副歌')
-  await shot(page,'UAT-20',info.project.name)
+  await shot(page,'UAT-47',info.project.name)
 })
-test('UAT-21 夜晚紙面與減少動畫仍可辨認',async({page},info)=>{
+test('UAT-48 夜晚紙面與減少動畫仍可辨認',async({page},info)=>{
   await page.emulateMedia({colorScheme:'dark',reducedMotion:'reduce'})
   await expect(page.locator('.studio-character')).toBeVisible()
   expect(await page.locator('.studio-character').evaluate(e=>getComputedStyle(e).animationName)).toBe('none')
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy()
-  await shot(page,'UAT-21',info.project.name)
+  await shot(page,'UAT-48',info.project.name)
 })
-test('UAT-22 媒體寫入失敗後先救回錄音，再換成哼唱',async({page,context},info)=>{
+test('UAT-49 媒體寫入失敗後先救回錄音，再換成哼唱',async({page,context},info)=>{
   await context.grantPermissions(['microphone'])
   await page.evaluate(()=>{
     const w=window as unknown as {failMedia:boolean;streams:MediaStream[]};w.failMedia=true;w.streams=[]
@@ -174,9 +174,9 @@ test('UAT-22 媒體寫入失敗後先救回錄音，再換成哼唱',async({page
   expect(await page.evaluate(()=>(window as unknown as {streams:MediaStream[]}).streams.every(s=>s.getTracks().every(t=>t.readyState==='ended')))).toBeTruthy()
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('maglody-inspirations-v1')!)[0])
   expect(saved.voice.assetId).toBeTruthy();expect(saved.hum.assetId).toBeTruthy();expect(saved.voice.assetId).not.toBe(saved.hum.assetId)
-  await shot(page,'UAT-22',info.project.name)
+  await shot(page,'UAT-49',info.project.name)
 })
-test('UAT-23 沒辨識到音符也能播放原始哼唱，換檯會停止',async({page,context},info)=>{
+test('UAT-50 沒辨識到音符也能播放原始哼唱，換檯會停止',async({page,context},info)=>{
   await context.grantPermissions(['microphone'])
   await page.evaluate(()=>{
     AudioContext.prototype.decodeAudioData=()=>Promise.reject(new Error('unsupported decoding'))
@@ -205,9 +205,9 @@ test('UAT-23 沒辨識到音符也能播放原始哼唱，換檯會停止',async
   await visit(page,'歌詞')
   expect(await page.evaluate(()=>(window as unknown as {startedSources:number}).startedSources)).toBe(1)
   expect(await page.evaluate(()=>(window as unknown as {stoppedSources:number}).stoppedSources)).toBe(1)
-  await shot(page,'UAT-23',info.project.name)
+  await shot(page,'UAT-50',info.project.name)
 })
-test('UAT-24 錄音裝置提早停止仍可收好聲音',async({page,context},info)=>{
+test('UAT-51 錄音裝置提早停止仍可收好聲音',async({page,context},info)=>{
   await context.grantPermissions(['microphone'])
   await page.evaluate(()=>{
     const w=window as unknown as {rec:MediaRecorder};const RealRecorder=MediaRecorder
@@ -220,9 +220,9 @@ test('UAT-24 錄音裝置提早停止仍可收好聲音',async({page,context},in
   await expect(page.getByRole('dialog')).toHaveCount(0)
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('maglody-inspirations-v1')!)[0])
   expect(saved.hum.assetId).toBeTruthy()
-  await shot(page,'UAT-24',info.project.name)
+  await shot(page,'UAT-51',info.project.name)
 })
-test('UAT-25 新手忘記按停止，25 秒後也會關麥並保留分析',async({page,context},info)=>{
+test('UAT-52 新手忘記按停止，25 秒後也會關麥並保留分析',async({page,context},info)=>{
   test.setTimeout(40000)
   await context.grantPermissions(['microphone'])
   await page.evaluate(()=>{
@@ -235,5 +235,5 @@ test('UAT-25 新手忘記按停止，25 秒後也會關麥並保留分析',async
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {stream:MediaStream}).stream.getTracks().every(t=>t.readyState==='ended')),{timeout:32000,intervals:[500]}).toBeTruthy()
   await expect(primary(page)).not.toHaveText('■ 哼完了')
   await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('music-lab-project-v2')!)?.hum?.duration||0)).toBeGreaterThanOrEqual(24)
-  await shot(page,'UAT-25',info.project.name)
+  await shot(page,'UAT-52',info.project.name)
 })

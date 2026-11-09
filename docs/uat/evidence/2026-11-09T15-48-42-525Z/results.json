@@ -1,0 +1,19 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-09 23:48",
+  "cases": 1,
+  "pass": 0,
+  "fail": 1,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T15-48-42-525Z；部分重跑，不能作為整體通過依據；音訊/LLM 採 mock，真實裝置/API 未驗證；A 尚有視覺缺失待修",
+  "rows": [
+    {
+      "case": "UAT-27",
+      "viewport": "desktop",
+      "status": "fail",
+      "reason": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.desk-name')\nExpected: visible\nTimeout: 7000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('.desk-name') with timeout 7000ms\n  - waiting for locator('.desk-name')\n",
+      "evidence": "docs/uat/evidence/2026-11-09T15-48-42-525Z/desktop/UAT-27.png"
+    }
+  ]
+}

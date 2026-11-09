@@ -1,3 +1,5 @@
+import { fetchJson, HttpError } from '../../src/lib/request.ts'
+import { isObject } from '../../src/agent/reply.ts'
 // Google provider：
 //  - vertex：Vertex AI Gemini（GCP 專案 + OAuth 存取權杖）
 //      env：GCP_PROJECT（必填）、GCP_LOCATION（預設 us-central1，可設 global）、LLM_MODEL
@@ -10,21 +12,21 @@ import { env, ProviderError, type LlmProvider, type LlmRequest } from './types.t
 const run = promisify(execFile)
 let cached: { token: string; at: number } | null = null
 
-async function accessToken(): Promise<string> {
+async function accessToken(signal?: AbortSignal): Promise<string> {
   if (process.env.GCP_ACCESS_TOKEN) return process.env.GCP_ACCESS_TOKEN
   // gcloud 權杖約 60 分鐘有效，快取 45 分鐘
   if (cached && Date.now() - cached.at < 45 * 60_000) return cached.token
   // 部署在 Cloud Run 時（部署指令會設 GCP_USE_METADATA=1）：向 GCP metadata server 取得服務帳戶權杖，
   // 這是 Google 官方函式庫在 Cloud Run 上取得憑證的同一種方式，不需要任何金鑰檔。本機開發不會走這條路。
   if (process.env.GCP_USE_METADATA === '1') {
-    const res = await fetch('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', { headers: { 'Metadata-Flavor': 'Google' } })
-    if (!res.ok) throw new ProviderError(`無法從 Cloud Run 取得服務帳戶權杖（${res.status}）`, 500)
-    const j = (await res.json()) as { access_token: string; expires_in: number }
-    cached = { token: j.access_token, at: Date.now() }
+    const j = await fetchJson('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', { headers: { 'Metadata-Flavor': 'Google' }, signal }, 5_000)
+    if (!isObject(j) || typeof j.access_token !== 'string' || !j.access_token || typeof j.expires_in !== 'number' || j.expires_in <= 60) throw new ProviderError('Invalid metadata token', 502)
+    cached = { token: j.access_token, at: Date.now() - 45 * 60_000 + Math.min(45 * 60_000, (j.expires_in - 60) * 1000) }
     return cached.token
   }
   try {
-    const { stdout } = await run('gcloud', ['auth', 'print-access-token'])
+    const { stdout } = await run('gcloud', ['auth', 'print-access-token'], { timeout: 5_000, maxBuffer: 16_384, signal })
+    if (!stdout.trim()) throw new Error('Empty GCP token')
     cached = { token: stdout.trim(), at: Date.now() }
     return cached.token
   } catch {
@@ -41,14 +43,18 @@ function body(req: LlmRequest) {
 }
 
 async function call(url: string, headers: Record<string, string>, req: LlmRequest) {
-  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body(req)) })
-  if (!res.ok) {
-    const body = (await res.text()).slice(0, 300)
-    const hint = res.status === 400 ? '請求被拒（常見原因：GEMINI_API_KEY 無效、模型名稱錯誤）' : res.status === 401 || res.status === 403 ? '沒有權限（Vertex：確認已啟用 Vertex AI API，帳號或服務帳戶有「Vertex AI 使用者」角色；Gemini：確認金鑰正確）' : res.status === 404 ? '找不到模型或區域，請檢查 LLM_MODEL 與 GCP_LOCATION' : res.status === 429 ? '額度用完或請求太頻繁' : '服務暫時錯誤'
-    throw new ProviderError(`Gemini ${res.status}：${hint}。原始訊息：${body}`, res.status === 429 ? 429 : 502)
+  let data: unknown
+  try {
+    data = await fetchJson(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body(req)), signal: req.signal })
+  } catch (error) {
+    throw new ProviderError('Gemini request failed', error instanceof HttpError && error.status === 429 ? 429 : 502)
   }
-  const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
-  return (data.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('')
+  const candidate = isObject(data) && Array.isArray(data.candidates) ? data.candidates[0] : undefined
+  const content = isObject(candidate) ? candidate.content : undefined
+  const parts = isObject(content) && Array.isArray(content.parts) ? content.parts : []
+  const text = parts.filter(isObject).map((p) => typeof p.text === 'string' ? p.text : '').join('')
+  if (!text.trim()) throw new ProviderError('Empty Gemini response')
+  return text
 }
 
 export function createVertex(): LlmProvider {
@@ -63,7 +69,7 @@ export function createVertex(): LlmProvider {
     name: 'vertex',
     model,
     async complete(req) {
-      return call(url, { Authorization: `Bearer ${await accessToken()}` }, req)
+      return call(url, { Authorization: `Bearer ${await accessToken(req.signal)}` }, req)
     },
   }
 }

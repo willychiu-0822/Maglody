@@ -85,6 +85,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
     const s = trackAudioSource(c.createBufferSource())
     s.buffer = b
     s.connect(c.destination)
+    trackAudioSource(s)
     s.start()
   }
 
