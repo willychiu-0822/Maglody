@@ -28,10 +28,11 @@ export default class UatReporter implements Reporter {
       [...fs.readFileSync(`e2e/${file}`, 'utf8').matchAll(/test\(['"](UAT-\d+)/g)].map(match => match[1])))
     const fullMatrix = rows.length === expectedCases.size * 2 && [...expectedCases].every(id =>
       ['desktop','mobile'].every(viewport => rows.some(row => row.case === id && row.viewport === viewport)))
+    const allEvidence = rows.every(row => row.evidence && fs.existsSync(row.evidence))
     const visualOpen = fs.existsSync('docs/uat/failures.md') && fs.readFileSync('docs/uat/failures.md','utf8').includes('狀態：OPEN')
     const status = { project: 'Maglody', updated, cases: rows.length, pass, fail, blocked,
-      ready_for_user_test: result.status === 'passed' && fullMatrix && !fail && !blocked && !visualOpen,
-      notes: `Chrome；desktop 1280x800/mobile 390x844；run=${run}；${fullMatrix ? '完整矩陣' : '部分重跑，不能作為整體通過依據'}；音訊/LLM 採 mock，真實裝置/API 未驗證${visualOpen ? '；A 尚有視覺缺失待修' : ''}` }
+      ready_for_user_test: result.status === 'passed' && fullMatrix && !fail && !blocked && allEvidence && !visualOpen,
+      notes: `Chrome；desktop 1280x800/mobile 390x844；run=${run}；${fullMatrix ? '完整矩陣' : '部分重跑，不能作為整體通過依據'}；音訊/LLM 採 mock，真實裝置/API 未驗證${visualOpen ? '；A 尚有視覺缺失待修' : ''}${allEvidence ? '' : '；有案例缺少截圖證據'}` }
     fs.mkdirSync(`docs/uat/evidence/${run}`, { recursive: true })
     fs.writeFileSync(`docs/uat/evidence/${run}/results.json`, JSON.stringify({ ...status, rows }, null, 2)+'\n')
     fs.writeFileSync('docs/uat/UAT-STATUS.json', JSON.stringify(status,null,2)+'\n')

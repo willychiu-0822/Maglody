@@ -12,16 +12,14 @@ export async function shot(page: Page, info: TestInfo, suffix = '') {
   if (!suffix) await info.attach('uat-screenshot', { path: file, contentType: 'image/png' })
 }
 export const test = base.extend<{ errors: string[] }>({
-  errors: [async ({ page }, use) => {
+  errors: [async ({ page }, use, info) => {
     const errors: string[] = []
     page.on('pageerror', e => errors.push(e.message))
     await page.route('**/api/master', r => r.abort('connectionrefused'))
     await use(errors)
+    await shot(page, info)
+    expect(errors, '使用者操作不應產生未處理 JS 錯誤').toEqual([])
   }, { auto: true }],
-})
-test.afterEach(async ({ page, errors }, info) => {
-  await shot(page, info)
-  expect(errors, '使用者操作不應產生未處理 JS 錯誤').toEqual([])
 })
 export async function go(page: Page, desk: string) {
   await page.getByRole('button', { name: '打開工作室選單' }).click()
