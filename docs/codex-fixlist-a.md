@@ -206,3 +206,15 @@ R1～R6 與新手 P0→P2 全部通過本機雙尺寸驗收。B 已合併，兩�
 - R1～R6 各有獨立 feat commit；P0、Demo、示範、儲存復原與 UAT 修復含對應 UAT 編號提交。前輪既存修改以 baseline 保存，不冒稱重切成前輪各項 commit。
 - 本機 metadata 使用 scripts/git-local.sh；原唯讀 index 未修改。未 push、未改 remote、未部署、未開 tunnel。
 - 4101／4102 皆已關閉；實機／真 LLM／主觀可聽品質不在本次本機 Chrome 驗證範圍。
+
+## 第 3 輪：長時間創作探索（2026-11-10）
+
+開始以 `scripts/git-local.sh merge --no-edit codex/burn-b` 確認已合併，正確 index 為乾淨。讀取新手回饋後沿用第 2 輪 P0→P2 的驗收，不重做既有素材。六份核可來源與 public WebP 雜湊再次全部相符。
+
+| 編號 | 需求 | 可驗收標準 | 驗證 |
+|---|---|---|---|
+| A-N08 | R3 | 連續 22 次提問讓聊天紀錄輪替後，換歌詞檯向作詞人再問一題；聊天與場景都顯示新回覆，維持 responding 狀態 | UAT-61，手機與桌面 |
+
+首次完整重跑 118/120：UAT-15、56 桌面逾時；兩份 trace 同時有約 572 秒事件空窗，其餘 118 次通過。保留原始失敗與 traces，疑似環境暫停，不增加 timeout、不改斷言，最終須重新完整跑。探索已用實際 UI 重現 A-N08，修復與結果接續記錄。
+
+A-N08：UAT-61 手機／桌面均已紅→綠，並與 UAT-59 延遲回覆隔離一起 4/4 通過。使用入檯時的訊息 ID 集合辨別新回覆，聊天輪替不再使場景失去反應；仍保留 14 秒淡出與按檯／角色篩選。證據：A-UAT61-before-desktop.png、A-UAT61-after-desktop.png、A-UAT61-after-mobile.png。

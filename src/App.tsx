@@ -50,8 +50,8 @@ export default function App() {
   const inspo = useInspirations()
   const versions = useVersions()
   const skipEnter = useRef(false)
-  const enteredAt = useRef(0)
   const step = STEPS[cur]
+  const [entry, setEntry] = useState(() => ({ step: step.key, messageIds: new Set<string>() }))
   const role = ROLES[DESK_ROLE[step.key]]
   const ready = step.requirements(p).every((r) => r.ok)
   const phase = PHASES.find((ph) => ph.keys.includes(step.key))!
@@ -59,7 +59,8 @@ export default function App() {
   useEffect(() => {
     stopAll()
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    enteredAt.current = master.messages.length
+    // History drops old messages once full; array offsets cannot mark a desk entry.
+    setEntry({ step: step.key, messageIds: new Set(master.messages.map(m => m.id)) })
     // 進場不再說開場白：角色登場那一句＋這一檯自己的一句話就夠了
     skipEnter.current = false
   }, [cur]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -67,7 +68,7 @@ export default function App() {
   // 這一檯的夥伴最近說的一句話（只取進入這一檯之後的）
   // 夥伴的話只停留 14 秒，之後讓位給這一檯當下該做的事
   const [, tick] = useState(0)
-  const latestRaw = master.messages.slice(enteredAt.current).filter((m) => m.role === 'master' && m.step === step.key && m.role_id === role.id).pop()
+  const latestRaw = entry.step === step.key ? master.messages.filter((m) => !entry.messageIds.has(m.id) && m.role === 'master' && m.step === step.key && m.role_id === role.id).pop() : undefined
   const latest = latestRaw && Date.now() - (latestRaw.at ?? 0) < 14000 ? latestRaw : undefined
   useEffect(() => {
     if (!latest) return
