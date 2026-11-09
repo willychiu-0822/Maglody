@@ -1,7 +1,6 @@
 import { Modal } from './Modal'
 import { useEffect, useRef, useState } from 'react'
 import type { AgentAction, AgentMessage } from '../agent/types'
-import { agentMode } from '../agent/client'
 import { ROLES, ROLE_ORDER, type RoleId } from '../agent/roles'
 
 const QUICK: Record<RoleId, string[]> = {
@@ -45,7 +44,7 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
           <button className="link-btn modal-capture" onClick={onCapture}>✎ 記一下</button>
           <button className="icon-btn" onClick={onClose} aria-label="關閉">✕</button>
         </div>
-        <div className="small muted">{role.name}　·　{role.focus}{agentMode() === 'mock' ? '（離線）' : ''}</div>
+        <div className="small muted">{role.name}　·　{role.focus}</div>
 
         <div className="master-list" ref={listRef}>
           {messages.length === 0 && <p className="muted small">想聊什麼都可以：靈感、卡住的地方、哪一版比較好。</p>}

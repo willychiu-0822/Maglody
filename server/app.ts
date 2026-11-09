@@ -43,6 +43,7 @@ export function createHandler(provider: LlmProvider, allowed = ['http://localhos
         }
       } catch { send(400, { error: 'Incomplete request' }); return }
       const input = parseRequest(Buffer.concat(chunks).toString('utf8'))
+      if (provider.name === 'mock') { send(200, { offline: true }); return }
       let output
       const controller = new AbortController()
       const abort = () => controller.abort()

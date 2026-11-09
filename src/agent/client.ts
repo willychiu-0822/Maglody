@@ -46,7 +46,7 @@ export interface AskInput {
 
 export async function askMaster(p: Project, input: AskInput, options: { endpoint?: string; signal?: AbortSignal; timeoutMs?: number } = {}): Promise<{ reply: AgentReply; source: 'mock' | 'llm' }> {
   const endpoint = options.endpoint ?? ENDPOINT
-  if (!endpoint) return { reply: flavor(mockReply(p, input), input.persona, input.question), source: 'mock' }
+  if (!endpoint || input.question && /(幫我|替我|直接).*(寫|作|完成)|代寫|寫一首/.test(input.question)) return { reply: flavor(mockReply(p, input), input.persona, input.question), source: 'mock' }
   try {
     const user = buildUserTurn({ step: input.step, persona: input.persona, songContext: songContext(p), event: input.event, question: input.question })
     const data = await fetchJson(endpoint, {
@@ -55,6 +55,7 @@ export async function askMaster(p: Project, input: AskInput, options: { endpoint
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ system: MASTER_SYSTEM_PROMPT, messages: [...(input.history ?? []).slice(-8), { role: 'user', content: user }] }),
     }, options.timeoutMs ?? 15_000)
+    if (data && typeof data === 'object' && ('offline' in data && data.offline || /後端 mock|LLM_PROVIDER|接上真正的 LLM/.test(JSON.stringify(data)))) throw new Error('Use studio coach')
     const reply = sanitizeReply(data)
     return { reply, source: 'llm' }
   } catch (e) {

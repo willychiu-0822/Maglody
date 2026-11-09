@@ -8,13 +8,8 @@ function createMock(): LlmProvider {
     name: 'mock',
     model: 'mock',
     async complete(req) {
-      const last = req.messages[req.messages.length - 1]?.content ?? ''
-      const q = /<學生的提問>(.*?)<\/學生的提問>/s.exec(last)?.[1]
-      return JSON.stringify({
-        text: q ? `（後端 mock）你問了「${q}」。接上真正的 LLM 後，我會依你的歌回答。` : '（後端 mock）我收到你剛做的事了。',
-        next: '設定 LLM_PROVIDER=openai、vertex 或 gemini 來啟用真正的大師。',
-        suggestions: [],
-      })
+      void req
+      return JSON.stringify({ text: '先聽聽你的歌。你最想調整哪一段？' })
     },
   }
 }

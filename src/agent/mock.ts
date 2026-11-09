@@ -7,7 +7,7 @@ import { RHYME_GROUPS, lastChar, rhymeOf } from '../lib/rhyme'
 import { progressionFeedback } from '../steps/Harmony'
 import { melodyFeedback } from '../steps/Melody'
 import { analyzeSection, KIND_ZH } from '../steps/Lyrics'
-import { arrangementFeedback, energy } from '../steps/Arrangement'
+import { arrangementFeedback } from '../steps/Arrangement'
 import { mixFeedback } from '../steps/Mix'
 import { MOODS } from '../steps/Ideation'
 import type { AgentReply, AgentSuggestion } from './types'
@@ -71,7 +71,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
       if (!p.hum) return { text: '我沒有聽清楚，再哼一次？' }
       const h = p.hum
       return {
-        text: `你哼了 ${h.notes.length} 個音，停留最久、最常回去的是 ${NOTE_NAMES[h.keyRoot]}。耳朵會把這種「一直回去的音」當成家。`,
+        text: `${h.source === 'demo' ? '示範裡有' : h.source === 'file' ? '音檔裡有' : '你哼了'} ${h.notes.length} 個音，停留最久、最常回去的是 ${NOTE_NAMES[h.keyRoot]}。耳朵會把這種「一直回去的音」當成家。`,
         learned: `這叫「主音」，以它為中心的 7 個音就是 ${keyName(h.keyRoot, h.keyMode)}。`,
         next: `按「加上主音襯底」聽聽看：你的旋律每次碰到 ${NOTE_NAMES[h.keyRoot]} 都會特別穩。`,
         suggestions: [{ label: '前往構想', action: { type: 'goStep', step: 'idea' } }],
@@ -214,15 +214,30 @@ function questionReply(p: Project, step: string, q: string): AgentReply {
     const hi = notes.length ? Math.max(...notes) : null
     return { text: hi != null ? `你旋律最高是 ${noteNameOct(hi)}${p.hum ? `，哼唱時最舒服的上限是 ${noteNameOct(p.hum.rangeHigh)}` : ''}。` : '還沒有旋律。', next: '改和聲的調性設定不會搬動已寫的旋律。請到旋律格把最高那一句往下點幾格，再跟唱確認音域。', learned: '移調（換 Key）不會改變旋律的形狀，只改變高低。' }
   }
-  const energyNote = p.arrangement.length ? `（目前結構最高能量 ${Math.max(...p.arrangement.map(energy))}）` : ''
-  return {
-    text: `好問題。我目前的離線模式只會回答幾類問題${energyNote}：為什麼這個和弦、換更哀傷／更明亮的走向、押韻、旋律怎麼改、音域太高、下一步。接上 LLM 後可以自由問。`,
-    next: `這一檯是「${STEP_ZH[step]}」——先動手，我會在你做完時解釋。`,
-  }
+  return { text: '先只改一件事，再聽聽差別。', next: '告訴我想改哪一句、哪一段，我陪你試。' }
+
 }
 
-export function mockReply(p: Project, input: { step: string; event?: { kind: string; detail: string }; question?: string }): AgentReply {
-  if (input.question) return questionReply(p, input.step, input.question)
+export function mockReply(p: Project, input: { step: string; event?: { kind: string; detail: string }; question?: string; persona?: { name: string } }): AgentReply {
+  if (input.question) {
+    const reply = questionReply(p, input.step, input.question)
+    const chords = chordsOf(p)
+    const progression = p.harmony.chorus.filter((d): d is number => d != null).map(d => chords[d].name).join('–')
+    const lyric = p.lyrics.find(s => s.text.trim())?.text.split('\n')[0]
+    const hook = p.idea.hook.trim() || p.idea.title.trim()
+    const song = hook ? `「${hook}」` : '這首還沒命名的歌'
+    const mood = ({warm:'溫暖療癒',happy:'開心雀躍',sad:'憂傷失落',miss:'思念懷舊',fire:'熱血衝刺',dream:'夢幻漂浮'} as Record<string,string>)[p.idea.mood] || '還在找感覺'
+    const context: Record<string,string> = {
+      作曲家: `${song}的副歌${progression ? `用了 ${progression}` : '還沒排和弦'}，旋律有 ${p.melody.chorus.filter(n=>n!=null&&n>=0).length} 個起音。先哼最後兩個音，聽它是否想回到開頭。`,
+      作詞人: `${song}${lyric ? `裡的「${lyric}」已經有畫面` : '可以先從眼前的一件物品寫起'}。先挑一個你看得到的細節，唸給自己聽。`,
+      錄音師: `${song}現在是 ${p.idea.bpm} BPM，${p.arrangement.length ? `排了 ${p.arrangement.length} 個段落` : '還沒排段落'}。先用副歌最響的一句測音量，保留不破音的空間。`,
+      編曲: `${song}想要「${mood}」，目前有 ${p.arrangement.length} 個段落。先讓主歌少一件樂器，再聽副歌進來。`,
+      製作人: `${song}選了「${mood}」、${p.idea.bpm} BPM。先聽副歌，問自己這句話有沒有留下來。`,
+    }
+    const observation = context[input.persona?.name || '製作人'] || context.製作人
+    // A refusal stays first; role-specific guidance still refers to the student's work.
+    return /不替你寫完/.test(reply.text) ? {...reply, next: observation} : {...reply, text: `${observation} ${reply.text}`}
+  }
   if (input.event) return eventReply(p, input.step, input.event.kind, input.event.detail)
   return { text: '' }
 }
