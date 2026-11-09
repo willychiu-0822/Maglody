@@ -86,6 +86,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const [collage, setCollage] = useState(false)
   const [moreOpen, setMoreOpen] = useState<string | null>(null)
   const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((i) => i !== id) : [...x, id]))
+  const [mediaSaveError, setMediaSaveError] = useState(false)
   const rec = useRecorder()
   const fileRef = useRef<HTMLInputElement>(null)
   useEffect(() => { if (open !== 'capture') rec.cancelPending() }, [open, rec.cancelPending])
@@ -124,7 +125,8 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
         }
       }
         pendingRecording.current = null
-      } catch (e) { flash('錄音還沒收好，請保留這頁，稍後再試。'); throw e }
+        setMediaSaveError(false)
+      } catch (e) { setMediaSaveError(true); flash('錄音還沒收好：儲存失敗，聲音還留在這頁，請釋出空間後重試。'); throw e }
       finally { setBusy(false) }
     } else {
       if (pendingRecording.current) await toggleRec(pendingRecording.current.kind)
@@ -166,6 +168,15 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
     } catch { flash('本子還沒存好，草稿留在這裡。請釋出瀏覽器空間後再試。') }
     finally { operation.current = false; setBusy(false) }
+  }
+
+  const saveTextCopy = () => {
+    try {
+      const item = api.add({...emptyDraft(), text:draftRef.current.text.trim(), fromStep:step})
+      setOpen(null)
+      flash('文字先收好了。錄音仍留在草稿，回來可以重試。')
+      onEvent('inspiration.saved',item.text)
+    } catch { flash('文字還沒存好，草稿留在這裡。請釋出空間後重試。') }
   }
 
   const pull = (x: Inspiration, opt: { label: string; how: string; apply: (p: Project, u: Update) => string | void }) => {
@@ -230,6 +241,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages(e.target.files); e.target.value = '' }} />
                 </div>
+                {mediaSaveError && <p className="small muted">錄音儲存失敗，聲音暫留在這頁。可重試收好，或先另存文字。</p>}
                 {rec.completed && <p className="small muted" role="status">剛才的錄音還在，按「夾進本子」收好。</p>}
                 {rec.pending && <p className="small muted" role="status">等麥克風許可……也可以先寫文字。</p>}
                 {rec.error && <p className="error small">{rec.error}</p>}
@@ -249,7 +261,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                     ))}
                   </div>
                 </details>
-                <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: busy || rec.pending || (!hasContent && !rec.recording && !rec.completed && !pendingRecording.current) }} />
+                <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: busy || rec.pending || (!hasContent && !rec.recording && !rec.completed && !pendingRecording.current) }} secondary={mediaSaveError && draft.text.trim() ? {label:'先另存文字，錄音留著', onClick:saveTextCopy} : undefined} />
               </div>
             )}
 

@@ -89,8 +89,11 @@ test('UAT-16 媒體儲存失敗可以恢復文字捕捉', async ({ page }) => {
   await page.locator('.inspo-big.rec').click()
   await expect(page.getByRole('status')).toContainText(/儲存|空間|失敗/)
   await expect(page.locator('.inspo-big').first()).toBeEnabled()
-  await page.getByRole('button',{name:'夾進本子',exact:true}).click()
-  await library(page)
+  await page.getByRole('button',{name:'先另存文字，錄音留著',exact:true}).click()
+  await page.getByRole('button',{name:'記一下靈感'}).click()
+  await expect(page.locator('.inspo-capture textarea')).toHaveValue('文字仍要留下')
+  await expect(page.locator('.inspo-capture')).toContainText('聲音暫留在這頁')
+  await page.getByRole('button',{name:/翻翻本子/}).click()
   await expect(page.locator('.inspo-card').filter({hasText:'文字仍要留下'})).toHaveCount(1)
 })
 
