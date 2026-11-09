@@ -12,8 +12,7 @@ import { DESK_ROLE, ROLES, type RoleId } from './roles'
  */
 export function useMaster(getProject: () => Project) {
   const [messages, setMessages] = useState<AgentMessage[]>([])
-  const [busy, setBusy] = useState(false)
-  const pending = useRef(0)
+  const [pending, setPending] = useState<{ id: string; step: string; roleId: RoleId }[]>([])
   const last = useRef<Record<string, number>>({})
   const timer = useRef<Record<string, number>>({})
   const msgsRef = useRef(messages)
@@ -27,14 +26,14 @@ export function useMaster(getProject: () => Project) {
   const run = useCallback(async (step: string, input: { event?: { kind: string; detail: string }; question?: string }, roleId?: RoleId) => {
     const rid = roleId ?? DESK_ROLE[step] ?? 'producer'
     const r = ROLES[rid]
-    pending.current++
-    setBusy(true)
-    // 等一個 tick，讓剛剛的 state 更新寫進專案後再讀
-    await new Promise((res) => setTimeout(res, 0))
-    const { reply, source } = await askMaster(getProject(), { step, ...input, persona: { name: r.name, focus: r.focus, voice: r.voice }, history: history() })
-    pending.current--
-    setBusy(pending.current > 0)
-    if (reply.text || reply.learned) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
+    const id = uid()
+    setPending(xs => [...xs, { id, step, roleId: rid }])
+    try {
+      // 等一個 tick，讓剛剛的 state 更新寫進專案後再讀
+      await new Promise((res) => setTimeout(res, 0))
+      const { reply, source } = await askMaster(getProject(), { step, ...input, persona: { name: r.name, focus: r.focus, voice: r.voice }, history: history() })
+      if (reply.text || reply.learned) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
+    } finally { setPending(xs => xs.filter(request => request.id !== id)) }
   }, [getProject]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const notify = useCallback((step: string, kind: string, detail = '') => {
@@ -56,5 +55,6 @@ export function useMaster(getProject: () => Project) {
   }, [run])
 
   useEffect(() => () => { Object.values(timer.current).forEach(clearTimeout) }, [])
-  return { messages, busy, notify, ask }
+  const isBusy = (step: string, roleId: RoleId) => pending.some(request => request.step === step && request.roleId === roleId)
+  return { messages, isBusy, notify, ask }
 }

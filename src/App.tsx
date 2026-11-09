@@ -131,7 +131,7 @@ export default function App() {
 
       {storageError && <p className="storage-notice" role="status">這首歌還沒存進瀏覽器，請先留在這頁。釋出儲存空間後，再改一個字就會重試。</p>}
       <main className="desk" key={step.key}>
-        <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.busy} onChat={() => openChat(role.id)} />
+        <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.isBusy(step.key, role.id)} onChat={() => openChat(role.id)} />
 
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
@@ -192,7 +192,7 @@ export default function App() {
         open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
 
       <MasterPanel open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
-        messages={master.messages} busy={master.busy} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />
+        messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />
     </div>
   )
 }
