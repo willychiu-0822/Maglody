@@ -18,7 +18,7 @@ export interface LiveState {
  */
 export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (midi: number | null, t: number) => void; onLimit?: (data: {data: Float32Array; sampleRate: number} | null) => void } = {}) {
   const [state, setState] = useState<LiveState>({ pending: false, running: false, midi: null, levelDb: -100, peakDb: -100, error: null })
-  const refs = useRef<{ stream?: MediaStream; raf?: number; chunks: Float32Array[]; proc?: ScriptProcessorNode; src?: MediaStreamAudioSourceNode; t0: number; peak: number }>({ chunks: [], t0: 0, peak: -100 })
+  const refs = useRef<{ stream?: MediaStream; raf?: number; limitTimer?: number; chunks: Float32Array[]; proc?: ScriptProcessorNode; src?: MediaStreamAudioSourceNode; t0: number; peak: number }>({ chunks: [], t0: 0, peak: -100 })
   const generation = useRef(0)
   const requesting = useRef(false)
   const optsRef = useRef(opts)
@@ -28,6 +28,8 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
     generation.current++
     requesting.current = false
     const r = refs.current
+    window.clearTimeout(r.limitTimer)
+    r.limitTimer = undefined
     if (r.raf) cancelAnimationFrame(r.raf)
     r.proc?.disconnect()
     r.src?.disconnect()
@@ -76,6 +78,14 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
       }
       const buf = new Float32Array(analyser.fftSize)
       setState({ pending: false, running: true, midi: null, levelDb: -100, peakDb: -100, error: null })
+      const finishAtLimit = () => {
+        if (token !== generation.current || r.stream !== stream) return
+        const rec = stop()
+        optsRef.current.onLimit?.(rec)
+      }
+      // A background tab can stop animation frames or suspend the audio clock.
+      // Releasing the microphone must not depend on drawing the pitch display.
+      if (optsRef.current.maxSec) r.limitTimer = window.setTimeout(finishAtLimit, optsRef.current.maxSec * 1000)
       const tick = () => {
         analyser.getFloatTimeDomainData(buf)
         let pk = 0
@@ -88,7 +98,7 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
         const t = c.currentTime - r.t0
         optsRef.current.onFrame?.(midi, t)
         setState((s) => ({ ...s, midi, levelDb: db, peakDb: r.peak }))
-        if (optsRef.current.maxSec && t >= optsRef.current.maxSec) { const rec = stop(); optsRef.current.onLimit?.(rec); return }
+        if (optsRef.current.maxSec && t >= optsRef.current.maxSec) { finishAtLimit(); return }
         r.raf = requestAnimationFrame(tick)
       }
       r.raf = requestAnimationFrame(tick)

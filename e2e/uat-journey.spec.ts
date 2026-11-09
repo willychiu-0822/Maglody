@@ -231,6 +231,9 @@ test('UAT-52 新手忘記按停止，25 秒後也會關麥並保留分析',async
   })
   await page.getByRole('button',{name:'● 哼一段',exact:true}).click()
   await expect(primary(page)).toHaveText('■ 哼完了')
+  // A hidden or stalled page may stop drawing frames while audio capture continues.
+  // The recording limit must release the microphone independently of the pitch display.
+  await page.evaluate(() => { window.requestAnimationFrame = () => 0 })
   // Deliberately leave recording alone, as a first-time user might.
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {stream:MediaStream}).stream.getTracks().every(t=>t.readyState==='ended')),{timeout:32000,intervals:[500]}).toBeTruthy()
   await expect(primary(page)).not.toHaveText('■ 哼完了')

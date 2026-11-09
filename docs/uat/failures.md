@@ -1,5 +1,29 @@
 # UAT 缺失與 A / B 交接
 
+## 第 3 輪探索修復
+
+### UAT-52 — 畫面不更新時忘記收麥
+
+狀態：CLOSED；負責：session A；需求：R5、錄音自動停止。
+
+原上限只在動畫畫格比較 AudioContext 時間；畫面不繪圖時不會檢查，麥克風可能持續開啟。刻意停止頁面 requestAnimationFrame 後兩尺寸穩定失敗，再改為獨立 timer 與原音訊時間雙重檢查，停止時清除 timer 並保護舊錄音世代。UAT-52/43/29 兩尺寸合計 6/6 通過：所有 track 結束，至少 24 秒音訊實際保存；未加長 timeout。證據為當輪 UAT-52 與 A-UAT52-after-*.png。
+
+### UAT-61 — 長對話輪替後場景失去回應
+
+狀態：CLOSED；負責：session A；需求：R3。
+
+連續 22 次提問後換歌詞檯，第 23 答雖在聊天裡，場景仍停在作詞人登場句。原因是用陣列長度標記入檯，但聊天會刪掉舊訊息。改用入檯時的訊息 ID 集合，仍依檯位、角色與 14 秒期限顯示。雙尺寸先紅→綠，並與延遲回覆案例 UAT-59 一起通過。
+
+證據：[修前桌面](evidence/A-UAT61-before-desktop.png)、[修後手機](evidence/A-UAT61-after-mobile.png)、[修後桌面](evidence/A-UAT61-after-desktop.png)。修復 commit：3edcc13。
+
+### UAT-62 — 作詞人誤用作曲家的等待狀態
+
+狀態：CLOSED；負責：session A；需求：R3。
+
+作曲家尚未回覆時，切作詞人也會顯示思考中並停用送出；換到歌詞檯亦顯示作詞人側耳聽。改為按 request ID、工作檯、角色追蹤等待狀態，完成時逐筆清除。測試明確扣住第一個 API 回覆，讓作詞人先回答，再釋放作曲家；正確等待身份與兩份歷史均通過手機／桌面驗證。
+
+證據：[修前桌面](evidence/A-UAT62-before-desktop.png)、[修後手機](evidence/A-UAT62-after-mobile.png)、[修後桌面](evidence/A-UAT62-after-desktop.png)。修復 commit：d193412。
+
 Session B，本機 Chrome；桌面 1280×800、手機 390×844。所有功能修復由 B 執行，視覺缺失由 A 處理。此文件的 OPEN 項目未解決前，ready_for_user_test 必須為 false。截圖均為實際瀏覽器，不是 mockup。
 
 ## UAT-24 — R2 空白工作檯缺少主要動作
