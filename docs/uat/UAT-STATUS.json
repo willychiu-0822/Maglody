@@ -1,0 +1,10 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-10 00:00",
+  "cases": 54,
+  "pass": 50,
+  "fail": 4,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T15-58-20-631Z；完整矩陣；音訊/LLM 採 mock，真實裝置/API 未驗證；A 尚有視覺缺失待修"
+}

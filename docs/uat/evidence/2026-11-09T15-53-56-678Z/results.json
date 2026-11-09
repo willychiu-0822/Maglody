@@ -1,0 +1,40 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-09 23:54",
+  "cases": 4,
+  "pass": 4,
+  "fail": 0,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T15-53-56-678Z；部分重跑，不能作為整體通過依據；音訊/LLM 採 mock，真實裝置/API 未驗證；A 尚有視覺缺失待修",
+  "rows": [
+    {
+      "case": "UAT-14",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-56-678Z/desktop/UAT-14.png"
+    },
+    {
+      "case": "UAT-14",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-56-678Z/mobile/UAT-14.png"
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-56-678Z/desktop/UAT-20.png"
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-56-678Z/mobile/UAT-20.png"
+    }
+  ]
+}

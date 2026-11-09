@@ -1,0 +1,40 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-09 23:53",
+  "cases": 4,
+  "pass": 2,
+  "fail": 2,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T15-53-03-876Z；部分重跑，不能作為整體通過依據；音訊/LLM 採 mock，真實裝置/API 未驗證；A 尚有視覺缺失待修",
+  "rows": [
+    {
+      "case": "UAT-14",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-03-876Z/desktop/UAT-14.png"
+    },
+    {
+      "case": "UAT-14",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-03-876Z/mobile/UAT-14.png"
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "desktop",
+      "status": "fail",
+      "reason": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.inspo-list')\nExpected: visible\nTimeout: 7000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('.inspo-list') with timeout 7000ms\n  - waiting for locator('.inspo-list')\n | Error: 使用者操作不應產生未處理 JS 錯誤\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 3\n\n- Array []\n+ Array [\n+   \"(i.text || (intermediate value) || \\\"\\\").trim is not a function\",\n+ ]",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-03-876Z/desktop/UAT-20.png"
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "mobile",
+      "status": "fail",
+      "reason": "Error: expect(locator).toBeVisible() failed\n\nLocator: locator('.inspo-list')\nExpected: visible\nTimeout: 7000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" locator('.inspo-list') with timeout 7000ms\n  - waiting for locator('.inspo-list')\n | Error: 使用者操作不應產生未處理 JS 錯誤\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 3\n\n- Array []\n+ Array [\n+   \"(i.text || (intermediate value) || \\\"\\\").trim is not a function\",\n+ ]",
+      "evidence": "docs/uat/evidence/2026-11-09T15-53-03-876Z/mobile/UAT-20.png"
+    }
+  ]
+}

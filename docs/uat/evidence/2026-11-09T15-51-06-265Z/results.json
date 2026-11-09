@@ -1,0 +1,390 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-09 23:52",
+  "cases": 54,
+  "pass": 50,
+  "fail": 4,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T15-51-06-265Z；完整矩陣；音訊/LLM 採 mock，真實裝置/API 未驗證；A 尚有視覺缺失待修；舊輪截圖不完整（24 次），已在最終輪修復證據 fixture",
+  "rows": [
+    {
+      "case": "UAT-01",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-01.png"
+    },
+    {
+      "case": "UAT-01",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-02",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-02.png"
+    },
+    {
+      "case": "UAT-02",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-03",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-03.png"
+    },
+    {
+      "case": "UAT-03",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-04",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-04.png"
+    },
+    {
+      "case": "UAT-04",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-05",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-05.png"
+    },
+    {
+      "case": "UAT-05",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-06",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-06.png"
+    },
+    {
+      "case": "UAT-06",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-07",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-07.png"
+    },
+    {
+      "case": "UAT-07",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-08",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-08.png"
+    },
+    {
+      "case": "UAT-08",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-09",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-09.png"
+    },
+    {
+      "case": "UAT-09",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-10",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-10.png"
+    },
+    {
+      "case": "UAT-10",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-11",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-11.png"
+    },
+    {
+      "case": "UAT-11",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-12",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-12.png"
+    },
+    {
+      "case": "UAT-12",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-13",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-13",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-13.png"
+    },
+    {
+      "case": "UAT-14",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-14",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-14.png"
+    },
+    {
+      "case": "UAT-15",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-15",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-15.png"
+    },
+    {
+      "case": "UAT-16",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-16",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-16.png"
+    },
+    {
+      "case": "UAT-17",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-17",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-17.png"
+    },
+    {
+      "case": "UAT-18",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-18",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-18.png"
+    },
+    {
+      "case": "UAT-19",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-19",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-19.png"
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-20",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-20.png"
+    },
+    {
+      "case": "UAT-21",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-21",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-21.png"
+    },
+    {
+      "case": "UAT-22",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-22",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-22.png"
+    },
+    {
+      "case": "UAT-23",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-23",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-23.png"
+    },
+    {
+      "case": "UAT-24",
+      "viewport": "desktop",
+      "status": "fail",
+      "reason": "Error: 構想 應恰有 1 個主要動作\n\nexpect(locator).toHaveCount(expected) failed\n\nLocator:  locator('main .primary-action').visible()\nExpected: 1\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 構想 應恰有 1 個主要動作 locator('main .primary-action').visible() with timeout 500ms\n  - waiting for locator('main .primary-action').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 和聲 應恰有 1 個主要動作\n\nexpect(locator).toHaveCount(expected) failed\n\nLocator:  locator('main .primary-action').visible()\nExpected: 1\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 和聲 應恰有 1 個主要動作 locator('main .primary-action').visible() with timeout 500ms\n  - waiting for locator('main .primary-action').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 歌詞 應恰有 1 個主要動作\n\nexpect(locator).toHaveCount(expected) failed\n\nLocator:  locator('main .primary-action').visible()\nExpected: 1\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 歌詞 應恰有 1 個主要動作 locator('main .primary-action').visible() with timeout 500ms\n  - waiting for locator('main .primary-action').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n",
+      "evidence": ""
+    },
+    {
+      "case": "UAT-24",
+      "viewport": "mobile",
+      "status": "fail",
+      "reason": "Error: 構想 應恰有 1 個主要動作\n\nexpect(locator).toHaveCount(expected) failed\n\nLocator:  locator('main .primary-action').visible()\nExpected: 1\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 構想 應恰有 1 個主要動作 locator('main .primary-action').visible() with timeout 500ms\n  - waiting for locator('main .primary-action').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 和聲 應恰有 1 個主要動作\n\nexpect(locator).toHaveCount(expected) failed\n\nLocator:  locator('main .primary-action').visible()\nExpected: 1\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 和聲 應恰有 1 個主要動作 locator('main .primary-action').visible() with timeout 500ms\n  - waiting for locator('main .primary-action').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 歌詞 應恰有 1 個主要動作\n\nexpect(locator).toHaveCount(expected) failed\n\nLocator:  locator('main .primary-action').visible()\nExpected: 1\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 歌詞 應恰有 1 個主要動作 locator('main .primary-action').visible() with timeout 500ms\n  - waiting for locator('main .primary-action').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-24.png"
+    },
+    {
+      "case": "UAT-25",
+      "viewport": "desktop",
+      "status": "fail",
+      "reason": "Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 角色應有可見人物外觀，不是單字字形 locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible() with timeout 500ms\n  - waiting for locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\n    6 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 角色應有可見人物外觀，不是單字字形 locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible() with timeout 500ms\n  - waiting for locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 角色應有可見人物外觀，不是單字字形 locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible() with timeout 500ms\n  - waiting for locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\n    6 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout: ",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-25.png"
+    },
+    {
+      "case": "UAT-25",
+      "viewport": "mobile",
+      "status": "fail",
+      "reason": "Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 角色應有可見人物外觀，不是單字字形 locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible() with timeout 500ms\n  - waiting for locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 角色應有可見人物外觀，不是單字字形 locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible() with timeout 500ms\n  - waiting for locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout:  500ms\n\nCall log:\n  - 角色應有可見人物外觀，不是單字字形 locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible() with timeout 500ms\n  - waiting for locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\n    7 × locator resolved to 0 elements\n      - unexpected value \"0\"\n | Error: 角色應有可見人物外觀，不是單字字形\n\nexpect(locator).not.toHaveCount(expected) failed\n\nLocator:  locator('.chat-sheet .role-dot[aria-selected=\"true\"] img, .chat-sheet .role-dot[aria-selected=\"true\"] svg, .chat-sheet [data-character-portrait]').visible()\nExpected: not 0\nReceived: 0\nTimeout: ",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-25.png"
+    },
+    {
+      "case": "UAT-26",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-26.png"
+    },
+    {
+      "case": "UAT-26",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-26.png"
+    },
+    {
+      "case": "UAT-27",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/desktop/UAT-27.png"
+    },
+    {
+      "case": "UAT-27",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-09T15-51-06-265Z/mobile/UAT-27.png"
+    }
+  ]
+}
