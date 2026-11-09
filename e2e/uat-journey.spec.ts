@@ -203,8 +203,8 @@ test('UAT-50 沒辨識到音符也能播放原始哼唱，換檯會停止',async
   await expect(primary(page)).toContainText('構想');await page.locator('.toolbox > summary').click()
   await page.getByRole('button',{name:'▶ 原始錄音',exact:true}).click()
   await visit(page,'歌詞')
-  expect(await page.evaluate(()=>(window as unknown as {startedSources:number}).startedSources)).toBe(1)
-  expect(await page.evaluate(()=>(window as unknown as {stoppedSources:number}).stoppedSources)).toBe(1)
+  expect(await page.evaluate(()=>(window as unknown as {startedSources:number}).startedSources)).toBe(2)
+  expect(await page.evaluate(()=>(window as unknown as {stoppedSources:number}).stoppedSources)).toBe(2)
   await shot(page,'UAT-50',info.project.name)
 })
 test('UAT-51 錄音裝置提早停止仍可收好聲音',async({page,context},info)=>{

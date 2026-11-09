@@ -11,6 +11,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
   const [live, setLive] = useState<PitchFrame[]>([])
   const [ana, setAna] = useState<HumAnalysis | null>(null)
   const [busy, setBusy] = useState(false)
+  const [analysisSource, setAnalysisSource] = useState<'mic' | 'file' | 'demo'>('mic')
   const [playhead, setPlayhead] = useState<number | null>(null)
   const rawRef = useRef<{ data: Float32Array; sampleRate: number } | null>(null)
   const liveRef = useRef<PitchFrame[]>([])
@@ -25,6 +26,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
   })
 
   const runAnalysis = (data: Float32Array, sampleRate: number, source: 'mic' | 'file' | 'demo') => {
+    setAnalysisSource(source)
     rawRef.current = { data, sampleRate }
     setBusy(true)
     setTimeout(() => {
@@ -74,6 +76,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
   const demo = () => {
     const sr = 22050
     runAnalysis(synthDemoHum(sr), sr, 'demo')
+    playOriginal()
   }
 
   const playOriginal = () => {
@@ -85,7 +88,6 @@ function HumStep({ p, update, notify, next }: StepProps) {
     const s = trackAudioSource(c.createBufferSource())
     s.buffer = b
     s.connect(c.destination)
-    trackAudioSource(s)
     s.start()
   }
 
@@ -134,15 +136,15 @@ function HumStep({ p, update, notify, next }: StepProps) {
   const hasResult = !!hum && !mic.running && !busy
   return (
     <>
-      <Coach short={mic.running ? '我在聽……哼完按停止。' : hum ? '聽聽整理後的樣子，喜歡就帶著它繼續。' : '哼一段腦中的旋律給我聽。不用好聽，有就好。'} />
+      <Coach short={mic.running ? '我在聽……哼完按停止。' : hum ? hum.source === 'demo' ? '這是示範旋律。先聽一小段，喜歡就帶著它繼續。' : hum.source === 'file' ? '音檔整理好了，聽聽是不是你要的樣子。' : '聽聽整理後的樣子，喜歡就帶著它繼續。' : '哼一段腦中的旋律給我聽。不用好聽，有就好。'} />
 
       <div className="stage">
         {mic.running && <div className={`big-note ${mic.midi != null ? 'on' : ''}`}>{mic.midi != null ? noteNameOct(mic.midi) : '…'}</div>}
         {(shownFrames.length > 0 || shownNotes.length > 0) ? (
           <PitchCanvas frames={shownFrames} notes={shownNotes} duration={shownDur} keyRoot={hum?.keyRoot} keyMode={hum?.keyMode} playhead={playhead} height={180} />
         ) : !mic.running && <div className="stage-empty" aria-hidden>～</div>}
-        {busy && <p className="muted small center">在聽你剛剛哼的……</p>}
-        {mic.error && <p className="error small">{mic.error}</p>}
+        {busy && <p className="muted small center">{analysisSource === 'demo' ? '在聽示範旋律……' : analysisSource === 'file' ? '在聽這段音檔……' : '在聽你剛剛哼的……'}</p>}
+        {mic.error && !hasResult && !busy && <p className="error small">{mic.error}</p>}
       </div>
 
       {mic.running ? (
