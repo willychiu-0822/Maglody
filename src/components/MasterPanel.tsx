@@ -38,13 +38,13 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
         <div className="row between">
           <div className="role-switch" role="tablist" aria-label="選擇夥伴">
             {ROLE_ORDER.map((id) => (
-              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name} aria-label={ROLES[id].name}>{ROLES[id].glyph}</button>
+              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name} aria-label={ROLES[id].name}><img src={`/studio/roles/${id}.webp`} width="40" height="40" alt="" /></button>
             ))}
           </div>
           <button className="link-btn modal-capture" onClick={onCapture}>✎ 記一下</button>
           <button className="icon-btn" onClick={onClose} aria-label="關閉">✕</button>
         </div>
-        <div className="small muted">{role.name}　·　{role.focus}</div>
+        <div className="chat-identity"><img data-character-portrait src={`/studio/roles/${role.id}.webp`} width="84" height="112" alt={`${role.name}，工作室夥伴`} /><div className="small muted">{role.name}　·　{role.focus}</div></div>
 
         <div className="master-list" ref={listRef}>
           {messages.length === 0 && <p className="muted small">想聊什麼都可以：靈感、卡住的地方、哪一版比較好。</p>}

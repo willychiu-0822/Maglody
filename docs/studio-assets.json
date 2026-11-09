@@ -1,0 +1,49 @@
+[
+  {
+    "role": "producer",
+    "approved_source": "/workspace/maglody/assets/studio-a/roles/producer/idle-v2.jpg",
+    "source_sha256": "8775254788da0a13e9fe02dc4ebba2590481faf20679fd80d37264a6d509fcf6",
+    "public_file": "public/studio/roles/producer.webp",
+    "bytes": 34098,
+    "sha256": "433a9612f7835eec1c1a3c8c9addf9583f5a8ca1e0e9a2c335598892973f14b9"
+  },
+  {
+    "role": "composer",
+    "approved_source": "/workspace/maglody/assets/studio-a/roles/composer/idle-v2.jpg",
+    "source_sha256": "5ed587f64f932fde8827f82dca78f17509509eb573e8412aeb7a008f4c2663d8",
+    "public_file": "public/studio/roles/composer.webp",
+    "bytes": 28424,
+    "sha256": "a3a84fe78633f746ca3b075c152cee3951f926693689f1027b164fad030b1294"
+  },
+  {
+    "role": "lyricist",
+    "approved_source": "/workspace/maglody/assets/studio-a/roles/lyricist/idle-v2.jpg",
+    "source_sha256": "60c070b0029e199735819c4dc3dc5e31927b2ac88d7289006a53e4ce4cdfb5ff",
+    "public_file": "public/studio/roles/lyricist.webp",
+    "bytes": 29202,
+    "sha256": "727f77d2ae011478256a491ff8ccd6dee8856fd0354651cf46a02dcbbcaff6fd"
+  },
+  {
+    "role": "arranger",
+    "approved_source": "/workspace/maglody/assets/studio-a/roles/arranger/idle-v2.jpg",
+    "source_sha256": "e0c4af1576777500a87946821df033fe8387e6f9e3fbcfc29a66e0500f7f8d70",
+    "public_file": "public/studio/roles/arranger.webp",
+    "bytes": 30788,
+    "sha256": "f4d49e87456051e13852acad23a59832a02d78024760e9c96500e2ffce2a158f"
+  },
+  {
+    "role": "engineer",
+    "approved_source": "/workspace/maglody/assets/studio-a/roles/engineer/idle-v2.jpg",
+    "source_sha256": "2386d8b405cca6ce259943f165139b306da7e027bb48f27b0cfe1a2a90d467fb",
+    "public_file": "public/studio/roles/engineer.webp",
+    "bytes": 38372,
+    "sha256": "34aadc7ae7e22c6997606b7c60e8574d7a0e8fe3ec5e9a39705aa7f487bb0142"
+  },
+  {
+    "approved_source": "/workspace/maglody/assets/studio-a/room/studio-room-base.jpg",
+    "source_sha256": "7e7c7f76284b2d63bede99b1e1ae29bb303ef1fb0808b5d82feac236a55c45c3",
+    "public_file": "public/studio/room.webp",
+    "bytes": 85342,
+    "sha256": "b9c0a1249e0729b142a487131f676f0e1f1ed8be5cb8b0f3978a6af82e5d0d13"
+  }
+]
