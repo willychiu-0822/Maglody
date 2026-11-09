@@ -85,13 +85,14 @@ export function Why({ title, children, apply, ready = true, hint, listen }: {
 export function FeedbackList({ items: raw, empty = '開始動手後，老師會在這裡即時回饋。' }: { items: Feedback[]; empty?: string }) {
   const gentle = useContext(GentleContext)
   const items = gentle ? raw.map((f) => (f.level === 'bad' ? { ...f, level: 'warn' as const } : f)) : raw
-  const [all, setAll] = useState(false)
+  const [extra, setExtra] = useState(0)
   if (!items.length) return <p className="muted small">{empty}</p>
   // 一次只說兩件事：一件做得好的、一件可以試的；其他想看再展開
   const good = items.find((f) => f.level === 'good')
   const tryOne = items.find((f) => f.level === 'bad') ?? items.find((f) => f.level === 'warn')
   const top = [good, tryOne].filter((f): f is Feedback => !!f)
-  const shown = all ? items : top
+  const remaining = items.filter(f=>!top.includes(f))
+  const shown = [...top, ...remaining.slice(0,extra)]
   return (
     <ul className="fb-list">
       {gentle && <li className="fb-gentle small muted">現在是發想期：先不審查，有就好。下面只是可以試試的方向。</li>}
@@ -104,7 +105,7 @@ export function FeedbackList({ items: raw, empty = '開始動手後，老師會�
           </div>
         </li>
       ))}
-      {items.length > shown.length && <li><button className="link-btn" onClick={() => setAll(true)}>還有 {items.length - shown.length} 則觀察</button></li>}
+      {items.length > shown.length && <li><button className="link-btn" onClick={() => setExtra(n=>n+1)}>還有 {items.length - shown.length} 則觀察（再看一則）</button></li>}
     </ul>
   )
 }
