@@ -193,3 +193,16 @@ Ruling：保留既有九檯、每檯一位人物，以原創樂手的工作穿�
 - UAT-60：錄音存不下，先另存文字，釋出空間後回草稿收好。驗證兩份成果、原文字、非空 IndexedDB Blob 均保留。手機/桌面通過。
 - 後端 mock 補單元案例：回傳本機教練委派標記，不呼叫會吐設定文案的 mock provider；unit 15/15。
 - 探索未發現新增功能缺失；新增為正式回歸案例，待 60 旅程 × 2 viewport 最終完整重跑。部分重跑即使全綠仍 ready=false。
+
+
+## 第 2 輪最終交付（2026-11-10 00:24 台北）
+
+R1～R6 與新手 P0→P2 全部通過本機雙尺寸驗收。B 已合併，兩個 OPEN 缺失已關閉；核可 idle-v2 和 room base 必用素材已取代自畫角色與房間，來源雜湊六份均核對成功。未使用 v1-rejected。
+
+- 完整 E2E：60 旅程 × 2 viewport = **120/120 PASS**，ready_for_user_test=true；包含全綠後新增的 UAT-59/60。
+- build PASS；selftest 50/50；unit 15/15；logic 10/10；git diff --check PASS。
+- 當輪 120 個案例截圖連結逐一驗證存在，狀態檔逐項列出 R1～R6 與七條新手回饋皆 pass。
+- 已人工檢視手機作詞人、首頁、推薦情緒，桌面聊天與深色紙面；文字可讀、人物與核可設計一致。
+- R1～R6 各有獨立 feat commit；P0、Demo、示範、儲存復原與 UAT 修復含對應 UAT 編號提交。前輪既存修改以 baseline 保存，不冒稱重切成前輪各項 commit。
+- 本機 metadata 使用 scripts/git-local.sh；原唯讀 index 未修改。未 push、未改 remote、未部署、未開 tunnel。
+- 4101／4102 皆已關閉；實機／真 LLM／主觀可聽品質不在本次本機 Chrome 驗證範圍。

@@ -1,10 +1,127 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 00:00",
-  "cases": 54,
-  "pass": 50,
-  "fail": 4,
+  "updated": "2026-11-10 00:24",
+  "cases": 120,
+  "pass": 120,
+  "fail": 0,
   "blocked": 0,
-  "ready_for_user_test": false,
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T15-58-20-631Z；完整矩陣；音訊/LLM 採 mock，真實裝置/API 未驗證；A 尚有視覺缺失待修"
+  "ready_for_user_test": true,
+  "requirements": {
+    "R1": {
+      "status": "pass",
+      "cases": [
+        "UAT-28",
+        "UAT-57"
+      ]
+    },
+    "R2": {
+      "status": "pass",
+      "cases": [
+        "UAT-24",
+        "UAT-56"
+      ]
+    },
+    "R3": {
+      "status": "pass",
+      "cases": [
+        "UAT-25",
+        "UAT-30",
+        "UAT-53",
+        "UAT-59"
+      ]
+    },
+    "R4": {
+      "status": "pass",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "R5": {
+      "status": "pass",
+      "cases": [
+        "UAT-13",
+        "UAT-14",
+        "UAT-15",
+        "UAT-16",
+        "UAT-49",
+        "UAT-60"
+      ]
+    },
+    "R6": {
+      "status": "pass",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "novice_feedback": {
+    "P0_context_coaching": {
+      "status": "pass",
+      "cases": [
+        "UAT-53"
+      ]
+    },
+    "P1_complete_demo": {
+      "status": "pass",
+      "cases": [
+        "UAT-54"
+      ]
+    },
+    "P1_denied_mic_demo": {
+      "status": "pass",
+      "cases": [
+        "UAT-55"
+      ]
+    },
+    "P1_one_primary": {
+      "status": "pass",
+      "cases": [
+        "UAT-24",
+        "UAT-56"
+      ]
+    },
+    "P1_approved_characters": {
+      "status": "pass",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "P2_watercolor": {
+      "status": "pass",
+      "cases": [
+        "UAT-28",
+        "UAT-57"
+      ]
+    },
+    "P2_knowledge_sparks": {
+      "status": "pass",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T16-20-25-972Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證",
+  "checks": {
+    "build": "pass",
+    "selftest": {
+      "pass": 50,
+      "fail": 0
+    },
+    "unit": {
+      "pass": 15,
+      "fail": 0
+    },
+    "logic": {
+      "pass": 10,
+      "fail": 0
+    },
+    "evidence_links": 120,
+    "preview_servers": "stopped"
+  }
 }
