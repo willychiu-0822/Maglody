@@ -762,9 +762,9 @@ button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px soli
 /* R3/R4: a watercolor studio vignette, with one musician actually in the room. */
 .studio-presence { position: relative; min-height: 172px; isolation: isolate; }
 .studio-scene { position: absolute; inset: 0; z-index: -1; border-radius: 48% 20% 24% 16%; background: radial-gradient(ellipse at 30% 30%, var(--wash-ochre), transparent 72%); }
-.studio-scene > img { width: 100%; height: 172px; object-fit: cover; opacity: .72; }
+.studio-scene > img { width: 100%; height: 172px; object-fit: cover; object-position: center 48%; opacity: .9; border-radius: 18px 26px 14px 20px; }
 .studio-presence .presence { min-height: 172px; padding: 0 10px; align-items: flex-end; gap: 16px; }
-.studio-character { width: 104px; height: 166px; flex: none; object-fit: contain; transform-origin: 50% 96%; animation: musician-breathe 5s ease-in-out infinite; }
+.studio-character { width: 126px; height: 168px; flex: none; object-fit: cover; border-radius: 44% 48% 14% 18%; transform-origin: 50% 96%; animation: musician-breathe 5s ease-in-out infinite; }
 .presence-avatar { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); animation: none; }
 .presence-name { min-width: 0; padding: 8px 10px; margin-bottom: 8px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px 16px 10px 14px; letter-spacing: .02em; }
 .presence-name strong { font-family: var(--font-title); font-weight: 500; color: var(--ink); }
@@ -806,3 +806,7 @@ dialog.inspo-overlay::backdrop { background: transparent; }
 [data-recommended="true"] { border-color:var(--accent); background:var(--accent-soft); }
 .seg[hidden] { display:none; }
 
+.chat-identity { display:flex; gap:16px; align-items:center; margin:8px 0 12px; }
+.chat-identity img { flex:none; width:84px; height:112px; object-fit:cover; border-radius:24px 28px 10px 14px; }
+.role-dot { padding:0; overflow:hidden; }
+.role-dot img { width:100%; height:100%; object-fit:cover; object-position:50% 24%; }
