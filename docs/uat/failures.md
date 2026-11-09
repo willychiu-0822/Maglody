@@ -4,7 +4,9 @@ Session B，本機 Chrome；桌面 1280×800、手機 390×844。所有功能修
 
 ## UAT-24 — R2 空白工作檯缺少主要動作
 
-狀態：OPEN；負責：session A（codex/burn-a）；分類：UI。
+狀態：CLOSED；負責：session A（codex/burn-a）；分類：UI。
+
+第 2 輪：UAT-24 雙尺寸通過。空白構想可聽推薦情緒、和聲可放入推薦和弦、歌詞有聚焦空白稿紙的主要入口；後續 UAT-56 驗證自己寫詞。
 
 現象：構想、和聲、歌詞在尚未填寫時，可見 `.primary-action` 數量皆為 0；其餘六檯是 1。兩種 viewport 都重現。現有情緒／和弦／文字輸入可以操作，主流程能完成，但初學者首屏缺少單一明確主要動作。
 
@@ -16,7 +18,9 @@ Session B，本機 Chrome；桌面 1280×800、手機 390×844。所有功能修
 
 ## UAT-25 — R4 五角色缺少人物外觀
 
-狀態：OPEN；負責：session A（codex/burn-a）；分類：UI／視覺資產。
+狀態：CLOSED；負責：session A（codex/burn-a）；分類：UI／視覺資產。
+
+第 2 輪：UAT-25、29、57 雙尺寸通過；使用 Willy 核可的 idle-v2 與 room base。已人工核對五張原畫、手機首屏與桌面聊天截圖，外觀對照 docs/design.md、character-design-brief.md；未使用 v1-rejected。
 
 現象：五位角色目前只顯示「製／曲／詞／編／錄」的圓形文字字形，沒有可見的人物外觀。R3 的按檯對應夥伴、五角色切換與回覆已可操作，但尚無法驗收「依真實音樂人外觀」或確認故事書 RPG 人物感。
 

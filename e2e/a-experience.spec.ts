@@ -13,7 +13,7 @@ test('UAT-29 R4 五位角色圖與對應檯位', async ({page}, info) => {
   for (const [desk, role] of [['構想','producer'],['哼唱解析','composer'],['歌詞','lyricist'],['編曲','arranger'],['錄音準備','engineer']]) {
     await visit(page, desk)
     const character = page.locator('.studio-character')
-    await expect(character).toHaveAttribute('src', `/characters/${role}.svg`)
+    await expect(character).toHaveAttribute('src', `/studio/roles/${role}.webp`)
     expect(await character.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0)).toBeTruthy()
     await shot(page,`R4-${role}`,info.project.name)
   }
@@ -123,7 +123,9 @@ test('UAT-36 A-07 空白跳檯仍能先寫旋律、混音與匯出有路徑',asy
   await page.locator('main .primary-action').click()
   await expect(page.locator('main .primary-action')).toHaveText('■ 停')
   await visit(page,'總檢討')
-  await expect(page.getByRole('button',{name:'下載 MIDI，帶進 REAPER',exact:true})).toBeVisible()
+  await expect(page.locator('.demo-missing')).toContainText('和弦')
+  await page.locator('.toolbox > summary').click()
+  await expect(page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true})).toBeEnabled()
   await shot(page,'A07',info.project.name)
 })
 test('UAT-37 R5 聊天和選單中可記靈感再回原處',async({page},info)=>{

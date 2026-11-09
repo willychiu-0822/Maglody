@@ -2,6 +2,7 @@ import { test as base, expect, type Page, type TestInfo } from '@playwright/test
 import path from 'node:path'
 import fs from 'node:fs'
 export { expect }
+export type { Page }
 export const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
 export const projectKey = 'music-lab-project-v2'
 export async function shot(page: Page, info: TestInfo, suffix = '') {

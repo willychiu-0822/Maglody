@@ -30,9 +30,14 @@ export default class UatReporter implements Reporter {
       ['desktop','mobile'].every(viewport => rows.some(row => row.case === id && row.viewport === viewport)))
     const allEvidence = rows.every(row => row.evidence && fs.existsSync(row.evidence))
     const visualOpen = fs.existsSync('docs/uat/failures.md') && fs.readFileSync('docs/uat/failures.md','utf8').includes('狀態：OPEN')
+    const passed = (ids: string[]) => ids.every(id=>['desktop','mobile'].every(viewport=>rows.some(r=>r.case===id&&r.viewport===viewport&&r.status==='pass')))
+    const checks = {R1:['UAT-28','UAT-57'],R2:['UAT-24','UAT-56'],R3:['UAT-25','UAT-30','UAT-53'],R4:['UAT-25','UAT-29','UAT-57'],R5:['UAT-13','UAT-14','UAT-15','UAT-16','UAT-49'],R6:['UAT-33','UAT-58']}
+    const novice = {P0_context_coaching:['UAT-53'],P1_complete_demo:['UAT-54'],P1_denied_mic_demo:['UAT-55'],P1_one_primary:['UAT-24','UAT-56'],P1_approved_characters:['UAT-25','UAT-29','UAT-57'],P2_watercolor:['UAT-28','UAT-57'],P2_knowledge_sparks:['UAT-33','UAT-58']}
+    const outcomes = (mapping:Record<string,string[]>)=>Object.fromEntries(Object.entries(mapping).map(([key,ids])=>[key,{status:passed(ids)?'pass':'not_verified',cases:ids}]))
     const status = { project: 'Maglody', updated, cases: rows.length, pass, fail, blocked,
       ready_for_user_test: result.status === 'passed' && fullMatrix && !fail && !blocked && allEvidence && !visualOpen,
-      notes: `Chrome；desktop 1280x800/mobile 390x844；run=${run}；${fullMatrix ? '完整矩陣' : '部分重跑，不能作為整體通過依據'}；音訊/LLM 採 mock，真實裝置/API 未驗證${visualOpen ? '；A 尚有視覺缺失待修' : ''}${allEvidence ? '' : '；有案例缺少截圖證據'}` }
+      requirements:outcomes(checks), novice_feedback:outcomes(novice),
+      notes: `Chrome；desktop 1280x800/mobile 390x844；run=${run}；${fullMatrix ? '完整矩陣' : '部分重跑，不能作為整體通過依據'}；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證${visualOpen ? '；A 尚有視覺缺失待修' : ''}${allEvidence ? '' : '；有案例缺少截圖證據'}` }
     fs.mkdirSync(`docs/uat/evidence/${run}`, { recursive: true })
     fs.writeFileSync(`docs/uat/evidence/${run}/results.json`, JSON.stringify({ ...status, rows }, null, 2)+'\n')
     fs.writeFileSync('docs/uat/UAT-STATUS.json', JSON.stringify(status,null,2)+'\n')
