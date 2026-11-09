@@ -14,7 +14,7 @@ test('UAT-29 R4 五位角色圖與對應檯位', async ({page}, info) => {
     await visit(page, desk)
     const character = page.locator('.studio-character')
     await expect(character).toHaveAttribute('src', `/studio/roles/${role}.webp`)
-    expect(await character.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0)).toBeTruthy()
+    await expect.poll(() => character.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0), { message: `${role} 的核可人物圖應完成載入` }).toBe(true)
     await shot(page,`R4-${role}`,info.project.name)
   }
 })
