@@ -120,7 +120,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
     <>
       <Coach short={say} />
 
-      <div className="seg seg-quiet">
+      <div className="seg seg-quiet" hidden={!h.verse.some(d => d != null) && !h.chorus.some(d => d != null)}>
         <button className={part === 'verse' ? 'on' : ''} onClick={() => { stop(); setTarget({ part: 'verse', i: Math.max(0, h.verse.indexOf(null)) }) }}>主歌</button>
         <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setTarget({ part: 'chorus', i: Math.max(0, h.chorus.indexOf(null)) }) }}>副歌</button>
       </div>
@@ -128,9 +128,9 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
 
       <div className={`chord-grid ${!h.verse.some((d) => d != null) ? 'nudge' : ''}`}>
         {chords.filter((c) => c.quality !== 'dim').map((c) => (
-          <button key={c.degree} className={`chord ${c.quality} ${humSet.has(c.name) ? 'hum' : ''}`} onClick={() => place(c.degree)}>
+          <button key={c.degree} className={`chord ${c.quality} ${humSet.has(c.name) ? 'hum' : ''}`} data-recommended={c.degree === [0,4,5,3][target.i] || undefined} onClick={() => place(c.degree)}>
             <span className="chord-name">{c.name}</span>
-            <span className="chord-role">{shortRole(c.degree)}</span>
+            <span className="chord-role">{shortRole(c.degree)}</span>{c.degree === [0,4,5,3][target.i] && <small className="material-recommendation">先試這個</small>}
           </button>
         ))}
       </div>
@@ -142,7 +142,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
       ) : full ? (
         <DeskActions primary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }}
           secondary={part === 'verse' && h.chorus.includes(null) ? { label: '換副歌 →', onClick: () => setTarget({ part: 'chorus', i: 0 }) } : undefined} />
-      ) : null}
+      ) : <DeskActions primary={{ label: `放入推薦和弦 ${chords[[0,4,5,3][target.i]].name}`, onClick: () => place([0,4,5,3][target.i]) }} />}
 
       <Toolbox>
         <div className="row wrap">

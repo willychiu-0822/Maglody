@@ -65,7 +65,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
 
       <div className={`mood-grid ${!idea.mood ? 'nudge' : ''}`}>
         {MOODS.map((m) => (
-          <button key={m.id} className={`mood ${idea.mood === m.id ? 'on' : ''}`} aria-pressed={idea.mood === m.id} onClick={() => pickMood(m)}>{m.name}</button>
+          <button key={m.id} className={`mood ${idea.mood === m.id ? 'on' : ''}`} aria-label={m.name} data-recommended={m.id === 'warm' || undefined} aria-pressed={idea.mood === m.id} onClick={() => pickMood(m)}>{m.name}{m.id === 'warm' && <small className="material-recommendation">先試這個</small>}</button>
         ))}
       </div>
 
@@ -76,8 +76,8 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
       {ready && next ? (
         <DeskActions primary={{ label: <>帶著這句話，去{next.label} →</>, onClick: next.go }} secondary={mood ? { label: '▶ 再聽一次這個感覺', onClick: () => preview(p.harmony.mode, idea.bpm) } : undefined} />
       ) : mood ? (
-        <DeskActions secondary={{ label: '▶ 再聽一次這個感覺', onClick: () => preview(p.harmony.mode, idea.bpm) }} />
-      ) : null}
+        <DeskActions primary={{ label: '寫下這首歌的一句話', onClick: () => document.querySelector<HTMLInputElement>('.one-line')?.focus() }} secondary={{ label: '▶ 再聽一次這個感覺', onClick: () => preview(p.harmony.mode, idea.bpm) }} />
+      ) : <DeskActions primary={{ label: '先聽推薦的溫暖療癒', onClick: () => pickMood(MOODS[1]) }} />}
 
       <Toolbox label="多寫一點（選填）">
         <label className="field"><span>歌名（不填就用上面那句）</span><input value={idea.title} onChange={(e) => set('title', e.target.value)} /></label>

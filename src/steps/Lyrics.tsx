@@ -112,7 +112,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
       ) : cur && lines(cur.text).length >= 2 ? (
         <DeskActions primary={{ label: '▶ 聽詞配旋律', onClick: () => speakLyrics(p, cur?.id) }}
           secondary={cur.kind === 'verse' && !secs.some((s) => s.kind === 'chorus' && s.text.trim()) ? { label: '換副歌 →', onClick: () => setCurId(secs.find((s) => s.kind === 'chorus')?.id ?? null) } : undefined} />
-      ) : null}
+      ) : <DeskActions primary={{ label: cur?.text.trim() ? '繼續寫下一句' : '先寫眼前的一個畫面', onClick: () => { if (!cur) add('verse'); else document.querySelector<HTMLTextAreaElement>('.lyric-input')?.focus() } }} />}
 
       <Toolbox>
         {cur && (

@@ -800,3 +800,9 @@ dialog.inspo-overlay::backdrop { background: transparent; }
 .collage-more { width: 100%; font-size: .85rem; color: var(--muted); }
 .collage-more > summary { cursor: pointer; padding: 8px 0; }
 .collage-more .link-btn { display: block; text-align: left; }
+
+/* R2: a quiet recommendation amongst editable musical materials. */
+.material-recommendation { display:block; font-size:.66rem; color:var(--accent); font-weight:400; }
+[data-recommended="true"] { border-color:var(--accent); background:var(--accent-soft); }
+.seg[hidden] { display:none; }
+
