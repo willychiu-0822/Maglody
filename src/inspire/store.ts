@@ -4,6 +4,7 @@ import type { HumNote } from '../lib/pitch'
 import type { Mode } from '../lib/theory'
 import { deleteBlob } from '../lib/media'
 import { uid } from '../lib/store'
+import { record } from '../lib/restore'
 
 /** 這則靈感「可能是什麼」：可以多選，之後決定要拉進哪一步 */
 export type InspoTag = 'title' | 'vibe' | 'lyric' | 'image' | 'story' | 'melody'
@@ -44,7 +45,23 @@ export const SEED: Inspiration = {
 function load(): Inspiration[] {
   try {
     const raw = localStorage.getItem(KEY)
-    const list = raw ? (JSON.parse(raw) as Inspiration[]) : []
+    const parsed: unknown = raw ? JSON.parse(raw) : []
+    const list: Inspiration[] = Array.isArray(parsed) ? parsed.flatMap(value => {
+      const x = record(value)
+      if (typeof x.id !== 'string' || typeof x.text !== 'string') return []
+      const humNotes = record(x.hum).notes
+      const validAsset = (v: unknown) => typeof record(v).assetId === 'string'
+      return [{
+        id: x.id, text: x.text, createdAt: typeof x.createdAt === 'number' ? x.createdAt : Date.now(),
+        note: typeof x.note === 'string' ? x.note : undefined,
+        tags: Array.isArray(x.tags) ? x.tags.filter((t): t is InspoTag => typeof t === 'string' && t in TAG_ZH) : [],
+        images: Array.isArray(x.images) ? x.images.filter(validAsset) as Inspiration['images'] : [],
+        voice: validAsset(x.voice) ? x.voice as Inspiration['voice'] : undefined,
+        hum: Array.isArray(humNotes) && humNotes.every(n => typeof record(n).midi === 'number' && typeof record(n).start === 'number' && typeof record(n).dur === 'number') ? x.hum as Inspiration['hum'] : undefined,
+        fromStep: typeof x.fromStep === 'string' ? x.fromStep : 'idea',
+        used: Array.isArray(x.used) ? x.used.filter(v => typeof record(v).step === 'string' && typeof record(v).how === 'string') as Inspiration['used'] : [],
+      }]
+    }) : []
     if (!localStorage.getItem(SEEDED) && !list.some((x) => x.id === SEED.id)) {
       list.unshift(SEED)
       localStorage.setItem(SEEDED, '1')

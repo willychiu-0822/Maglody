@@ -1,3 +1,4 @@
+import { restoreProject } from './restore'
 import { useCallback, useEffect, useState } from 'react'
 import type { Mode } from './theory'
 import type { HumNote } from './pitch'
@@ -70,9 +71,7 @@ function load(): Project {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return defaultProject()
-    const p = JSON.parse(raw) as Partial<Project>
-    const d = defaultProject()
-    return { ...d, ...p, idea: { ...d.idea, ...p.idea }, harmony: { ...d.harmony, ...p.harmony }, melody: { ...d.melody, ...p.melody }, recording: { ...d.recording, ...p.recording }, mix: { ...d.mix, ...p.mix, tracks: { ...d.mix.tracks, ...p.mix?.tracks } }, review: { ...d.review, ...p.review } } as Project
+    return restoreProject(JSON.parse(raw), defaultProject())
   } catch {
     return defaultProject()
   }
