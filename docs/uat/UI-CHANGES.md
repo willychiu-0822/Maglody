@@ -69,3 +69,13 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 - 原本自由跳檯、作品前進條件與唯一主按鈕都保留。這是本輪探索找到並直接修正的任務文案缺口。
 - 修後混音：[桌面](evidence/A-UI-07-mix-desktop.png)、[手機](evidence/A-UI-07-mix-mobile.png)；總檢討：[桌面](evidence/A-UI-07-review-desktop.png)、[手機](evidence/A-UI-07-review-mobile.png)。修前：[桌面混音](evidence/A-UI-07-before-mix-desktop.png)、[手機總檢討](evidence/A-UI-07-before-review-mobile.png)。
 - UAT-68 兩尺寸先紅→綠；與 UAT-16/36/54/67 共10/10，已看手機混音、桌面總檢討截圖。擴為68個旅程、136次完整驗收，部分通過仍不放行。
+
+## 第 6 輪最終驗收
+
+本輪四筆可見改動均獨立本機提交：UI-04 `d1a6620`、UI-05 `f060750`、UI-06 `f8bf964`、UI-07 `f562252`；UAT-16 測試定位修正為 `abc84a0`，未弱化儲存復原斷言。
+
+最終完整 run `2026-11-10T01-02-26-844Z`：**136/136 通過，0 fail／0 blocked，ready_for_user_test=true**。136 個逐案非空截圖皆已核對，沒有拼接多輪通過。build 通過、最終手機 selftest 50/50，六份核可來源與六份 WebP 雜湊均一致。首次132/134的結果與trace保留。
+
+全綠後再從長歌名、深色地圖、自由跳檯、捲動後捕捉、重整後找回自己的三行歌詞做探索，手機／桌面均通過，無新增缺失、無 JS 錯誤與水平溢出。證據：[桌面紙頁](evidence/A-UI-round6-explore-desktop.png)、[手機紙頁](evidence/A-UI-round6-explore-mobile.png)、[桌面地圖](evidence/A-UI-round6-explore-map-desktop.png)、[手機地圖](evidence/A-UI-round6-explore-map-mobile.png)。已看手機紙頁與桌面地圖。
+
+自己啟動的4101已用保留的session控制關閉，4102由E2E自動關閉，兩埠均確認停止。無push、remote修改、部署、tunnel或其他運維process操作。放行範圍為本機Chrome與本機教練；實體手機、Safari、真LLM與主觀音樂品質仍待使用者親自驗收。

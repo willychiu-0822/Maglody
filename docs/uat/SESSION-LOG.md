@@ -32,3 +32,7 @@
 - 本環境原 linked worktree index 唯讀，使用 scripts/git-local.sh；普通 git status 會讀到舊 index。詳見 LOCAL-TEST.md，請勿因此 reset 或刪檔。
 
 下一輪：先看本文件、git log、以 scripts/git-local.sh status 查看正確狀態，執行 scripts/git-local.sh merge --no-edit codex/burn-a；保留雙方功能解衝突。A 修好後重跑 UAT-24／25、人工確認人物參考與 R1/R3/R6 視覺，再跑完整 npm run test:e2e。OPEN 視覺缺失未結之前不得 ready_for_user_test=true。前輪 B-07 去抖／併發指示保留為後續探索驗證項，不可把本輪通過案例擴大宣稱為所有工程問題已修完。
+
+## 第6輪（2026-11-10）
+
+接續正確.uat-git索引，B merge Already up to date。UI04創作地圖d1a6620、UI05小任務f060750、UI06對比f8bf964、UI07自由跳檯素材提示f562252；UAT16定位修正abc84a0。首次完整132/134因status定位衝突，修後原復原檢查保留；探索新增UAT68紅→綠。最後完整136/136（2026-11-10T01-02-26-844Z）、build pass、selftest50/50、ready=true。逐案證據與四項改造的桌面手機截圖皆可讀；全綠後探索兩尺寸通過。4101/4102均停止，無push／部署／tunnel。只保留本機提交與目前工作目錄。
