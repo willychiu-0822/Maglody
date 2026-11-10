@@ -1014,3 +1014,8 @@ body::before { opacity: .12; }
   .song-trail ul { margin-top: 8px; }
   .song-trail li { padding: 2px 6px; font-size: .75rem; }
 }
+
+/* UI-06 · keep watercolor soft while making small status text legible. */
+.map-stop.on .map-stop-mark, .map-stop.on .map-stop-copy small { color: var(--ink); }
+.desk-mission[data-ready="true"] strong { color: #49633e; }
+@media (prefers-color-scheme: dark) { .desk-mission[data-ready="true"] strong { color: #b1c79e; } }

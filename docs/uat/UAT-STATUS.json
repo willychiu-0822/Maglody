@@ -1,6 +1,6 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 08:50",
+  "updated": "2026-11-10 08:54",
   "cases": 6,
   "pass": 6,
   "fail": 0,
@@ -12,7 +12,8 @@
       "cases": [
         "UAT-28",
         "UAT-57",
-        "UAT-65"
+        "UAT-65",
+        "UAT-66"
       ]
     },
     "R2": {
@@ -20,7 +21,9 @@
       "cases": [
         "UAT-24",
         "UAT-56",
-        "UAT-65"
+        "UAT-65",
+        "UAT-66",
+        "UAT-67"
       ]
     },
     "R3": {
@@ -33,7 +36,9 @@
         "UAT-61",
         "UAT-62",
         "UAT-63",
-        "UAT-65"
+        "UAT-65",
+        "UAT-66",
+        "UAT-67"
       ]
     },
     "R4": {
@@ -145,11 +150,23 @@
       ]
     },
     "studio_song_journal": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-65"
       ]
+    },
+    "studio_map": {
+      "status": "pass",
+      "cases": [
+        "UAT-66"
+      ]
+    },
+    "companion_mission": {
+      "status": "pass",
+      "cases": [
+        "UAT-67"
+      ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T00-50-45-371Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T00-53-59-992Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
 }

@@ -49,3 +49,15 @@
 - 下方四張小材料紙片記住已留下的靈感、和弦、旋律、詞。便箋沒有新增按鈕，唯一的大按鈕與隨手記入口照常可用，小火花仍先收起。
 - 首頁：[桌面](evidence/A-UI-05-desktop.png)、[手機](evidence/A-UI-05-mobile.png)；完成構想後：[桌面](evidence/A-UI-05-ready-desktop.png)、[手機](evidence/A-UI-05-ready-mobile.png)。
 - 驗證：UAT-67 兩尺寸先失敗再通過；與 UAT-24/33/56/58/65 共 12/12。調整手機小字、截圖位置後，UAT-65/66/67 再驗 6/6。已人工看兩尺寸首頁與構想便箋，文字與人物清楚；完整放行以本輪完整矩陣為準。
+
+## UI-06：淡彩保留，定位和完成提示更好讀（R1、UAT-66/67）
+
+獨立審查發現「你在這裡」、當前夥伴小字和任務完成提示的文字偏淡。已用實際瀏覽器量測重現 3.12／3.83／3.36:1，再加深小字：地圖當前文字淺色 10.14:1、深色 9.33:1；任務完成文字淺色 6.19:1、深色 8.14:1（相對紙底），皆高於 4.5:1。水彩底與墨線保留，操作不變。
+
+- 地圖：[桌面](evidence/A-UI-06-light-map-desktop.png)、[手機](evidence/A-UI-06-light-map-mobile.png)。
+- 完成任務：[桌面](evidence/A-UI-06-light-ready-desktop.png)、[手機](evidence/A-UI-06-light-ready-mobile.png)。
+- 夜間紙面：[桌面](evidence/A-UI-06-dark-ready-desktop.png)、[手機](evidence/A-UI-06-dark-ready-mobile.png)。
+
+已看手機地圖、桌面夜間紙面截圖；獨立 reviewer 已確認唯一 Important 項解決，沒有其他重大發現。實體裝置與真 LLM 尚待使用者測試。
+
+UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 ready=false，接續本輪完整 134 次驗收。
