@@ -125,7 +125,8 @@ export default function App() {
           <span className="brand-mark">Maglody</span>　{step.title} <span aria-hidden>▾</span>
         </button>
         <button className={`sticker ${inspoRec ? 'rec' : ''}`} onClick={() => setInspoOpen('capture')} aria-label="記一下靈感">
-        <span aria-hidden>✎</span> {inspoRec ? '錄音中' : '記一下'}
+        <span className="sticker-label"><span aria-hidden>✎</span> {inspoRec ? '錄音中' : '記一下'}</span>
+        <small>{inspoRec ? '靈感先留在這裡' : '文字 · 哼唱'}</small>
       </button>
       </header>
 

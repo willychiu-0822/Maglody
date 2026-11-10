@@ -19,3 +19,11 @@
 - 場景下方的「歌的手記」會顯示自己已留下的一句靈感、和弦、旋律與歌詞；可自由跳檯，不必過關。紙頁顯示目前的發想／成形／打磨篇與頁次，沒有新增行動按鈕。
 - 首頁：[桌面](evidence/A-UI-02-desktop.png)、[手機](evidence/A-UI-02-mobile.png)；作詞人陪伴：[桌面](evidence/A-UI-02-detail-desktop.png)、[手機](evidence/A-UI-02-detail-mobile.png)。
 - 驗證：UAT-24/25/29/30/57 兩尺寸 10/10；新增 UAT-65 兩尺寸 2/2，實際輸入自己的句子與歌詞，跳檯、重整後手記仍保留。核可首屏圖片仍共 113,766 bytes，小於 150KB，未增加圖檔請求。
+
+## UI-03：隨時記住靈感，知識像一張可翻開的小紙片（R2、R5、R6）
+
+- 固定在頁首的「記一下」便條補上「文字 · 哼唱」，新手不用先點開猜用途；打開選單或聊天時仍能記，保存後回到原工作。
+- 動手後才出現「小火花」淡綠紙片，先看一句短觀察；想知道才按紙片展開。右下角的加／減號表明可開合，深入說明仍另外收起。
+- 情緒材料的推薦小字加大，仍只凸顯一個大主動作。
+- 小火花收合：[桌面](evidence/A-UI-03-desktop.png)、[手機](evidence/A-UI-03-mobile.png)；展開：[桌面](evidence/A-UI-03-open-desktop.png)、[手機](evidence/A-UI-03-open-mobile.png)；記下念頭：[桌面](evidence/A-UI-03-capture-desktop.png)、[手機](evidence/A-UI-03-capture-mobile.png)。
+- 驗證：UAT-13/32/33/37/56/58 兩尺寸 12/12，包含九檯捕捉、聊天與選單裡捕捉、保存返回原處、知識預設收合、額外觀察一次一則。

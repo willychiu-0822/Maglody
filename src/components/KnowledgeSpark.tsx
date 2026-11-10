@@ -16,5 +16,5 @@ export function KnowledgeSpark({ step, p }: { step: string; p: Project }) {
   }
   const spark = sparks[step]
   if (!spark?.ready) return null
-  return <details className="knowledge-spark"><summary><span aria-hidden="true">◦ </span>{spark.line}<span className="spark-invite">想知道？</span></summary><div className="spark-body"><p>{spark.detail}</p><details><summary>再深一點</summary><p>打開下方工具箱的「想知道？」可以看原理，並用這首歌的聲音再試一次。</p></details></div></details>
+  return <details className="knowledge-spark"><summary><span className="spark-kicker">小火花</span><span className="spark-line">{spark.line}</span><span className="spark-invite">想知道？<span className="spark-toggle" aria-hidden="true" /></span></summary><div className="spark-body"><p>{spark.detail}</p><details><summary>再深一點</summary><p>打開下方工具箱的「想知道？」可以看原理，並用這首歌的聲音再試一次。</p></details></div></details>
 }

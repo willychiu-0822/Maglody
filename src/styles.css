@@ -935,3 +935,26 @@ body::before { opacity: .12; }
   .room-caption { color: var(--ink); background: var(--paper); }
   .room-caption > span { color: var(--muted); }
 }
+
+/* UI-03 · a small note within reach; knowledge on an optional watercolor scrap. */
+.sticker { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px 13px 12px; flex: none; }
+.sticker-label { font-size: 1rem; line-height: 1.4; white-space: nowrap; }
+.sticker > small { font-family: var(--font-body); font-size: .62rem; letter-spacing: .08em; opacity: .8; line-height: 1.6; }
+.knowledge-spark {
+  order: 2; position: relative; border: 1px solid var(--line); border-left: 3px solid #9baf8a;
+  padding: 12px 14px; background: radial-gradient(ellipse at 8% 5%, var(--wash-sage), transparent 85%), var(--paper);
+  border-radius: 3px 14px 6px 9px; color: var(--ink); font-size: .88rem;
+}
+.knowledge-spark::before { content: ''; position: absolute; right: 16px; top: -5px; width: 32px; height: 9px; transform: rotate(4deg); background: color-mix(in srgb, var(--wash-ochre) 70%, transparent); border: 1px solid var(--line); }
+.knowledge-spark > summary { min-height: 44px; }
+.knowledge-spark > summary::-webkit-details-marker { display: none; }
+.spark-kicker { display: block; font-family: var(--font-title); font-size: .9rem; color: #5c7050; margin-bottom: 5px; letter-spacing: .15em; }
+.spark-line { display: block; line-height: 1.7; }
+.spark-invite { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: .78rem; color: var(--muted); }
+.spark-toggle { font-size: 1.1rem; color: var(--accent); }
+.spark-toggle::after { content: '＋'; }
+.knowledge-spark[open] .spark-toggle::after { content: '－'; }
+.spark-body { border-top: 1px dashed var(--grid-strong); padding-top: 8px; font-size: .88rem; }
+.spark-body details > summary { min-height: 44px; cursor: pointer; display: flex; align-items: center; color: var(--accent); }
+.material-recommendation { font-size: .72rem; }
+@media (prefers-color-scheme: dark) { .spark-kicker { color: #afc19d; } }
