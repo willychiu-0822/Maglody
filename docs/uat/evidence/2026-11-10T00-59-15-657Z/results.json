@@ -1,0 +1,230 @@
+{
+  "project": "Maglody",
+  "updated": "2026-11-10 08:59",
+  "cases": 8,
+  "pass": 8,
+  "fail": 0,
+  "blocked": 0,
+  "ready_for_user_test": false,
+  "requirements": {
+    "R1": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-28",
+        "UAT-57",
+        "UAT-65",
+        "UAT-66"
+      ]
+    },
+    "R2": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-24",
+        "UAT-56",
+        "UAT-65",
+        "UAT-66",
+        "UAT-67"
+      ]
+    },
+    "R3": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-25",
+        "UAT-30",
+        "UAT-53",
+        "UAT-59",
+        "UAT-61",
+        "UAT-62",
+        "UAT-63",
+        "UAT-65",
+        "UAT-66",
+        "UAT-67"
+      ]
+    },
+    "R4": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "R5": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-13",
+        "UAT-14",
+        "UAT-15",
+        "UAT-16",
+        "UAT-49",
+        "UAT-60"
+      ]
+    },
+    "R6": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "novice_feedback": {
+    "P0_context_coaching": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-53"
+      ]
+    },
+    "P1_complete_demo": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-54"
+      ]
+    },
+    "P1_denied_mic_demo": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-55"
+      ]
+    },
+    "P1_one_primary": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-24",
+        "UAT-56"
+      ]
+    },
+    "P1_approved_characters": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-25",
+        "UAT-29",
+        "UAT-57"
+      ]
+    },
+    "P2_watercolor": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-28",
+        "UAT-57"
+      ]
+    },
+    "P2_knowledge_sparks": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-33",
+        "UAT-58"
+      ]
+    }
+  },
+  "exploration": {
+    "A_N08_long_conversation": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-61"
+      ]
+    },
+    "A_N09_role_waiting": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-62"
+      ]
+    },
+    "A_N10_mic_limit_without_frames": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-52",
+        "UAT-43"
+      ]
+    },
+    "A_N11_new_song_conversation": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-63"
+      ]
+    },
+    "text_first_song": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-64"
+      ]
+    },
+    "studio_song_journal": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-65"
+      ]
+    },
+    "studio_map": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-66"
+      ]
+    },
+    "companion_mission": {
+      "status": "pass",
+      "cases": [
+        "UAT-67"
+      ]
+    }
+  },
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T00-59-15-657Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證",
+  "rows": [
+    {
+      "case": "UAT-16",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/desktop/UAT-16.png"
+    },
+    {
+      "case": "UAT-16",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/mobile/UAT-16.png"
+    },
+    {
+      "case": "UAT-49",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/desktop/UAT-49.png"
+    },
+    {
+      "case": "UAT-49",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/mobile/UAT-49.png"
+    },
+    {
+      "case": "UAT-60",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/desktop/UAT-60.png"
+    },
+    {
+      "case": "UAT-60",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/mobile/UAT-60.png"
+    },
+    {
+      "case": "UAT-67",
+      "viewport": "desktop",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/desktop/UAT-67.png"
+    },
+    {
+      "case": "UAT-67",
+      "viewport": "mobile",
+      "status": "pass",
+      "reason": "",
+      "evidence": "docs/uat/evidence/2026-11-10T00-59-15-657Z/mobile/UAT-67.png"
+    }
+  ]
+}

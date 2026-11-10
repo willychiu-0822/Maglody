@@ -87,7 +87,7 @@ test('UAT-16 媒體儲存失敗可以恢復文字捕捉', async ({ page }) => {
   await expect(page.locator('.inspo-big.rec')).toBeVisible()
   await page.waitForTimeout(700)
   await page.locator('.inspo-big.rec').click()
-  await expect(page.getByRole('status')).toContainText(/儲存|空間|失敗/)
+  await expect(page.locator('.toast[role="status"]')).toContainText(/儲存|空間|失敗/)
   await expect(page.locator('.inspo-big').first()).toBeEnabled()
   await page.getByRole('button',{name:'先另存文字，錄音留著',exact:true}).click()
   await page.getByRole('button',{name:'記一下靈感'}).click()
