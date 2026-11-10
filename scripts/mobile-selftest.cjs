@@ -1,6 +1,7 @@
 // 用法：npm run build && npx vite preview --port 4101，另開終端機執行 node scripts/mobile-selftest.cjs
 // 斷言式手機自測：每屏 ≤1 主動作、≤1 次要；靈感多模態；角色自由聊；全流程到總檢討
 const { chromium, devices } = require('playwright')
+const { expect } = require('@playwright/test')
 const results = []
 const check = (name, ok, detail = '') => { results.push({ name, ok, detail }); console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? '  — ' + detail : ''}`) }
 async function screen(page, label) {
@@ -33,10 +34,17 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
   try {
     // 哼唱：真（假）麥克風錄音
     await screen(page, '哼唱 首屏')
-    await pclick(page, /哼一段/); await page.waitForTimeout(1800)
+    await pclick(page, /哼一段/)
+    // Permission/device startup is asynchronous; record for 1.8s only after capture starts.
+    await expect(P(page)).toHaveText('■ 哼完了')
+    await page.waitForTimeout(1800)
     await screen(page, '哼唱 錄音中')
-    await pclick(page, /哼完/); await page.waitForTimeout(2500)
-    check('哼唱：麥克風錄音後有分析結果', await page.locator('main .pitch-canvas').count() > 0)
+    await pclick(page, /哼完/)
+    // The live canvas can still be on screen before analysis writes the result.
+    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('music-lab-project-v2')).hum)).toMatchObject({ source: 'mic' })
+    await expect(page.locator('main .pitch-canvas')).toBeVisible()
+    const captured = await page.evaluate(() => JSON.parse(localStorage.getItem('music-lab-project-v2')).hum)
+    check('哼唱：麥克風錄音後有分析結果', await page.locator('main .pitch-canvas').count() > 0 && captured?.source === 'mic' && captured.duration > 0)
     // 改用示範哼唱（音比較多）
     await page.evaluate(() => { const k = 'music-lab-project-v2'; const p = JSON.parse(localStorage.getItem(k)); p.hum = null; localStorage.setItem(k, JSON.stringify(p)) })
     await page.reload(); await page.waitForTimeout(500)
@@ -146,13 +154,18 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
   // 角色自由聊：在構想檯跟 5 位都聊
   try {
     await page.locator('.presence').click(); await page.waitForTimeout(200)
-    const names = ['製', '曲', '詞', '編', '錄']
+    const names = ['製作人', '作曲家', '作詞人', '編曲', '錄音師']
+    const portraits = ['producer', 'composer', 'lyricist', 'arranger', 'engineer']
     for (let i = 0; i < 5; i++) {
       await page.locator('.role-dot').nth(i).click()
       await page.locator('.master-input input').fill(i === 2 ? '幫我寫一句' : '下一步')
-      await page.locator('.master-input button').click(); await page.waitForTimeout(450)
-      const who = await page.locator('.msg-master .msg-avatar').last().textContent()
-      check(`角色自由聊：${names[i]} 回答（目前在構想檯）`, who === names[i], `回答者=${who}`)
+      const before = await page.locator('.msg-master:not(:has(.typing))').count()
+      await page.locator('.master-input button').click()
+      await expect(page.locator('.msg-master:not(:has(.typing))')).toHaveCount(before + 1)
+      const reply = page.locator('.msg-master:not(:has(.typing))').last()
+      const who = await reply.locator('.msg-speaker').textContent()
+      const portrait = await reply.locator('.msg-avatar img').getAttribute('src')
+      check(`角色自由聊：${names[i]} 回答（目前在構想檯）`, who === names[i] && portrait === `/studio/roles/${portraits[i]}.webp`, `回答者=${who}｜人物=${portrait}`)
     }
     const lyr = await page.evaluate(() => { const ms = [...document.querySelectorAll('.master-list .msg')]; const i = ms.findIndex((m) => m.classList.contains('msg-student') && m.textContent.includes('幫我寫一句')); return ms.slice(i + 1).find((m) => m.classList.contains('msg-master'))?.textContent || '' })
     check('作詞人不代寫整句', /不替你寫完/.test(lyr), lyr.slice(0, 40))
