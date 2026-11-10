@@ -20,7 +20,7 @@ Repo：<https://github.com/willychiu-0822/Maglody>
 - 本機 Chrome 的手機 390×844／桌面 1280×800 驗收：[UAT 計畫](docs/uat/UAT-PLAN.md)、[最新結果與截圖](docs/uat/UAT-RESULTS.md)、[機器狀態](docs/uat/UAT-STATUS.json)。
 - `npm run build`、`npm run selftest`、`npm run test:logic` 是補充檢查；範圍與修正記錄見 [Session A 清單](docs/codex-fixlist-a.md)。
 - 尚未驗證：實體手機、iOS Safari 的麥克風/靜音鍵/聽寫/PWA 安裝，以及真實 OpenAI/Gemini/Vertex 金鑰。預設使用離線 mock，測試不需要金鑰。
-- 已接手並合併 session B，兩邊案例加上長時間使用探索編為 UAT-01～68。第 5 輪完成全站手寫紙頁、場景／手記與小火花卡片；第 6 輪新增淡彩創作地圖、隨素材變化的夥伴小任務，並加深定位／完成提示文字。[改造對照與桌面／手機截圖](docs/uat/UI-CHANGES.md)。完整矩陣已擴為 UAT-01～68 × 兩尺寸共 136 次，第6輪最後完整136/136通過、手機selftest50/50；是否放行以最新狀態檔為準。原 worktree metadata 唯讀，本機提交使用 `scripts/git-local.sh`（HEAD/index 留在本目錄 `.uat-git`，沿用原 shared refs/objects，未改 remote）。無 push、部署或 tunnel。
+- 已接手 session B，正式矩陣為 UAT-01～70 × 手機／桌面共140次。第7輪新增全夥伴紙箋對話、核可人物回答與矮畫面小景；[改造與桌面／手機截圖](docs/uat/UI-CHANGES.md)。最後完整140/140、手機selftest50/50、build通過；放行以最新狀態檔為準。原worktree metadata唯讀，提交使用 `scripts/git-local.sh`；無push、部署或tunnel操作。
 
 本機完整驗收（自動 build，在 4102 啟動 preview，跑完關閉）：
 

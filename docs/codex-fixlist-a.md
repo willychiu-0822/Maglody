@@ -2,7 +2,7 @@
 
 日期：2026-11-09。分支：`codex/burn-a`。只在本機 commit，未連網、未 push、未修改 remote。
 
-最新進度：第 4 輪 2026-11-10 08:26，R1～R6、新手 P0～P2 與新增探索均通過；完整 128/128、ready=true。已修新歌對話隔離 UAT-63，新增文字起步 UAT-64；以文末與 [UAT-STATUS.json](uat/UAT-STATUS.json) 為準。以下較早環境限制保留作歷史記錄。
+最新進度：第7輪 2026-11-10 09:29，UI08紙箋對話、UI09矮畫面場景已獨立提交；最後完整140/140、selftest50/50、build通過，ready=true；原R1–R6／新手P0→P2均通過本機Chrome範圍。歷史記錄保留，最新詳見[UAT-STATUS.json](uat/UAT-STATUS.json)。
 
 ## 方法與限制
 
@@ -337,3 +337,5 @@ UI-09結果：UAT-70兩尺寸先RED（內容高度0px）→GREEN；與UAT-31/37/
 ### 第7輪selftest接續（UAT-02／04）
 
 140/140完整E2E通過後，補充selftest首次44/50：五項角色仍讀已移除的單字圓章；另有錄音計時與結果就緒檢查。五角色改查每則新回答的完整姓名＋核可圖路徑，等待實際回答數量增加，保留拒絕代寫。錄音保持1.8秒，但等待「哼完了」證明已收音後才計時；即時canvas可能早於結果存入，第二次49/50後改等待實際mic分析寫入，再要求結果圖可見及來源mic、長度>0。未把假音或無聲判成成功，未修改產品錄音程式。最終selftest **50/50**、exit0，完整輸出在uat/evidence/A-round7-selftest.txt。
+
+第7輪最終：2026-11-10T01-21-10-291Z完整140/140、逐案非空證據140/140、build pass、selftest50/50；全綠後自己的問題／原詞探索兩尺寸通過。UI08 `6c56432`、UI09 `dc26518`、selftest `a3c0022`。Final: fixed short-viewport reading — UAT-70 RED→GREEN, suite140/140。無未解Critical/Important、無deferred minor；4101/4102已停止。
