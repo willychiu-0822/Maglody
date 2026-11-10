@@ -139,3 +139,29 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 - 保存、拼貼與儲存失敗提示都附「好」按鈕，讀完再收起。提示放在頁首，手機不用往下找；重新打開隨手記也可在紙頁裡按好，沒有被彈窗擋住的按鈕。
 - 截圖：[桌面](evidence/A-UI-12-notice-desktop.png)、[手機](evidence/A-UI-12-notice-mobile.png)。已實際檢視兩尺寸，發現初版提示排在頁尾後改到頁首並重截；通知不遮擋輸入或主動作。
 - 相關UAT-16/49/60/69/70/72/73共14/14通過；調整位置後UAT-73兩尺寸2/2通過，自動build通過。完整矩陣待本輪結束重跑，ready=false。
+
+## UI-13：按鈕有墨線、手指按得準（第9輪，UAT-74／UAT-38）
+
+- 全站次要動作從純文字外觀改成低彩度墨線按鈕。包含角色切換、工具箱、主副歌切換、旋律格與混音滑桿，點擊區都至少44×44px，按住會變暗並出現內墨線。
+- 主動作保留較大的淡水彩按鈕；地圖新增「回到目前工作檯，繼續創作」，本子沒挑紙片時有「記下一點新靈感」，挑紙片後讓位給原有主動作。
+- 放大音符格後，格子內可左右捲動，補上說明並可鍵盤進入。手機角色腳邊調回場景底線；聊天的X固定排在右上方。
+- 作品儲存失敗改為真正的「重試保存」按鈕，不再要求先改一個字。UAT-38實際恢復儲存、按重試、重整驗證歌曲保留。
+- 人工逐頁檢視下列18張與四種彈窗兩尺寸：人物在核可場景、字可讀、九檯恰一主動作、次要層次明確、沒有整頁水平溢出。旋律格內捲動保留完整32格。
+
+| 畫面 | 桌面截圖 | 手機截圖 |
+|---|---|---|
+| 哼唱 | [桌面](evidence/A-UI-13-page-1-desktop.png) | [手機](evidence/A-UI-13-page-1-mobile.png) |
+| 構想 | [桌面](evidence/A-UI-13-page-2-desktop.png) | [手機](evidence/A-UI-13-page-2-mobile.png) |
+| 和聲 | [桌面](evidence/A-UI-13-page-3-desktop.png) | [手機](evidence/A-UI-13-page-3-mobile.png) |
+| 旋律 | [桌面](evidence/A-UI-13-page-4-desktop.png) | [手機](evidence/A-UI-13-page-4-mobile.png) |
+| 歌詞 | [桌面](evidence/A-UI-13-page-5-desktop.png) | [手機](evidence/A-UI-13-page-5-mobile.png) |
+| 編曲 | [桌面](evidence/A-UI-13-page-6-desktop.png) | [手機](evidence/A-UI-13-page-6-mobile.png) |
+| 錄音準備 | [桌面](evidence/A-UI-13-page-7-desktop.png) | [手機](evidence/A-UI-13-page-7-mobile.png) |
+| 混音觀念 | [桌面](evidence/A-UI-13-page-8-desktop.png) | [手機](evidence/A-UI-13-page-8-mobile.png) |
+| 總檢討 | [桌面](evidence/A-UI-13-page-9-desktop.png) | [手機](evidence/A-UI-13-page-9-mobile.png) |
+| 地圖 | [桌面](evidence/A-UI-13-map-desktop.png) | [手機](evidence/A-UI-13-map-mobile.png) |
+| 夥伴聊天 | [桌面](evidence/A-UI-13-chat-desktop.png) | [手機](evidence/A-UI-13-chat-mobile.png) |
+| 隨手記 | [桌面](evidence/A-UI-13-capture-desktop.png) | [手機](evidence/A-UI-13-capture-mobile.png) |
+| 靈感本子 | [桌面](evidence/A-UI-13-library-desktop.png) | [手機](evidence/A-UI-13-library-mobile.png) |
+
+相關UAT-24/38/70/73/74共10/10通過，加入格子左右捲動說明後UAT-74兩尺寸2/2通過，自動build通過。手機selftest首次49/50（新增「好」被舊多餘按鈕檢查攔下）；補上實際按好確認及消失斷言，不放寬原檢查，重跑51/51。初次記錄保留在A-round9-selftest-initial.txt。最後完整148次仍待重跑，ready=false。

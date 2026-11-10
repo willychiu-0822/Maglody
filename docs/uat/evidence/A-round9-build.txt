@@ -1,0 +1,15 @@
+
+> maglody@0.1.0 build
+> tsc -b && vite build && node scripts/prepare-offline.mjs
+
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 71 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                         1.10 kB │ gzip:   0.59 kB
+dist/assets/iansui-ui-xpl34yzE.woff2  365.38 kB
+dist/assets/index-DI4vK1Gk.css         68.66 kB │ gzip:  14.40 kB
+dist/assets/index-_7bPNo-d.js         400.52 kB │ gzip: 140.04 kB
+✓ built in 1.10s
+Offline shell prepared: 10 build assets

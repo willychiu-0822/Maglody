@@ -276,6 +276,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
 
             {open === 'library' && (
               <div className="inspo-list">
+                {(collage ? picked.length < 2 : !api.list.some(x => x.id === expanded)) && <div className="library-entry"><DeskActions primary={{ label: '記下一點新靈感', onClick: () => setOpen('capture') }} /></div>}
                 <button className="link-btn" onClick={() => { setCollage(!collage); setPicked([]) }}>{collage ? '不拼了' : '拼貼：挑幾則拼成新東西'}</button>
                 {picked.length >= 2 && (
                   <div className="collage-bar">

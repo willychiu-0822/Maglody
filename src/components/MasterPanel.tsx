@@ -35,7 +35,7 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
 
   return (
     <Modal label={`跟${role.name}聊`} className="chat-sheet" onClose={onClose}>
-        <div className="row between">
+        <div className="row between chat-toolbar">
           <div className="role-switch" role="tablist" aria-label="選擇夥伴">
             {ROLE_ORDER.map((id) => (
               <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name} aria-label={ROLES[id].name}><img src={`/studio/roles/${id}.webp`} width="40" height="40" alt="" /></button>

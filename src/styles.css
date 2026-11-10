@@ -144,14 +144,14 @@ p { margin: .4em 0; }
 .why-apply { margin-top: 8px; background: var(--chip); border-radius: 10px; padding: 8px 10px; font-size: .9rem; }
 
 /* ---------- buttons / inputs ---------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); cursor: pointer; font-weight: 600; transition: transform .08s, background .15s; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); cursor: pointer; font-weight: 600; transition: transform .08s, background .15s; }
 .btn:active { transform: scale(.97); }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn-danger { background: var(--bad); border-color: var(--bad); color: #fff; }
 .btn-ghost { background: transparent; }
 .btn-lg { min-height: 48px; padding: 10px 20px; font-size: 1.02rem; }
-.btn.small { min-height: 32px; padding: 4px 10px; font-size: .85rem; }
+.btn.small { min-height: 44px; padding: 4px 10px; font-size: .85rem; }
 .icon-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); cursor: pointer; }
 .chip { border: 1px solid var(--line); background: var(--chip); padding: 4px 12px; border-radius: 999px; cursor: pointer; font-size: .88rem; }
 .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
@@ -272,7 +272,7 @@ textarea { resize: vertical; }
 
 /* ---------- arrangement ---------- */
 .energy { display: flex; gap: 4px; height: 140px; align-items: stretch; margin-top: 14px; }
-.energy-col { flex: 1 1 0; min-width: 34px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; padding: 4px 2px; position: relative; }
+.energy-col { flex: 1 1 0; min-width: 44px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; padding: 4px 2px; position: relative; }
 .energy-col.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .energy-bar { width: 80%; border-radius: 4px 4px 0 0; background: var(--grid-strong); min-height: 4px; transition: height .25s; }
 .k-chorus .energy-bar { background: var(--accent); }
@@ -384,8 +384,8 @@ input, textarea, select { font-size: 16px; } /* iOS：小於 16px 會在聚焦�
 .reaper-steps li { margin: 4px 0; }
 @media (pointer: coarse) {
   .btn { min-height: 44px; }
-  .btn.small { min-height: 40px; }
-  .chip { min-height: 38px; padding: 6px 14px; }
+  .btn.small { min-height: 44px; }
+  .chip { min-height: 44px; padding: 6px 14px; }
   .icon-btn { width: 44px; height: 44px; }
   .cell { height: 38px; }
   .star { width: 48px; height: 48px; }
@@ -614,17 +614,17 @@ h1 { font-size: 1.85rem; letter-spacing: .08em; }
 .inspo-card .pick { display: flex; gap: 6px; align-items: center; font-size: .85rem; color: var(--muted); cursor: pointer; }
 .inspo-card.picked { background: color-mix(in srgb, var(--wash-ochre) 55%, transparent); }
 /* 火種式學習：一行好奇心，不是知識牆 */
-.link-btn { background: none; border: none; padding: 4px 0; min-height: 32px; color: var(--accent); text-decoration: underline dotted; text-underline-offset: 4px; cursor: pointer; font-size: .9rem; }
+.link-btn { background: none; border: none; padding: 4px 0; min-height: 44px; color: var(--accent); text-decoration: underline dotted; text-underline-offset: 4px; cursor: pointer; font-size: .9rem; }
 .coach-more { margin-top: 6px; color: var(--ink); }
 .why { border-style: dotted; }
 .why-head { padding: 10px 14px; }
 .why-title { font-weight: 400; }
 .why-apply summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
-.inspo-card .pick { min-height: 40px; }
+.inspo-card .pick { min-height: 44px; }
 .cheat summary { cursor: pointer; list-style: none; margin: 0; }
 .cheat summary::-webkit-details-marker { display: none; }
 .cheat[open] summary { margin-bottom: 10px; }
-details.quiet summary { cursor: pointer; color: var(--accent); text-decoration: underline dotted; text-underline-offset: 4px; font-size: .9rem; min-height: 36px; display: flex; align-items: center; list-style: none; }
+details.quiet summary { cursor: pointer; color: var(--accent); text-decoration: underline dotted; text-underline-offset: 4px; font-size: .9rem; min-height: 44px; display: flex; align-items: center; list-style: none; }
 details.quiet summary::-webkit-details-marker { display: none; }
 .spark { font-size: 1.05rem; }
 @media (pointer: coarse) { .link-btn { min-height: 44px; } .inspo-card .pick input { width: 26px; height: 26px; } }
@@ -676,7 +676,7 @@ details.quiet summary::-webkit-details-marker { display: none; }
 
 /* 安靜的分頁 */
 .seg-quiet { border: none; gap: 18px; align-self: center; }
-.seg-quiet button { background: none !important; color: var(--muted); padding: 8px 2px; min-height: 40px; border-bottom: 1.5px solid transparent; border-radius: 0; font-size: .95rem; }
+.seg-quiet button { background: none !important; color: var(--muted); padding: 8px 2px; min-height: 44px; border-bottom: 1.5px solid transparent; border-radius: 0; font-size: .95rem; }
 .seg-quiet button.on { color: var(--ink); border-bottom-color: var(--accent); }
 
 /* 構想：情緒是一排淡彩紙片 */
@@ -722,7 +722,7 @@ textarea.one-line { border: 1px solid var(--line) !important; border-radius: 12p
 .inspo-media { display: flex; gap: 14px; justify-content: center; }
 .inspo-media .inspo-big { min-height: 0; width: 76px; padding: 6px 0; border: none; background: none; gap: 4px; }
 .inspo-media .inspo-big-icon { width: 52px; height: 52px; font-size: 1.1rem; }
-.inspo-tags-wrap summary { cursor: pointer; list-style: none; min-height: 36px; }
+.inspo-tags-wrap summary { cursor: pointer; list-style: none; min-height: 44px; }
 .inspo-more { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
 .inspo-card .inspo-actions { flex-direction: column; }
 
@@ -913,7 +913,7 @@ body::before { opacity: .12; }
   .studio-scene { border-radius: 3px 25px 6px 20px; }
   .room-caption { top: 10px; left: auto; right: 12px; font-size: 1rem; padding: 5px 10px; }
   .room-caption > span { display: none; }
-  .studio-character { width: 166px; height: 222px; left: 2px; bottom: -8px; }
+  .studio-character { width: 166px; height: 222px; left: 2px; bottom: 0; }
   .presence-name { right: 10px; bottom: 12px; width: 52%; padding: 8px 10px; }
   .presence-name strong { font-size: 1.05rem; }
   .presence-state { -webkit-line-clamp: 2; font-size: .77rem; }
@@ -1123,6 +1123,30 @@ body::before { opacity: .12; }
 .toast > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .toast .notice-ack { flex: none; min-width: 56px; min-height: 44px; background: var(--wash-sage); }
 .notebook-sheet > .toast { width: 100%; margin: 0 0 12px; }
+
+/* UI-13 · paper buttons remain recognizable and easy to press on every device. */
+:where(.app) :where(button, summary, select, input[type="range"]) { min-width: 44px; min-height: 44px; }
+.app button { transition: background-color .12s, filter .08s, box-shadow .08s; }
+.app button:enabled:active { filter: brightness(.9); box-shadow: inset 0 0 0 2px var(--accent); }
+.app .link-btn { border: 1px solid var(--grid-strong); border-radius: 4px 9px 5px 8px; padding: 8px 12px; text-decoration: none; background: color-mix(in srgb, var(--paper) 75%, transparent); }
+.app .desk-actions .link-btn { align-self: center; }
+.app .icon-btn, .app .role-dot { flex-shrink: 0; }
+.app .role-switch { flex-shrink: 0; }
+.app .cell { height: 44px; }
+.app summary { border: 1px dashed var(--grid-strong); border-radius: 4px 8px 5px 7px; padding: 9px 12px; }
+.app .inspo-card .pick { min-height: 44px; }
+.menu-return { margin: 0; }
+.library-entry { margin: 0 0 12px; }
+.library-entry .desk-actions { margin: 0; }
 .notebook-sheet .inspo-text { line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
 .notebook-sheet .inspo-list { gap: 14px; padding: 4px 3px 4px 0; }
 @media (max-width: 640px) { .notebook-sheet { padding: 24px 18px calc(18px + env(safe-area-inset-bottom)) 26px; border-radius: 12px 18px 0 0; } .notebook-sheet::before { left: 12px; } .notebook-cover h1 { font-size: 1.4rem; } }
+
+.storage-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.storage-notice > span { flex: 1 1 240px; }
+@media (max-width: 520px) {
+  .chat-sheet .chat-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; }
+  .chat-toolbar .role-switch { grid-row: 2; grid-column: 1 / -1; }
+  .chat-toolbar .modal-capture { grid-row: 1; grid-column: 1; justify-self: end; }
+  .chat-toolbar .icon-btn { grid-row: 1; grid-column: 2; }
+}

@@ -144,7 +144,7 @@ export default function App() {
         onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
         open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
 
-      {storageError && <p className="storage-notice" role="status">這首歌還沒存進瀏覽器，請先留在這頁。釋出儲存空間後，再改一個字就會重試。</p>}
+      {storageError && <div className="storage-notice" role="status"><span>這首歌還沒存進瀏覽器，請先留在這頁。釋出儲存空間後，按「重試保存」。</span><button className="btn" onClick={() => setProject({ ...p })}>重試保存</button></div>}
       <main className="desk" key={step.key}>
         <div className="studio-corner">
         <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.isBusy(step.key, role.id)} onChat={() => openChat(role.id)} />
@@ -178,6 +178,7 @@ export default function App() {
       {menu && (
         <Modal label="工作室" className="menu-sheet" onClose={() => setMenu(false)}>
             <div className="row between"><strong className="menu-title">工作室</strong><button className="link-btn modal-capture" onClick={() => setInspoOpen('capture')}>✎ 記一下</button><button className="icon-btn" onClick={() => setMenu(false)} aria-label="關閉">✕</button></div>
+            <button className="primary-action menu-return" onClick={() => setMenu(false)}>回到{step.title}，繼續創作</button>
             <nav className="studio-map" aria-label="創作地圖">
             <div className="map-intro"><p>一首歌的探險地圖</p><span>可以跳著走，隨時回來。每一檯，都有人陪你。</span></div>
             <div className="map-regions">

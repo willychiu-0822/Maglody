@@ -194,8 +194,9 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
             ))}
           </div>
         )}
-        <div className="roll-scroll">
-          <div className={`roll ${narrow ? 'narrow' : ''}`} style={{ gridTemplateColumns: `44px repeat(${visible.length}, minmax(${narrow ? 34 : 26}px, 1fr))` }}>
+        <p className="muted small">左右滑動格子，接著寫後面的音。</p>
+        <div className="roll-scroll" role="region" aria-label="音符格，可以左右捲動" tabIndex={0}>
+          <div className={`roll ${narrow ? 'narrow' : ''}`} style={{ gridTemplateColumns: `44px repeat(${visible.length}, minmax(44px, 1fr))` }}>
             <div className="roll-corner" />
             {(narrow ? [shownPage] : [0, 1, 2, 3]).map((b) => (
               <div key={b} className="roll-chord" style={{ gridColumn: `span 8` }}>{prog[b] != null ? `${chords[prog[b]!].name}（${chords[prog[b]!].roman}）` : '—'}</div>
