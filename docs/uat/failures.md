@@ -136,3 +136,11 @@ UI-08獨立審查以實際dist重現：844×390開聊天並提問，master-list 
 首次22次定向為20/22：桌面UAT15/72等待click穩定時超時，trace中兩worker同時從約25秒跳到135秒，連45秒測試時限都延後。單獨重跑4次又有2次瀏覽器退出，Chrome stderr明確為FATAL D-Bus connection was disconnected；runner有繼承session bus。未據此誤修錄音或放寬測試。
 
 用DBUS_SESSION_BUS_ADDRESS=disabled:單一變因重跑原UAT15/72，4/4通過；再在playwright.config.ts的Chrome launchOptions.env隔離暫時session bus，正常npm run test:e2e定向22/22通過（54.4秒）。Chrome仍使用系統channel，原假麥克風及WebAudio實播不變。失敗run與trace完整保留：2026-11-10T01-35-30-142Z、2026-11-10T01-38-38-227Z。整體放行仍等完整矩陣。
+
+## 第8輪完整回歸 — UAT-49故障注入的非同步時序
+
+狀態：CLOSED；測試器修正，沒有產品修改。
+
+首次完整144次為143/144；桌面UAT49在等待哼唱錄音狀態時失敗。trace顯示重試媒體保存還在await IDB open時，測試只檢查「目前無錄音」便立刻解除failMedia；先前的點擊因此成功重試並開始哼唱，下一次點擊將它停掉。螢幕已有0秒語音與原始哼唱附件，符合兩次點擊重疊而非啟動失敗。
+
+測試現在先等哼唱按鈕恢復enabled，並確認仍顯示「還沒收好」，才解除故障及重新按哼唱。所有原斷言保留：實際錄音中、保存兩個不同asset、全部stream ended、返回與截圖。UAT15/16/49/60/72兩尺寸10/10通過（30.4秒），未加固定等待或提高timeout；最終仍須重新跑完整144次。失敗run 2026-11-10T01-45-13-361Z及trace保留。

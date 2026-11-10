@@ -355,3 +355,5 @@ Review focus：長歌詞及長和弦不撐出紙頁；只有副歌、只有哼�
 UI-10完成：16594bb；UAT-71 RED缺手記→GREEN，相關14/14。已看手機與夜間桌面截圖。Task 1 complete。
 
 UI-11完成：UAT72 RED缺標題→GREEN。22/22相關通過、build通過、selftest50/50，獨立唯讀審查無發現；環境D-Bus崩潰另以63a4a89修正，不改產品/測試標準。兩尺寸capture/library已人工看圖。Task 2 complete。
+
+第8輪首次完整run 2026-11-10T01-45-13-361Z：143/144，桌面UAT49失敗，ready=false。trace顯示在108622ms點哼唱重試，108668ms「沒有錄音」即通過，108672ms便解除媒體故障；但putBlob仍在await indexedDB.open。第一個重試因此開始哼唱，第二次點擊反而把它停止。修正測試先等媒體按鈕恢復enabled並仍顯示儲存失敗，才解除注入；原保存兩個不同asset及所有stream ended的斷言保留。沒有改產品錄音行為或放寬timeout。待定向與完整再驗。

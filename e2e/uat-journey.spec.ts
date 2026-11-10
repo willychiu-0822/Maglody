@@ -166,6 +166,10 @@ test('UAT-49 媒體寫入失敗後先救回錄音，再換成哼唱',async({page
   await media.nth(0).click();await expect(page.locator('.inspo-big.rec')).toBeVisible();await page.waitForTimeout(400)
   await media.nth(0).click();await expect(page.locator('.toast')).toContainText('還沒收好')
   await media.nth(1).click()
+  // No recording yet does not mean the asynchronous IDB retry has settled.
+  // Keep the storage fault active until that retry releases the controls.
+  await expect(media.nth(1)).toBeEnabled()
+  await expect(page.locator('.toast')).toContainText('還沒收好')
   await expect(page.locator('.inspo-big.rec')).toHaveCount(0)
   await page.evaluate(()=>{(window as unknown as {failMedia:boolean}).failMedia=false})
   await media.nth(1).click();await expect(page.locator('.inspo-big.rec')).toBeVisible();await page.waitForTimeout(400)
