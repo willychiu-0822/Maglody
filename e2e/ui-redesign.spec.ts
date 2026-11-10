@@ -160,7 +160,16 @@ test('UAT-69 紙箋對話保留每位回答者，長對話仍能輸入與隨手�
   await page.getByRole('button', { name: '夾進本子', exact: true }).click()
   await expect(dialog).toBeVisible()
   await expect(page.getByRole('textbox', { name: '跟夥伴說的話' })).toHaveValue('窗外的雨，要留給下一句')
-  await expect(page.locator('.msg-master .msg-speaker')).toHaveText(speakers.map(([name]) => name))
+  // Saving emits a delayed reply from the current desk's composer. Wait for it,
+  // then verify every original author plus the new note instead of racing that reply.
+  await expect(page.locator('.msg-master .msg-speaker')).toHaveText([...speakers.map(([name]) => name), '作曲家'])
+  const savedReply = page.locator('.msg-master').last()
+  await expect(savedReply).toContainText('紙箋對話時想到：雨落在琴上')
+  await expect(savedReply.locator('.msg-avatar img')).toHaveAttribute('src', '/studio/roles/composer.webp')
+  for (const [i, [, id]] of speakers.entries()) {
+    await expect(page.locator('.msg-master .msg-avatar img').nth(i)).toHaveAttribute('src', `/studio/roles/${id}.webp`)
+  }
+  await expect(dialog.locator('[data-character-portrait]')).toHaveAttribute('src', '/studio/roles/lyricist.webp')
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.screenshot({ path: `docs/uat/evidence/A-UI-08-dark-${info.project.name}.png`, animations: 'disabled' })
   expect(await dialog.locator('.chat-sheet').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)

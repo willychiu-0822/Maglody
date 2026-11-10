@@ -1,6 +1,6 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 11:12",
+  "updated": "2026-11-10 11:47",
   "cases": 4,
   "pass": 4,
   "fail": 0,
@@ -208,7 +208,7 @@
       ]
     },
     "companion_paper_chat": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-69"
       ]
@@ -238,7 +238,7 @@
       ]
     },
     "button_targets": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-74"
       ]
@@ -268,12 +268,12 @@
       ]
     },
     "notebook_decisions": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-79",
         "UAT-80"
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T03-11-50-868Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；A 尚有未結缺失待驗收"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T03-29-34-357Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；A 尚有未結缺失待驗收"
 }
