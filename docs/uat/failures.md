@@ -128,3 +128,11 @@ Session B，本機 Chrome；桌面 1280×800、手機 390×844。所有功能修
 UI-08獨立審查以實際dist重現：844×390開聊天並提問，master-list clientHeight=16px，恰被上下padding占滿；輸入與關閉仍可操作但讀不到回覆。固定人物區與其他列耗盡高度，minmax(0,1fr)令對話列歸零，而外層overflow:hidden。標準138/138完整驗收通過仍不放行此新缺失；補UAT-70與矮畫面精簡場景。
 
 修復：600px以下高改64px核可人物小景，對話列保留至少96px實際內容高度，極矮時可捲動紙頁。UAT-70兩project先RED（0px）→GREEN，另驗844×390／390×400／390×600；連同UAT-31/37/62/69共10/10。已人工查看兩張橫向截圖。未降低測試門檻或增加timeout，完整140次仍待重跑。
+
+## 第8輪 — Chrome受runner暫時桌面服務中斷影響（UAT-15/72）
+
+狀態：CLOSED；測試瀏覽器環境隔離，不改產品邏輯、斷言、timeout、重試次數。
+
+首次22次定向為20/22：桌面UAT15/72等待click穩定時超時，trace中兩worker同時從約25秒跳到135秒，連45秒測試時限都延後。單獨重跑4次又有2次瀏覽器退出，Chrome stderr明確為FATAL D-Bus connection was disconnected；runner有繼承session bus。未據此誤修錄音或放寬測試。
+
+用DBUS_SESSION_BUS_ADDRESS=disabled:單一變因重跑原UAT15/72，4/4通過；再在playwright.config.ts的Chrome launchOptions.env隔離暫時session bus，正常npm run test:e2e定向22/22通過（54.4秒）。Chrome仍使用系統channel，原假麥克風及WebAudio實播不變。失敗run與trace完整保留：2026-11-10T01-35-30-142Z、2026-11-10T01-38-38-227Z。整體放行仍等完整矩陣。

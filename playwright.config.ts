@@ -8,7 +8,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4102', actionTimeout: 8000, navigationTimeout: 10000, channel: 'chrome', colorScheme: 'light',
     permissions: ['microphone'], trace: 'retain-on-failure',
-    launchOptions: { args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required'] },
+    // Headless Chrome must not depend on the runner's temporary desktop session bus.
+    launchOptions: { env: { ...process.env, DBUS_SESSION_BUS_ADDRESS: 'disabled:' }, args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required'] },
   },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1280, height: 800 } } },
