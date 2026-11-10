@@ -353,5 +353,86 @@
     "fail": 4,
     "blocked": 0,
     "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 07:33",
+    "run": "2026-11-09T23-25-26-107Z",
+    "cases": 124,
+    "pass": 122,
+    "fail": 2,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 07:49",
+    "run": "2026-11-09T23-49-15-283Z",
+    "cases": 2,
+    "pass": 0,
+    "fail": 2,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 07:50",
+    "run": "2026-11-09T23-49-52-395Z",
+    "cases": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 08:02",
+    "run": "2026-11-09T23-51-11-442Z",
+    "cases": 126,
+    "pass": 120,
+    "fail": 6,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 08:11",
+    "run": "2026-11-10T00-06-41-441Z",
+    "cases": 126,
+    "pass": 122,
+    "fail": 4,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 08:14",
+    "run": "2026-11-10T00-11-06-427Z",
+    "cases": 126,
+    "pass": 126,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 08:16",
+    "run": "2026-11-10T00-15-49-916Z",
+    "cases": 2,
+    "pass": 2,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 08:20",
+    "run": "2026-11-10T00-16-46-844Z",
+    "cases": 128,
+    "pass": 128,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": true
+  },
+  {
+    "updated": "2026-11-10 08:26",
+    "run": "2026-11-10T00-22-16-291Z",
+    "cases": 128,
+    "pass": 128,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": true
   }
 ]

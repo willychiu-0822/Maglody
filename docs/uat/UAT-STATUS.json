@@ -1,11 +1,11 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 06:28",
-  "cases": 124,
-  "pass": 120,
-  "fail": 4,
+  "updated": "2026-11-10 08:26",
+  "cases": 128,
+  "pass": 128,
+  "fail": 0,
   "blocked": 0,
-  "ready_for_user_test": false,
+  "ready_for_user_test": true,
   "requirements": {
     "R1": {
       "status": "pass",
@@ -22,14 +22,15 @@
       ]
     },
     "R3": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-25",
         "UAT-30",
         "UAT-53",
         "UAT-59",
         "UAT-61",
-        "UAT-62"
+        "UAT-62",
+        "UAT-63"
       ]
     },
     "R4": {
@@ -108,7 +109,40 @@
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-09T22-07-25-143Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；本輪未全綠；UAT-12/39 桌面 trace 同時約 165.5 秒空窗；UAT-03/62 手機截圖逾時。詳見 failures.md OPEN 項，需穩定執行後完整重跑；未增加 timeout、未略過案例。",
+  "exploration": {
+    "A_N08_long_conversation": {
+      "status": "pass",
+      "cases": [
+        "UAT-61"
+      ]
+    },
+    "A_N09_role_waiting": {
+      "status": "pass",
+      "cases": [
+        "UAT-62"
+      ]
+    },
+    "A_N10_mic_limit_without_frames": {
+      "status": "pass",
+      "cases": [
+        "UAT-52",
+        "UAT-43"
+      ]
+    },
+    "A_N11_new_song_conversation": {
+      "status": "pass",
+      "cases": [
+        "UAT-63"
+      ]
+    },
+    "text_first_song": {
+      "status": "pass",
+      "cases": [
+        "UAT-64"
+      ]
+    }
+  },
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T00-22-16-291Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證",
   "checks": {
     "build": "pass",
     "selftest": {
@@ -123,29 +157,7 @@
       "pass": 10,
       "fail": 0
     },
-    "evidence_links": 124,
+    "evidence_links": 128,
     "preview_servers": "stopped"
-  },
-  "exploration": {
-    "A-N08_long_conversation": {
-      "status": "pass",
-      "cases": [
-        "UAT-61"
-      ]
-    },
-    "A-N09_role_waiting": {
-      "status": "not_verified_in_final_run",
-      "cases": [
-        "UAT-62"
-      ],
-      "note": "定向雙尺寸通過；最後完整輪手機中途截圖逾時"
-    },
-    "A-N10_mic_limit_without_frames": {
-      "status": "pass",
-      "cases": [
-        "UAT-52",
-        "UAT-43"
-      ]
-    }
   }
 }

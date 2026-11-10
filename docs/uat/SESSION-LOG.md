@@ -1,5 +1,14 @@
 # Session B 接續紀錄
 
+## Session A 第 4 輪交付（2026-11-10 08:26）
+
+- scripts/git-local.sh merge codex/burn-b：Already up to date；正確索引起始乾淨。沒有重做既有 R1–R6；重新核對六份核可原畫/房間及六份壓縮圖雜湊。
+- 修 UAT-63 新歌殘留對話、輸入與等待；晚到回覆按歌曲世代隔離。雙尺寸先紅→綠，相關 10/10。產品修復 commit 53e7714。
+- 前幾次完整執行仍有同步停頓/Chrome 關閉，原 traces/results 全保留。持續收取工具輸出的完整輪 126/126 通過；沒有調大 timeout、略過或用多輪補過。
+- 全綠後從純文字靈感探索，不用麥克風/示範即可到有聲 Demo，新增 UAT-64 雙尺寸通過。再完整 128/128；截圖捲動位置正常化後最後完整 run `2026-11-10T00-22-16-291Z` 仍 128/128，ready=true。
+- build pass、selftest 50/50、unit 15/15、音訊/邏輯 10/10；128 份非空案例截圖，人工視覺核對。R1–R6/P0→P2/exploration 全部 pass。
+- 4101/4102 均已關閉。未 push、未改 remote、未碰 deploy 或 tunnel。真實手機/Safari/真人收音/真 API 由使用者後續測試；本機試用指引見 LOCAL-TEST.md。
+
 ## Session A 第 3 輪接續（2026-11-10）
 
 - 已以 scripts/git-local.sh 合併 codex/burn-b（Already up to date），正確 index 開始為乾淨；普通 git 的 index 仍是唯讀舊資料，不可 reset。
