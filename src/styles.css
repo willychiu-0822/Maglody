@@ -1187,3 +1187,8 @@ body::before { opacity: .12; }
 .decision-effect p { margin: 0 0 8px; }
 .decision-effect ul { margin: 0; padding-left: 22px; }
 .notebook-decision .primary-action { width: 100%; }
+
+/* UI-18 · long song names stay readable without pushing the notebook tools away. */
+.decision-song-title { max-height: 96px; overflow-y: auto; overscroll-behavior: contain; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px dashed var(--grid-strong); border-radius: 3px 8px 4px 6px; padding: 6px 10px; font-family: var(--font-title); }
+.decision-notebook .notebook-tools { position: sticky; top: 0; z-index: 2; flex-shrink: 0; padding: 6px 0; background: var(--paper); border-bottom: 1px dashed var(--grid-strong); }
+.decision-notebook .notebook-tools::before { content: ''; position: absolute; inset: -28px -1px 100%; background: var(--paper); pointer-events: none; }

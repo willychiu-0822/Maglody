@@ -219,3 +219,10 @@ UI-16最後build版定向10/10通過；錯誤與有效音檔雙尺寸截圖已�
 - 這兩個操作已取代瀏覽器原生確認框。沿用全站紙纖維、墨框、柔和水彩與手寫字；一個可見主按鈕、44px以上、按下有回饋、點背景不收起。先聚焦取消按鈕，取消回到原操作；紙頁內可「記一下」，保存後回原決定。
 - 採用：[桌面](evidence/A-UI-17-adopt-desktop.png)、[手機](evidence/A-UI-17-adopt-mobile.png)；移除：[桌面](evidence/A-UI-17-remove-desktop.png)、[手機](evidence/A-UI-17-remove-mobile.png)；採用重試：[桌面](evidence/A-UI-17-adopt-retry-desktop.png)、[手機](evidence/A-UI-17-adopt-retry-mobile.png)；移除重試：[桌面](evidence/A-UI-17-remove-retry-desktop.png)、[手機](evidence/A-UI-17-remove-retry-mobile.png)。改前本子：[桌面](evidence/A-UI-17-before-desktop.png)、[手機](evidence/A-UI-17-before-mobile.png)。已人工檢視手機採用重試、移除及桌面移除重試，按鈕與內容清楚。
 - 相關UAT-17/42/64/79/80兩尺寸10/10通過，原照片拼貼與文字起步驗收不變。首次4個焦點斷言順序失誤與trace已留在failures.md；改為先驗初始焦點，再點背景驗不關閉。無新增圖片或外部請求；完整160次待重跑，ready=false。
+
+## UI-18：長文字也不會把「記一下」擠走（第11輪，UAT-81）
+
+- 全綠後的看圖自查發現：長靈感會被當作未命名歌曲的名稱，確認頁變得很長，手機看不到頂部的記一下。現在沒有歌名就寫「還沒取名字的歌」；真正的長歌名與靈感原文各在一小塊紙上完整保留，可以捲讀。
+- 即使捲到頁尾，確認紙頁頂部的「記一下」與X仍在眼前；底下文字不會穿過工具列。記完回到原決定，按取消仍保留原歌與新靈感。一個主按鈕與44px點擊區維持。
+- 原尺寸：[桌面1280×800](evidence/A-UI-18-long-desktop.png)、[手機390×844](evidence/A-UI-18-long-mobile.png)；短視窗：[橫向844×390](evidence/A-UI-18-short-desktop.png)、[窄手機320×568](evidence/A-UI-18-short-mobile.png)。修前：[桌面](evidence/A-UI-18-before-desktop.png)、[窄手機](evidence/A-UI-18-before-mobile.png)。已人工看原尺寸與短視窗，確認文字、主次與固定捕捉入口。
+- UAT-74/79/80/81相關8/8、底紙細節調整後81再2/2通過；selftest53/53。原160/160 run已保留，但新增81後須完整162次才放行。

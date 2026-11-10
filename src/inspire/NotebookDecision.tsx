@@ -20,7 +20,7 @@ export function NotebookDecisionPage({ decision, project, error, onConfirm, onCa
       <span>{[item.voice && '語音', item.hum && '哼唱', item.images.length > 0 && `${item.images.length} 張照片`].filter(Boolean).join(' · ') || '一則文字靈感'}</span>
     </article>
     {decision.kind === 'start' ? <div className="decision-effect">
-      <p>帶進《{project.idea.title || project.idea.hook || '還沒取名字的歌'}》：</p>
+      <p>帶進這首歌：</p><p className="decision-song-title" tabIndex={0}>《{project.idea.title || '還沒取名字的歌'}》</p>
       <ul>
         {(item.text || item.voice?.transcript) && <li>{item.tags.includes('title') ? '歌名與記憶點會換成這句話。' : '記憶點會換成這句話，歌名留在原處。'}這句話也會加進 Vibe。</li>}
         {item.tags.includes('image') && !project.idea.image && <li>這句話會成為核心畫面。</li>}

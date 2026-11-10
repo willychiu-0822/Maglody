@@ -265,7 +265,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       {toast && !open && <div className="toast" role="status"><span>{toast}</span><button className="btn notice-ack" onClick={() => setToast(null)}>好</button></div>}
 
       {open && (
-        <Modal label={decision && open === 'library' ? decisionTitle(decision) : '靈感'} className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'}`} onClose={closeNotebook}>
+        <Modal label={decision && open === 'library' ? decisionTitle(decision) : '靈感'} className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'} ${decision && open === 'library' ? 'decision-notebook' : ''}`} onClose={closeNotebook}>
             <div className="row between notebook-tools">
               {open === 'capture'
                 ? <button className="link-btn" onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
