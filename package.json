@@ -3,17 +3,21 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/prepare-offline.mjs",
     "preview": "vite preview",
     "server": "node server/index.ts",
+    "start": "node scripts/start-production.mjs",
     "dev:mobile": "HTTPS=1 vite --host",
     "selftest": "node scripts/mobile-selftest.cjs",
     "test:e2e": "playwright test",
     "test:ui": "playwright test -c playwright.a.config.ts",
     "test:logic": "node scripts/audio-regression.cjs && node scripts/logic-regression.cjs",
-    "selftest:unit": "node --import ./scripts/test-loader.mjs --test --test-isolation=none scripts/tests/*.test.mjs"
+    "selftest:unit": "node scripts/run-unit.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

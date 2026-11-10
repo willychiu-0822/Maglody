@@ -80,7 +80,7 @@ VITE_AGENT_URL=http://localhost:8787/api/master npm run dev
 | `ALLOW_ORIGIN` | 允許呼叫後端的前端網址（CORS），多個請用逗號分隔 | `http://localhost:5173` |
 | `VITE_AGENT_URL` | **前端**：後端網址；不設定就用離線 mock | — |
 
-健康檢查：`curl localhost:8787/api/health`。**一步一步的雲端設定（OpenAI、Gemini、Vertex、Netlify／Render／Cloud Run 部署）見 [docs/cloud-setup.md](docs/cloud-setup.md)，給非工程背景的人也能照做。**Prompt 模板見 [docs/agent-prompts.md](docs/agent-prompts.md)。
+健康檢查：`curl localhost:8787/api/health`。**一個不會換網址的 HTTPS 預覽（免費 Render，預設 mock、零金鑰）見 [docs/deploy/CLOUD-DEPLOY.md](docs/deploy/CLOUD-DEPLOY.md)。** 本機 production 是 `npm run build && npm start`，同一個埠同時提供首頁與 `/api/health`。舊的「靜態網站＋另外一台 API」路線仍在 [docs/cloud-setup.md](docs/cloud-setup.md)。Prompt 模板見 [docs/agent-prompts.md](docs/agent-prompts.md)。
 
 ## 帶進 DAW：預設教學用 REAPER
 
@@ -103,7 +103,8 @@ REAPER 選擇原因：輕量、跨平台、可完整試用 60 天。試用期結
 - [docs/architecture.md](docs/architecture.md)：前後端架構、LLM provider 抽象層、資料模型
 - [docs/agent-prompts.md](docs/agent-prompts.md)：大師 Agent 的 prompt 模板
 - [docs/design.md](docs/design.md)：視覺語言（紙、墨、淡彩）與禁止清單
-- [docs/cloud-setup.md](docs/cloud-setup.md)：雲端與部署設定（非工程新手版）
+- [docs/deploy/CLOUD-DEPLOY.md](docs/deploy/CLOUD-DEPLOY.md)：一個穩定的 HTTPS 預覽網址（建議路線）
+- [docs/cloud-setup.md](docs/cloud-setup.md)：雲端與部署設定（非工程新手版，舊的拆開部署路線）
 - [docs/ux-review.md](docs/ux-review.md)：新手手機路徑自測紀錄與修正狀態
 
 ## 技術
