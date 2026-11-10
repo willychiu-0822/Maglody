@@ -9,7 +9,7 @@ rendering chunks...
 computing gzip size...
 dist/index.html                         1.10 kB │ gzip:   0.59 kB
 dist/assets/iansui-ui-xpl34yzE.woff2  365.38 kB
-dist/assets/index-DI4vK1Gk.css         68.66 kB │ gzip:  14.40 kB
-dist/assets/index-_7bPNo-d.js         400.52 kB │ gzip: 140.04 kB
-✓ built in 1.10s
+dist/assets/index-qoHliNT1.css         68.74 kB │ gzip:  14.42 kB
+dist/assets/index-CsjrwN9o.js         400.52 kB │ gzip: 140.04 kB
+✓ built in 1.09s
 Offline shell prepared: 10 build assets
