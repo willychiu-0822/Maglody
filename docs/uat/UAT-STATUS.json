@@ -1,14 +1,14 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 10:41",
-  "cases": 150,
-  "pass": 150,
+  "updated": "2026-11-10 10:49",
+  "cases": 20,
+  "pass": 20,
   "fail": 0,
   "blocked": 0,
-  "ready_for_user_test": true,
+  "ready_for_user_test": false,
   "requirements": {
     "R1": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-73",
         "UAT-74",
@@ -23,7 +23,7 @@
       ]
     },
     "R2": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-75",
         "UAT-73",
@@ -41,7 +41,7 @@
       ]
     },
     "R3": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-71",
         "UAT-25",
@@ -60,7 +60,7 @@
       ]
     },
     "R4": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-25",
         "UAT-29",
@@ -69,7 +69,7 @@
       ]
     },
     "R5": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-75",
         "UAT-73",
@@ -86,7 +86,7 @@
       ]
     },
     "R6": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-33",
         "UAT-58"
@@ -95,32 +95,32 @@
   },
   "novice_feedback": {
     "P0_context_coaching": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-53"
       ]
     },
     "P1_complete_demo": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-54"
       ]
     },
     "P1_denied_mic_demo": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-55"
       ]
     },
     "P1_one_primary": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-24",
         "UAT-56"
       ]
     },
     "P1_approved_characters": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-25",
         "UAT-29",
@@ -128,14 +128,14 @@
       ]
     },
     "P2_watercolor": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-28",
         "UAT-57"
       ]
     },
     "P2_knowledge_sparks": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-33",
         "UAT-58"
@@ -144,19 +144,19 @@
   },
   "exploration": {
     "A_N08_long_conversation": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-61"
       ]
     },
     "A_N09_role_waiting": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-62"
       ]
     },
     "A_N10_mic_limit_without_frames": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-52",
         "UAT-43"
@@ -169,32 +169,32 @@
       ]
     },
     "text_first_song": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-64"
       ]
     },
     "studio_song_journal": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-65"
       ]
     },
     "studio_map": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-66"
       ]
     },
     "companion_mission": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-67",
         "UAT-68"
       ]
     },
     "companion_paper_chat": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-69"
       ]
@@ -206,13 +206,13 @@
       ]
     },
     "personal_materials": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-71"
       ]
     },
     "capture_notebook": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-72"
       ]
@@ -236,5 +236,5 @@
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T02-36-55-295Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T02-48-52-271Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
 }

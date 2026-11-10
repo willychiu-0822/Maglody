@@ -1152,3 +1152,24 @@ body::before { opacity: .12; }
   .chat-toolbar .modal-capture { grid-row: 1; grid-column: 1; justify-self: end; }
   .chat-toolbar .icon-btn { grid-row: 1; grid-column: 2; }
 }
+
+/* UI-15 · a revision is a keepsake on paper, with one deliberate decision. */
+.revision-sheet { max-width: 560px; gap: 14px; }
+.revision-toolbar { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.revision-toolbar .notebook-kicker { flex: 1; }
+.revision-snapshot { min-width: 0; padding: 14px 16px; border: 1px solid var(--grid-strong); border-radius: 3px 12px 5px 9px; background: radial-gradient(ellipse at 100% 0, var(--wash-ochre), transparent 85%), var(--paper); box-shadow: 2px 3px 0 var(--line); overflow-wrap: anywhere; }
+.revision-snapshot small, .revision-snapshot > span { display: block; color: var(--muted); font-size: .78rem; }
+.revision-snapshot strong { display: block; margin: 4px 0 8px; font-family: var(--font-title); font-weight: 400; font-size: 1.15rem; line-height: 1.7; }
+.revision-snapshot p { white-space: pre-wrap; font-size: .86rem; line-height: 1.8; margin: 8px 0; }
+.revision-form { display: flex; flex-direction: column; gap: 14px; }
+.revision-form .field { margin: 0; }
+.revision-form textarea { min-height: 100px; background: repeating-linear-gradient(transparent 0 30px, var(--line) 30px 31px), var(--paper); line-height: 31px; padding: 8px 10px; }
+.revision-cancel { align-self: center; }
+.revision-effect, .revision-error { padding: 12px 14px; margin: 0; font-size: .86rem; line-height: 1.9; border-left: 2px solid var(--grid-strong); background: var(--wash-indigo); }
+.revision-error { background: var(--wash-ochre); }
+.revision-saved { margin: 0; padding: 14px; background: var(--wash-sage); font-family: var(--font-title); font-size: 1.1rem; }
+.revision-saved span { display: block; margin-top: 6px; font-family: var(--font-body); font-size: .84rem; line-height: 1.8; }
+.version { flex-wrap: wrap; }
+.version > span:first-child { min-width: 0; flex: 1 1 180px; overflow-wrap: anywhere; }
+.version > .row { flex: 0 0 auto; margin-left: auto; }
+@media (max-width: 520px) { .revision-sheet { gap: 10px; } .revision-toolbar { gap: 8px; } .revision-toolbar .notebook-kicker { font-size: .7rem; letter-spacing: .02em; } }

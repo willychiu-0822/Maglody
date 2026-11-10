@@ -1,4 +1,5 @@
 import { SongMaterials } from './components/SongMaterials'
+import { ProjectDialog, type ProjectDecision } from './components/ProjectDialog'
 import { Modal } from './components/Modal'
 import { StudioPresence } from './components/StudioPresence'
 import { KnowledgeSpark } from './components/KnowledgeSpark'
@@ -50,6 +51,7 @@ export default function App() {
   const master = useMaster(getProject)
   const inspo = useInspirations()
   const versions = useVersions()
+  const [projectDecision, setProjectDecision] = useState<ProjectDecision | null>(null)
   const skipEnter = useRef(false)
   const step = STEPS[cur]
   const [entry, setEntry] = useState(() => ({ step: step.key, messageIds: new Set<string>() }))
@@ -119,12 +121,6 @@ export default function App() {
   }
 
   const openChat = (r: RoleId) => { setChatRole(r); setChat(r) }
-  const saveDemo = () => {
-    const note = prompt('這一版改了什麼？（可留空）', '')
-    if (note === null) return
-    try { const name = versions.save(p, note); setTimeout(() => alert(`存好了：${name}`), 0) }
-    catch { alert('這版還沒存好，作品仍留在這頁。請釋出瀏覽器空間後再試。') }
-  }
   const Comp = step.Component
 
   return (
@@ -211,25 +207,30 @@ export default function App() {
                 <summary>更多</summary>
                 <SongSheet p={p} />
                 <div className="versions">
-                  <button className="btn small" onClick={saveDemo}>存成新的一版</button>
+                  <button className="btn small" onClick={() => setProjectDecision({ kind: 'save' })}>存成新的一版</button>
                   {versions.list.map((v) => (
                     <div key={v.id} className="version">
                       <span><strong>{v.name}</strong> <span className="muted small">{v.note}</span></span>
                       <span className="row">
-                        <button className="btn btn-ghost small" onClick={() => { stopAll(); playDemo(v.project) }}>▶</button>
-                        <button className="btn btn-ghost small" onClick={() => { if (confirm(`回到 ${v.name}？`)) setProject(structuredClone(v.project)) }}>回到這版</button>
+                        <button className="btn btn-ghost small" aria-label={`試聽 ${v.name}`} onClick={() => { stopAll(); playDemo(v.project) }}>▶</button>
+                        <button className="btn btn-ghost small" onClick={() => setProjectDecision({ kind: 'restore', version: v })}>回到這版</button>
                       </span>
                     </div>
                   ))}
                 </div>
                 <ReaperGuide step={['arrange', 'record', 'mix'].includes(step.key) ? step.key : 'arrange'} p={p} />
-                <button className="btn btn-ghost small" onClick={() => { if (confirm('清掉這首歌、重新開始？（靈感本子會保留）')) { master.clear(); reset(); setCur(0); setMenu(false) } }}>重新開始一首新歌</button>
+                <button className="btn btn-ghost small" onClick={() => setProjectDecision({ kind: 'reset' })}>重新開始一首新歌</button>
               </details>
             </div>
         </Modal>
       )}
 
 
+
+      {projectDecision && <ProjectDialog decision={projectDecision} project={p} onSave={note => versions.save(p, note)}
+        onRestore={v => { stopAll(); master.clear(); setProject(structuredClone(v.project)) }}
+        onReset={() => { stopAll(); master.clear(); reset(); setCur(0); setMenu(false) }}
+        onCapture={() => setInspoOpen('capture')} onClose={() => setProjectDecision(null)} />}
 
       <MasterPanel key={master.session} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
         messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />

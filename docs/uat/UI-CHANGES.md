@@ -181,3 +181,12 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 最後build通過、手機selftest **51/51**。全綠後夜間探索：[320×568](evidence/A-round9-explore-320x568.png)、[390×400](evidence/A-round9-explore-390x400.png)、[844×390](evidence/A-round9-explore-844x390.png)，聊天提問、500字靈感保存返回、按好確認均成功；0JS錯誤，無水平溢出。已人工看最窄手機與橫向圖。
 
 驗收範圍是本機Chrome；真機/Safari、真實麥克風品質及真LLM仍未驗。只本機commit，無push、部署或tunnel操作。
+
+## UI-15：改稿與新歌，也留在水彩紙頁裡（第10輪，R1/R2/R5、UAT-76～77）
+
+- 「存成新的一版」會打開改稿手記：先看自己的歌名，再寫這版改了什麼；收好後顯示Demo版本名，要按「好，回到工作室」才收起。保存失敗會留下原說明，按「重試保存」就能重試，不會假裝成功或重複存一份。
+- 「回到這版」先展示原版歌名與說明；「重新開始一首新歌」先交代會清空目前歌曲與對話、保留本子與Demo。都有取消按鈕，取消不會改稿；確認還原時也清掉舊稿的聊天，避免夥伴沿用另一版的內容。
+- 三張紙頁共用纖維、墨框、淡水彩與手寫標題，只有一個主要確認鈕，所有操作為44px以上真按鈕，按下有回饋、點背景不關閉。右上仍可記靈感；返回後版本說明不遺失。長說明在版本清單內換行，手機不橫向溢出。
+- 保存：[桌面](evidence/A-UI-15-save-desktop.png)、[手機](evidence/A-UI-15-save-mobile.png)；新歌：[桌面](evidence/A-UI-15-new-desktop.png)、[手機](evidence/A-UI-15-new-mobile.png)；失敗重試：[桌面](evidence/A-UI-15-retry-desktop.png)、[手機](evidence/A-UI-15-retry-mobile.png)；成功確認：[桌面](evidence/A-UI-15-saved-desktop.png)、[手機](evidence/A-UI-15-saved-mobile.png)。改前：[桌面](evidence/A-UI-15-before-desktop.png)、[手機](evidence/A-UI-15-before-mobile.png)。已人工看保存／新歌／錯誤手機圖與桌面成功圖，主次、字句和按鈕清楚。
+- UAT-76/77雙尺寸先4/4紅燈，再4/4通過；與UAT-22/31/41/63/70/73/74/75共20/20通過，自動build通過。九檯18張與既有彈窗截圖重新產出；逐頁檢查人物、紙頁、唯一主動作與格子內捲動。獨立唯讀審查無待修項；審查者的額外瀏覽器操作因4102已關閉未執行，不算新增驗證。
+- 這是部分驗收，完整154次仍待最後重跑，ready=false；無push、部署或tunnel操作。
