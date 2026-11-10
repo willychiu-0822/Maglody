@@ -131,14 +131,28 @@ export default function App() {
 
       {storageError && <p className="storage-notice" role="status">這首歌還沒存進瀏覽器，請先留在這頁。釋出儲存空間後，再改一個字就會重試。</p>}
       <main className="desk" key={step.key}>
+        <div className="studio-corner">
         <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.isBusy(step.key, role.id)} onChat={() => openChat(role.id)} />
-
+        <div className="song-trail" aria-label="歌曲手記">
+          <p className="trail-title">{p.idea.title ? `《${p.idea.title}》的手記` : '我們的第一首歌'}</p>
+          <p className="trail-caption">一點一點，把喜歡的聲音留下來。</p>
+          <ul>{[
+            { name: '一句靈感', kept: !!p.idea.hook.trim() },
+            { name: '和弦', kept: [...p.harmony.verse, ...p.harmony.chorus].some(n => n != null) },
+            { name: '旋律', kept: [...p.melody.verse, ...p.melody.chorus].some(n => n != null && n >= 0) },
+            { name: '歌詞', kept: p.lyrics.some(s => s.text.trim()) },
+          ].map(item => <li key={item.name} data-kept={item.kept}><span aria-hidden="true">{item.kept ? '✓' : '◦'}</span> {item.name}<span className="sr-only">{item.kept ? '已留下' : '還在醞釀'}</span></li>)}</ul>
+        </div>
+        </div>
+        <section className="workpage" aria-label={`${step.title}創作紙頁`}>
+        <div className="page-caption"><span>冒險手記 · {phase.name}篇</span><span>第 {cur + 1} 頁</span></div>
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
             <Comp goTo={goKey} p={p} update={update} notify={notify} next={next} />
             <KnowledgeSpark step={step.key} p={p} />
           </GentleContext.Provider>
         </WhisperContext.Provider>
+        </section>
       </main>
 
 
