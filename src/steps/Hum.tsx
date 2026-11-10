@@ -14,6 +14,9 @@ function HumStep({ p, update, notify, next }: StepProps) {
   const [analysisSource, setAnalysisSource] = useState<'mic' | 'file' | 'demo'>('mic')
   const [playhead, setPlayhead] = useState<number | null>(null)
   const rawRef = useRef<{ data: Float32Array; sampleRate: number } | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const uploadRef = useRef<HTMLButtonElement>(null)
+  const [fileError, setFileError] = useState(false)
   const liveRef = useRef<PitchFrame[]>([])
   const mic = useMic({
     record: true,
@@ -26,6 +29,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
   })
 
   const runAnalysis = (data: Float32Array, sampleRate: number, source: 'mic' | 'file' | 'demo') => {
+    setFileError(false)
     setAnalysisSource(source)
     rawRef.current = { data, sampleRate }
     setBusy(true)
@@ -56,6 +60,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
       const rec = mic.stop()
       if (rec) runAnalysis(rec.data, rec.sampleRate, 'mic')
     } else {
+      setFileError(false)
       liveRef.current = []
       setLive([])
       setAna(null)
@@ -64,12 +69,13 @@ function HumStep({ p, update, notify, next }: StepProps) {
   }
 
   const onFile = async (f: File) => {
+    setFileError(false)
     try {
       const buf = await ac().decodeAudioData(await f.arrayBuffer())
       const mono = toMono(buf)
       runAnalysis(mono.slice(0, Math.min(mono.length, buf.sampleRate * 40)), buf.sampleRate, 'file')
     } catch {
-      alert('這個檔案無法解析，請改用 mp3 / wav / m4a。')
+      setFileError(true)
     }
   }
 
@@ -158,13 +164,16 @@ function HumStep({ p, update, notify, next }: StepProps) {
       <Toolbox>
         <div className="row wrap">
           {hum && <button className="btn small" disabled={busy || mic.pending} onClick={toggleRec}>● 再哼一次</button>}
-          <label className="btn small">
-            上傳音檔
-            <input type="file" accept="audio/*" hidden onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
-          </label>
+          <button ref={uploadRef} type="button" className="btn small" disabled={busy || mic.pending || mic.running} onClick={() => fileRef.current?.click()}>上傳音檔</button>
+          <input ref={fileRef} type="file" accept="audio/*" hidden onChange={e => {
+            const file = e.target.files?.[0]
+            e.target.value = ''
+            if (file) void onFile(file)
+          }} />
           {ana && <button className="btn small" onClick={playOriginal}>▶ 原始錄音</button>}
           {hum && <button className="btn small" onClick={() => playNotes(false)}>▶ 只聽旋律</button>}
         </div>
+        {fileError && <div className="audio-file-notice" role="status" aria-label="音檔提示"><p>這個檔案還讀不出聲音。原本的哼唱留著，請改用 mp3 / wav / m4a，再按「上傳音檔」試一次。</p><button className="btn" onClick={() => { setFileError(false); uploadRef.current?.focus() }}>好</button></div>}
         {hum && (
           <div className="result-grid">
             <div className="result"><div className="muted small">調</div><div className="result-big">{keyName(hum.keyRoot, hum.keyMode)}</div></div>

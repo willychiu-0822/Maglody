@@ -1173,3 +1173,8 @@ body::before { opacity: .12; }
 .version > span:first-child { min-width: 0; flex: 1 1 180px; overflow-wrap: anywhere; }
 .version > .row { flex: 0 0 auto; margin-left: auto; }
 @media (max-width: 520px) { .revision-sheet { gap: 10px; } .revision-toolbar { gap: 8px; } .revision-toolbar .notebook-kicker { font-size: .7rem; letter-spacing: .02em; } }
+
+/* UI-16 · a failed audio file stays a small, acknowledgeable paper note. */
+.audio-file-notice { display: flex; align-items: center; gap: 14px; margin: 12px 0; padding: 12px 14px; border: 1px solid var(--grid-strong); border-radius: 3px 12px 5px 9px; background: radial-gradient(ellipse at 0 0, var(--wash-ochre), transparent 85%), var(--paper); }
+.audio-file-notice p { flex: 1; min-width: 0; margin: 0; font-size: .86rem; line-height: 1.9; overflow-wrap: anywhere; }
+.audio-file-notice button { flex: none; min-width: 48px; }

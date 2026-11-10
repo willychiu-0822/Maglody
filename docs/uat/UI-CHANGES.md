@@ -190,3 +190,13 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 - 保存：[桌面](evidence/A-UI-15-save-desktop.png)、[手機](evidence/A-UI-15-save-mobile.png)；新歌：[桌面](evidence/A-UI-15-new-desktop.png)、[手機](evidence/A-UI-15-new-mobile.png)；失敗重試：[桌面](evidence/A-UI-15-retry-desktop.png)、[手機](evidence/A-UI-15-retry-mobile.png)；成功確認：[桌面](evidence/A-UI-15-saved-desktop.png)、[手機](evidence/A-UI-15-saved-mobile.png)。改前：[桌面](evidence/A-UI-15-before-desktop.png)、[手機](evidence/A-UI-15-before-mobile.png)。已人工看保存／新歌／錯誤手機圖與桌面成功圖，主次、字句和按鈕清楚。
 - UAT-76/77雙尺寸先4/4紅燈，再4/4通過；與UAT-22/31/41/63/70/73/74/75共20/20通過，自動build通過。九檯18張與既有彈窗截圖重新產出；逐頁檢查人物、紙頁、唯一主動作與格子內捲動。獨立唯讀審查無待修項；審查者的額外瀏覽器操作因4102已關閉未執行，不算新增驗證。
 - 這是部分驗收，完整154次仍待最後重跑，ready=false；無push、部署或tunnel操作。
+
+## UI-16：音檔上傳按得到，也能放心重試（第10輪，R1/R2、UAT-78）
+
+- 哼唱工具箱的「上傳音檔」已改成真正按鈕，有44px點擊區與按下回饋，也能用鍵盤聚焦後按Enter開選檔。
+- 檔案讀不出聲音時，原哼唱會留著；錯誤變成工具箱裡的淡彩紙條，按「好」收起，焦點回到上傳鈕。可再選同一個檔案重試，或改用其他mp3／wav／m4a。
+- 錄音或分析中暫停上傳入口，避免同時混入另一段；成功上傳的音檔照樣顯示自己的音高軌跡與「音檔整理好了」，主動作仍只有一顆。
+- 錯誤提示：[桌面](evidence/A-UI-16-error-desktop.png)、[手機](evidence/A-UI-16-error-mobile.png)；有效音檔：[桌面](evidence/A-UI-16-upload-desktop.png)、[手機](evidence/A-UI-16-upload-mobile.png)。修前：[手機](evidence/A-UI-16-before-mobile.png)。截圖已檢視，並修正截圖前的捲動位置，避免固定頁首出現在長圖中間；最後以build版重截確認。
+- UAT-78雙尺寸先2/2失敗（沒有button語意），再在4103開發預覽2/2通過；不以開發預覽取代最終build驗收。獨立唯讀審查無待修項。UI-15的154次全過，但當時新增UAT-78尚未納入、缺失仍OPEN，因此ready維持false；最後須完整156次重跑。
+
+UI-16最後build版定向10/10通過；錯誤與有效音檔雙尺寸截圖已重截、人工檢視，固定頁首位於圖頂，文字及好按鈕清楚。完整156次待重跑，ready=false。
