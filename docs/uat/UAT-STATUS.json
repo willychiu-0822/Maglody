@@ -1,8 +1,8 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 10:29",
-  "cases": 4,
-  "pass": 4,
+  "updated": "2026-11-10 10:36",
+  "cases": 14,
+  "pass": 14,
   "fail": 0,
   "blocked": 0,
   "ready_for_user_test": false,
@@ -25,6 +25,7 @@
     "R2": {
       "status": "not_verified",
       "cases": [
+        "UAT-75",
         "UAT-73",
         "UAT-74",
         "UAT-71",
@@ -70,6 +71,7 @@
     "R5": {
       "status": "not_verified",
       "cases": [
+        "UAT-75",
         "UAT-73",
         "UAT-74",
         "UAT-72",
@@ -192,7 +194,7 @@
       ]
     },
     "companion_paper_chat": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-69"
       ]
@@ -210,23 +212,29 @@
       ]
     },
     "capture_notebook": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-72"
       ]
     },
     "explicit_confirmation": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-73"
       ]
     },
     "button_targets": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-74"
       ]
+    },
+    "long_page_confirmation": {
+      "status": "pass",
+      "cases": [
+        "UAT-75"
+      ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T02-29-35-189Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T02-35-52-043Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；A 尚有未結缺失待驗收"
 }

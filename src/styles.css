@@ -1144,6 +1144,8 @@ body::before { opacity: .12; }
 
 .storage-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .storage-notice > span { flex: 1 1 240px; }
+/* A saved idea can be acknowledged without leaving the current place in a song. */
+.app > .toast { position: sticky; top: calc(84px + env(safe-area-inset-top)); z-index: 35; }
 @media (max-width: 520px) {
   .chat-sheet .chat-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; }
   .chat-toolbar .role-switch { grid-row: 2; grid-column: 1 / -1; }
