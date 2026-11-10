@@ -1,0 +1,16 @@
+# One free Node service serves the built site and the mock agent on a stable HTTPS URL.
+# Do not set NODE_ENV here: npm would skip the Vite/TypeScript devDependencies and the build would fail.
+# `npm start` sets NODE_ENV=production itself.
+services:
+  - type: web
+    name: maglody
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22.18.0"
+      - key: LLM_PROVIDER
+        value: mock
