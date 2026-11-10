@@ -1,0 +1,107 @@
+{
+  "run": "2026-11-10T08-06-28-528Z",
+  "failures": [
+    {
+      "case": "UAT-25",
+      "viewport": "desktop",
+      "reason": "Test timeout of 45000ms exceeded. | Error: locator.click: Target page, context or browser has been closed",
+      "gaps": [
+        {
+          "start_ms": 142275.839,
+          "end_ms": 526245.486,
+          "gap_ms": 383969.647
+        },
+        {
+          "start_ms": 142367.005,
+          "end_ms": 526304.102,
+          "gap_ms": 383937.09699999995
+        }
+      ]
+    },
+    {
+      "case": "UAT-32",
+      "viewport": "mobile",
+      "reason": "TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: '打開工作室選單' })\n    - locator resolved to <button class=\"desk-name\" aria-label=\"打開工作室選單\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - performing click action\n",
+      "gaps": [
+        {
+          "start_ms": 577591.695,
+          "end_ms": 596183.88,
+          "gap_ms": 18592.185000000056
+        },
+        {
+          "start_ms": 577734.676,
+          "end_ms": 595084.383,
+          "gap_ms": 17349.707000000053
+        }
+      ]
+    },
+    {
+      "case": "UAT-49",
+      "viewport": "desktop",
+      "reason": "Tearing down \"errors\" exceeded the test timeout of 45000ms. | TimeoutError: page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "gaps": [
+        {
+          "start_ms": 142210.679,
+          "end_ms": 526302.324,
+          "gap_ms": 384091.645
+        },
+        {
+          "start_ms": 142213.4,
+          "end_ms": 526269.185,
+          "gap_ms": 384055.78500000003
+        }
+      ]
+    },
+    {
+      "case": "UAT-52",
+      "viewport": "mobile",
+      "reason": "Error: expect(received).toBeTruthy()\n\nReceived: false\n\nCall Log:\n- Timeout 32000ms exceeded while waiting on the predicate",
+      "gaps": [
+        {
+          "start_ms": 1403702.474,
+          "end_ms": 1863023.419,
+          "gap_ms": 459320.94500000007
+        },
+        {
+          "start_ms": 1403701.235,
+          "end_ms": 1863183.617,
+          "gap_ms": 459482.382
+        }
+      ]
+    },
+    {
+      "case": "UAT-72",
+      "viewport": "mobile",
+      "reason": "Test timeout of 45000ms exceeded. | TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: '打開工作室選單' })\n    - locator resolved to <button class=\"desk-name\" aria-label=\"打開工作室選單\">…</button>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n",
+      "gaps": [
+        {
+          "start_ms": 1403800.336,
+          "end_ms": 1863182.249,
+          "gap_ms": 459381.9130000002
+        },
+        {
+          "start_ms": 1403805.861,
+          "end_ms": 1863004.551,
+          "gap_ms": 459198.68999999994
+        }
+      ]
+    },
+    {
+      "case": "UAT-74",
+      "viewport": "mobile",
+      "reason": "TimeoutError: page.screenshot: Timeout 8000ms exceeded.\nCall log:\n  - taking page screenshot\n    - disabled all CSS animations\n  - waiting for fonts to load...\n  - fonts loaded\n",
+      "gaps": [
+        {
+          "start_ms": 577641.071,
+          "end_ms": 596677.121,
+          "gap_ms": 19036.050000000047
+        },
+        {
+          "start_ms": 577645.369,
+          "end_ms": 595151.275,
+          "gap_ms": 17505.906000000075
+        }
+      ]
+    }
+  ]
+}

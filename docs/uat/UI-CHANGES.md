@@ -226,3 +226,33 @@ UI-16最後build版定向10/10通過；錯誤與有效音檔雙尺寸截圖已�
 - 即使捲到頁尾，確認紙頁頂部的「記一下」與X仍在眼前；底下文字不會穿過工具列。記完回到原決定，按取消仍保留原歌與新靈感。一個主按鈕與44px點擊區維持。
 - 原尺寸：[桌面1280×800](evidence/A-UI-18-long-desktop.png)、[手機390×844](evidence/A-UI-18-long-mobile.png)；短視窗：[橫向844×390](evidence/A-UI-18-short-desktop.png)、[窄手機320×568](evidence/A-UI-18-short-mobile.png)。修前：[桌面](evidence/A-UI-18-before-desktop.png)、[窄手機](evidence/A-UI-18-before-mobile.png)。已人工看原尺寸與短視窗，確認文字、主次與固定捕捉入口。
 - UAT-74/79/80/81相關8/8、底紙細節調整後81再2/2通過；selftest53/53。原160/160 run已保留，但新增81後須完整162次才放行。
+
+## 第11輪交付（2026-11-10 17:52 台北；尚未放行）
+
+- 可見改造各自提交：UI-17 `17be58e`（本子採用／移除的水彩確認紙頁），UI-18 `a4147dd`（長原文分區捲讀、固定記一下與X）。
+- 最新完整run `2026-11-10T08-06-28-528Z`：**162項，156 pass／6 fail／0 blocked，ready_for_user_test=false**。失敗為UAT-25/49 desktop及UAT-32/52/72/74 mobile。trace空窗約19秒、384秒及459秒，工具host亦重置；單worker與持續收取輸出都未消除問題，根因未確定，預設已恢復2 workers。所有斷言、0 retries及原timeout保留。
+- UI-17階段曾有同輪160/160（`2026-11-10T04-09-27-488Z`），但之後看圖找到長文字缺失並新增81；該160次不能作為162項矩陣放行依據。原始失敗輪次、trace及結果完整保留。
+- 最新build通過、手機selftest **53/53**。host重置後的20/22失敗與舊確認流程失敗均另存，沒有覆蓋成成功。UAT-49 desktop未能產生結尾截圖，保留該案例原trace最後一張JPEG；它是中途證據，未冒稱為結尾截圖。
+- 修後探索以自己的和弦／詞句、未命名歌曲、480字靈感、Escape取消、未存草稿返回、保存再取消與重整執行；1280×800、390×844夜間、320×568夜間、844×390均通過，0 JS錯誤、無水平溢出。記錄[A-round11-exploration.json](evidence/A-round11-exploration.json)。
+- 九檯與地圖／聊天／隨手記／本子已逐頁看過兩尺寸26張，UI-17/18確認頁另有原尺寸及短視窗證據；核可素材12個來源／公開檔案雜湊全一致，未新增圖片載入。
+- 待辦：在穩定不中斷的執行環境完整重跑162項，取得同輪全綠與完整結尾截圖後，才可關閉驗收阻擋並設ready=true。驗證範圍仍限本機Chrome、假麥克風、離線教練；實機／Safari／真LLM未驗。
+
+第11輪逐頁自查（桌面1280×800／手機390×844；同一產品版本）：
+
+| 畫面 | 桌面 | 手機 |
+|---|---|---|
+| 哼唱 | [桌面](evidence/A-round11-page-1-desktop.png) | [手機](evidence/A-round11-page-1-mobile.png) |
+| 構想 | [桌面](evidence/A-round11-page-2-desktop.png) | [手機](evidence/A-round11-page-2-mobile.png) |
+| 和聲 | [桌面](evidence/A-round11-page-3-desktop.png) | [手機](evidence/A-round11-page-3-mobile.png) |
+| 旋律 | [桌面](evidence/A-round11-page-4-desktop.png) | [手機](evidence/A-round11-page-4-mobile.png) |
+| 歌詞 | [桌面](evidence/A-round11-page-5-desktop.png) | [手機](evidence/A-round11-page-5-mobile.png) |
+| 編曲 | [桌面](evidence/A-round11-page-6-desktop.png) | [手機](evidence/A-round11-page-6-mobile.png) |
+| 錄音 | [桌面](evidence/A-round11-page-7-desktop.png) | [手機](evidence/A-round11-page-7-mobile.png) |
+| 混音 | [桌面](evidence/A-round11-page-8-desktop.png) | [手機](evidence/A-round11-page-8-mobile.png) |
+| 總檢討 | [桌面](evidence/A-round11-page-9-desktop.png) | [手機](evidence/A-round11-page-9-mobile.png) |
+| 地圖 | [桌面](evidence/A-round11-map-desktop.png) | [手機](evidence/A-round11-map-mobile.png) |
+| 聊天 | [桌面](evidence/A-round11-chat-desktop.png) | [手機](evidence/A-round11-chat-mobile.png) |
+| 隨手記 | [桌面](evidence/A-round11-capture-desktop.png) | [手機](evidence/A-round11-capture-mobile.png) |
+| 本子 | [桌面](evidence/A-round11-library-desktop.png) | [手機](evidence/A-round11-library-mobile.png) |
+
+第11輪已關閉自己啟動的4101預覽，4101／4102皆確認closed；無push、remote更動、部署或tunnel操作。

@@ -1,9 +1,9 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 14:08",
-  "cases": 2,
-  "pass": 2,
-  "fail": 0,
+  "updated": "2026-11-10 17:52",
+  "cases": 162,
+  "pass": 156,
+  "fail": 6,
   "blocked": 0,
   "ready_for_user_test": false,
   "requirements": {
@@ -103,7 +103,7 @@
       ]
     },
     "R6": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-33",
         "UAT-58"
@@ -112,25 +112,25 @@
   },
   "novice_feedback": {
     "P0_context_coaching": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-53"
       ]
     },
     "P1_complete_demo": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-54"
       ]
     },
     "P1_denied_mic_demo": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-55"
       ]
     },
     "P1_one_primary": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-24",
         "UAT-56"
@@ -145,14 +145,14 @@
       ]
     },
     "P2_watercolor": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-28",
         "UAT-57"
       ]
     },
     "P2_knowledge_sparks": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-33",
         "UAT-58"
@@ -161,13 +161,13 @@
   },
   "exploration": {
     "A_N08_long_conversation": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-61"
       ]
     },
     "A_N09_role_waiting": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-62"
       ]
@@ -180,50 +180,50 @@
       ]
     },
     "A_N11_new_song_conversation": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-63"
       ]
     },
     "text_first_song": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-64"
       ]
     },
     "studio_song_journal": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-65"
       ]
     },
     "studio_map": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-66"
       ]
     },
     "companion_mission": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-67",
         "UAT-68"
       ]
     },
     "companion_paper_chat": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-69"
       ]
     },
     "short_viewport_chat": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-70"
       ]
     },
     "personal_materials": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-71"
       ]
@@ -235,7 +235,7 @@
       ]
     },
     "explicit_confirmation": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-73"
       ]
@@ -247,31 +247,31 @@
       ]
     },
     "long_page_confirmation": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-75"
       ]
     },
     "paper_revisions": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-76"
       ]
     },
     "revision_retry": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-77"
       ]
     },
     "audio_upload_controls": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-78"
       ]
     },
     "notebook_decisions": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-79",
         "UAT-80"
@@ -284,5 +284,65 @@
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T06-08-47-148Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；A 尚有未結缺失待驗收"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T08-06-28-528Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；有案例缺少截圖證據；第11輪UI-17/18已提交，最新build與selftest53/53通過、修後四尺寸探索通過；工具host重置與重複事件空窗尚未解決，不用先前160/160或部分通過取代本輪162次。",
+  "validation_blocker": {
+    "status": "open",
+    "kind": "execution_pauses",
+    "failed_cases": [
+      "UAT-25 desktop",
+      "UAT-49 desktop",
+      "UAT-32 mobile",
+      "UAT-74 mobile",
+      "UAT-52 mobile",
+      "UAT-72 mobile"
+    ],
+    "evidence": "docs/uat/evidence/A-round11-runtime-pauses.json",
+    "missing_final_screenshot": "UAT-49 desktop (last in-case frame preserved separately)",
+    "next_acceptance": "在不中斷的執行環境，以原斷言及期限完整重跑162項，全部通過才可放行。"
+  },
+  "supplementary": {
+    "build": "pass",
+    "selftest": {
+      "cases": 53,
+      "pass": 53,
+      "fail": 0,
+      "evidence": "docs/uat/evidence/A-round11-selftest-final.txt"
+    },
+    "approved_asset_hashes": "12/12 pass",
+    "reviewed_page_screenshots": 26,
+    "post_UI18_exploration": [
+      {
+        "width": 1280,
+        "height": 800,
+        "colorScheme": "light",
+        "status": "pass",
+        "errors": []
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "colorScheme": "dark",
+        "status": "pass",
+        "errors": []
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "colorScheme": "dark",
+        "status": "pass",
+        "errors": []
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "colorScheme": "light",
+        "status": "pass",
+        "errors": []
+      }
+    ],
+    "preview_ports": {
+      "4101": "closed",
+      "4102": "closed"
+    }
+  }
 }
