@@ -53,7 +53,9 @@ export default function App() {
   const step = STEPS[cur]
   const [entry, setEntry] = useState(() => ({ step: step.key, messageIds: new Set<string>() }))
   const role = ROLES[DESK_ROLE[step.key]]
-  const ready = step.requirements(p).every((r) => r.ok)
+  const requirements = step.requirements(p)
+  const unfinished = requirements.find((r) => !r.ok)
+  const ready = !unfinished
   const phase = PHASES.find((ph) => ph.keys.includes(step.key))!
 
   useEffect(() => {
@@ -136,7 +138,10 @@ export default function App() {
         <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.isBusy(step.key, role.id)} onChat={() => openChat(role.id)} />
         <div className="song-trail" aria-label="歌曲手記">
           <p className="trail-title">{p.idea.title ? `《${p.idea.title}》的手記` : '我們的第一首歌'}</p>
-          <p className="trail-caption">一點一點，把喜歡的聲音留下來。</p>
+          <div className="desk-mission" role="status" aria-label="當下的小任務" data-ready={ready}>
+            <span className="mission-kicker">現在的小任務 · {role.name}陪你</span>
+            <strong>{unfinished ? unfinished.label : nextStep ? `這一頁準備好了，可以去${nextStep.title}` : '留下了自己的判斷，這一版由你決定'}</strong>
+          </div>
           <ul>{[
             { name: '一句靈感', kept: !!p.idea.hook.trim() },
             { name: '和弦', kept: [...p.harmony.verse, ...p.harmony.chorus].some(n => n != null) },
