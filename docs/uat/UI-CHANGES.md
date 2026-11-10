@@ -61,3 +61,11 @@
 已看手機地圖、桌面夜間紙面截圖；獨立 reviewer 已確認唯一 Important 項解決，沒有其他重大發現。實體裝置與真 LLM 尚待使用者測試。
 
 UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 ready=false，接續本輪完整 134 次驗收。
+
+## UI-07：跳著創作，也知道先補哪一點聲音（R2、R3，UAT-68）
+
+- 從地圖直接去空白混音檯，便箋現在會先說「先留一小句副歌旋律，再來混音」，主按鈕可帶你去旋律檯。
+- 總檢討如果還沒有和弦或旋律，先提醒留下一點聲音。只寫評語不會讓任務提早顯示完成；留下聲音後仍可先聽部分草稿，不必把整首做滿。
+- 原本自由跳檯、作品前進條件與唯一主按鈕都保留。這是本輪探索找到並直接修正的任務文案缺口。
+- 修後混音：[桌面](evidence/A-UI-07-mix-desktop.png)、[手機](evidence/A-UI-07-mix-mobile.png)；總檢討：[桌面](evidence/A-UI-07-review-desktop.png)、[手機](evidence/A-UI-07-review-mobile.png)。修前：[桌面混音](evidence/A-UI-07-before-mix-desktop.png)、[手機總檢討](evidence/A-UI-07-before-review-mobile.png)。
+- UAT-68 兩尺寸先紅→綠；與 UAT-16/36/54/67 共10/10，已看手機混音、桌面總檢討截圖。擴為68個旅程、136次完整驗收，部分通過仍不放行。

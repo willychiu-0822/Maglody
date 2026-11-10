@@ -57,6 +57,12 @@ export default function App() {
   const unfinished = requirements.find((r) => !r.ok)
   const ready = !unfinished
   const phase = PHASES.find((ph) => ph.keys.includes(step.key))!
+  // Free visits to polishing desks still need a little sound before listening.
+  const hasWrittenSound = [...p.harmony.verse, ...p.harmony.chorus].some(n => n != null)
+    || [...p.melody.verse, ...p.melody.chorus].some(n => n != null && n >= 0)
+  const missionPrerequisite = step.key === 'mix' && !p.melody.chorus.some(n => n != null && n >= 0)
+    ? '先留一小句副歌旋律，再來混音'
+    : step.key === 'review' && !hasWrittenSound ? '先留下一點聲音：挑幾個和弦，或寫幾個音' : null
 
   useEffect(() => {
     stopAll()
@@ -138,9 +144,9 @@ export default function App() {
         <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.isBusy(step.key, role.id)} onChat={() => openChat(role.id)} />
         <div className="song-trail" aria-label="歌曲手記">
           <p className="trail-title">{p.idea.title ? `《${p.idea.title}》的手記` : '我們的第一首歌'}</p>
-          <div className="desk-mission" role="status" aria-label="當下的小任務" data-ready={ready}>
+          <div className="desk-mission" role="status" aria-label="當下的小任務" data-ready={ready && !missionPrerequisite}>
             <span className="mission-kicker">現在的小任務 · {role.name}陪你</span>
-            <strong>{unfinished ? unfinished.label : nextStep ? `這一頁準備好了，可以去${nextStep.title}` : '留下了自己的判斷，這一版由你決定'}</strong>
+            <strong>{missionPrerequisite ?? (unfinished ? unfinished.label : nextStep ? `這一頁準備好了，可以去${nextStep.title}` : '留下了自己的判斷，這一版由你決定')}</strong>
           </div>
           <ul>{[
             { name: '一句靈感', kept: !!p.idea.hook.trim() },
