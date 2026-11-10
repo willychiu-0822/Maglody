@@ -120,3 +120,15 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 - 翻本子時有清楚的「靈感本子」標題，自己的碎片變成一張張淡彩紙片；更多用法照樣收起。空本子的提示也修正為右上角入口。
 - 記下念頭：[桌面](evidence/A-UI-11-capture-desktop.png)、[手機](evidence/A-UI-11-capture-mobile.png)；翻本子：[桌面](evidence/A-UI-11-library-desktop.png)、[手機](evidence/A-UI-11-library-mobile.png)。改前：[桌面](evidence/A-UI-11-before-desktop.png)、[手機](evidence/A-UI-11-before-mobile.png)。已人工檢視手機捕捉、桌面本子，紙墨、返回位置與唯一保存按鈕清楚。
 - UAT-72先因缺少紙頁標題兩尺寸失敗，再實作；首輪定向20/22因Chrome環境中斷失敗，保留trace與診斷於failures.md，未放寬斷言。隔離暫時桌面session bus後，用正常指令重跑相關UAT-13/14/15/16/19/31/37/49/60/69/72 **22/22通過**；自動build通過，手機selftest **50/50**。獨立唯讀審查無未解重大或細項；矮視窗與長內容探索通過。完整144次仍待最後重跑，ready=false。
+
+## 第8輪最終驗收
+
+可見改造均獨立本機提交：UI-10 `16594bb`、UI-11 `949650a`。Chrome環境隔離 `63a4a89` 與UAT-49非同步故障注入修正 `0f1247b` 各自獨立；沒有修改產品錄音語意、放寬timeout或減少斷言。
+
+最後完整run `2026-11-10T02-11-21-830Z`：**144/144通過，0 fail／0 blocked，ready_for_user_test=true**，144份非空逐案截圖均已核對。前兩次完整143/144、141/144及trace如實保留，不用部分通過代替完整重跑。UAT-STATUS.json包含R1–R6、新手P0→P2與本輪兩項驗收。
+
+最後明確build通過，手機selftest **50/50**；六份核可來源與public圖雜湊一致，首屏房間＋作曲家仍113,766bytes。獨立唯讀審查沒有Critical/Important/Minor；也驗過只有副歌、只有哼唱、5000字靈感、16000字不斷行詞與320×360矮畫面。
+
+全綠後再用自己寫的長句、三行詞做深色素材手記、390×600捕捉、聊天草稿返回與重整探索，兩尺寸均通過、0JS錯誤、無水平溢出。證據：[桌面手記](evidence/A-UI-round8-explore-desktop.png)、[手機手記](evidence/A-UI-round8-explore-mobile.png)、[桌面捕捉](evidence/A-UI-round8-capture-desktop.png)、[手機矮視窗捕捉](evidence/A-UI-round8-capture-mobile.png)，已人工看手機手記與桌面夜間捕捉。
+
+4101用原session控制關閉、4102由E2E自動關閉，兩埠均確認closed。保持本機分支與工作目錄，無push、remote更動、部署或tunnel操作。放行範圍為本機Chrome；實體手機／Safari、實際麥克風品質與真LLM仍未驗證。
