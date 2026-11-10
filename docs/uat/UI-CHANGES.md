@@ -132,3 +132,10 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 全綠後再用自己寫的長句、三行詞做深色素材手記、390×600捕捉、聊天草稿返回與重整探索，兩尺寸均通過、0JS錯誤、無水平溢出。證據：[桌面手記](evidence/A-UI-round8-explore-desktop.png)、[手機手記](evidence/A-UI-round8-explore-mobile.png)、[桌面捕捉](evidence/A-UI-round8-capture-desktop.png)、[手機矮視窗捕捉](evidence/A-UI-round8-capture-mobile.png)，已人工看手機手記與桌面夜間捕捉。
 
 4101用原session控制關閉、4102由E2E自動關閉，兩埠均確認closed。保持本機分支與工作目錄，無push、remote更動、部署或tunnel操作。放行範圍為本機Chrome；實體手機／Safari、實際麥克風品質與真LLM仍未驗證。
+
+## UI-12：看得見的「好」，自己決定何時收起（第9輪，UAT-73）
+
+- 工作室、聊天和隨手記按背景不會突然關閉；右上「X」與鍵盤Escape可明確離開。
+- 保存、拼貼與儲存失敗提示都附「好」按鈕，讀完再收起。提示放在頁首，手機不用往下找；重新打開隨手記也可在紙頁裡按好，沒有被彈窗擋住的按鈕。
+- 截圖：[桌面](evidence/A-UI-12-notice-desktop.png)、[手機](evidence/A-UI-12-notice-mobile.png)。已實際檢視兩尺寸，發現初版提示排在頁尾後改到頁首並重截；通知不遮擋輸入或主動作。
+- 相關UAT-16/49/60/69/70/72/73共14/14通過；調整位置後UAT-73兩尺寸2/2通過，自動build通過。完整矩陣待本輪結束重跑，ready=false。

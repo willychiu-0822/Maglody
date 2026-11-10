@@ -139,6 +139,11 @@ export default function App() {
       </button>
       </header>
 
+      <InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
+        onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0 && i !== cur) { skipEnter.current = true; go(i) } }}
+        onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
+        open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
+
       {storageError && <p className="storage-notice" role="status">這首歌還沒存進瀏覽器，請先留在這頁。釋出儲存空間後，再改一個字就會重試。</p>}
       <main className="desk" key={step.key}>
         <div className="studio-corner">
@@ -223,10 +228,7 @@ export default function App() {
         </Modal>
       )}
 
-      <InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
-        onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0 && i !== cur) { skipEnter.current = true; go(i) } }}
-        onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
-        open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
+
 
       <MasterPanel key={master.session} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
         messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />

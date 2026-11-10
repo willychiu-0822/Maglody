@@ -99,7 +99,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
     return () => window.removeEventListener('keydown', f)
   }, [setOpen])
 
-  const flash = (t: string) => { setToast(t); window.setTimeout(() => setToast(null), 2600) }
+  const flash = (t: string) => setToast(t)
   const toggleTag = (t: InspoTag) => setDraft((d) => ({ ...d, tags: d.tags.includes(t) ? d.tags.filter((x) => x !== t) : [...d.tags, t] }))
 
   const toggleRec = async (kind: 'voice' | 'hum') => {
@@ -217,7 +217,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
 
   return (
     <>
-      {toast && <div className="toast" role="status">{toast}</div>}
+      {toast && !open && <div className="toast" role="status"><span>{toast}</span><button className="btn notice-ack" onClick={() => setToast(null)}>好</button></div>}
 
       {open && (
         <Modal label="靈感" className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'}`} onClose={() => setOpen(null)}>
@@ -227,6 +227,8 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                 : <button className="link-btn" onClick={() => setOpen('capture')}>← 記新的</button>}
               <button className="icon-btn" onClick={() => setOpen(null)} aria-label="關閉">✕</button>
             </div>
+
+            {toast && <div className="toast" role="status"><span>{toast}</span><button className="btn notice-ack" onClick={() => setToast(null)}>好</button></div>}
 
             <div className="notebook-cover">
               <span className="notebook-kicker">{open === 'capture' ? '工作室的隨手記' : '收著，等一首歌長出來'}</span>

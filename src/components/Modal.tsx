@@ -16,7 +16,7 @@ export function Modal({ label, className = '', onClose, children }: { label: str
     const first = items[0], last = items[items.length - 1]
     if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog)) { e.preventDefault(); last?.focus() }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus() }
-  }} onCancel={e => { e.preventDefault(); onClose() }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+  }} onCancel={e => { e.preventDefault(); onClose() }}>
     <div className={`inspo-sheet ${className}`}>{children}</div>
   </dialog>
 }
