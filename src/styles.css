@@ -1076,3 +1076,20 @@ body::before { opacity: .12; }
   .chat-sheet .master-list { gap: 10px; }
   .chat-sheet .master-input { padding-top: 6px; }
 }
+
+/* UI-10: the musician's scrapbook holds the creator's actual words and sounds. */
+.material-journal { border-top: 1px dashed var(--grid-strong); margin-top: 12px; }
+.material-journal > summary { min-height: 44px; padding: 10px 0 2px; display: flex; align-items: center; justify-content: space-between; gap: 12px; list-style: none; cursor: pointer; font-size: .83rem; color: var(--ink); }
+.material-journal > summary::-webkit-details-marker { display: none; }
+.journal-fold { font-size: 1.1rem; color: var(--accent); transition: transform .2s; }
+.material-journal[open] .journal-fold { transform: rotate(45deg); }
+.journal-pages { display: grid; gap: 12px; padding: 14px 0 4px; }
+.material-note { min-width: 0; padding: 12px 15px 14px; border: 1px solid var(--grid-strong); border-radius: 2px 9px 4px 6px; background: radial-gradient(ellipse at 0 0, var(--wash-ochre), transparent 75%), var(--paper); box-shadow: 2px 3px 0 var(--line); }
+.material-note[data-material="harmony"] { background: radial-gradient(ellipse at 100% 0, var(--wash-sage), transparent 85%), var(--paper); }
+.material-note[data-material="melody"] { background: radial-gradient(ellipse at 0 100%, var(--wash-indigo), transparent 80%), var(--paper); }
+.material-note[data-material="lyrics"] { background: repeating-linear-gradient(transparent 0 29px, var(--line) 29px 30px), var(--paper); }
+.material-note h2 { font-family: var(--font-title); font-size: .82rem; font-weight: 400; color: var(--muted); margin: 0 0 8px; }
+.material-note p { white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-title); font-size: 1rem; line-height: 1.9; margin: 6px 0 0; }
+.material-note p small { display: block; font-family: var(--font-body); color: var(--muted); font-size: .75rem; }
+.journal-empty { color: var(--muted); font-size: .84rem; line-height: 1.8; margin: 0; }
+@media (max-width: 760px) { .material-journal { margin-top: 8px; } .material-journal > summary { padding-top: 6px; } .material-note { padding: 10px 12px 12px; } }

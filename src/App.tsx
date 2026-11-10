@@ -1,3 +1,4 @@
+import { SongMaterials } from './components/SongMaterials'
 import { Modal } from './components/Modal'
 import { StudioPresence } from './components/StudioPresence'
 import { KnowledgeSpark } from './components/KnowledgeSpark'
@@ -154,6 +155,7 @@ export default function App() {
             { name: '旋律', kept: [...p.melody.verse, ...p.melody.chorus].some(n => n != null && n >= 0) },
             { name: '歌詞', kept: p.lyrics.some(s => s.text.trim()) },
           ].map(item => <li key={item.name} data-kept={item.kept}><span aria-hidden="true">{item.kept ? '✓' : '◦'}</span> {item.name}<span className="sr-only">{item.kept ? '已留下' : '還在醞釀'}</span></li>)}</ul>
+          <SongMaterials p={p} />
         </div>
         </div>
         <section className="workpage" aria-label={`${step.title}創作紙頁`}>

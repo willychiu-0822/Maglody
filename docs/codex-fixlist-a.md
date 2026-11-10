@@ -339,3 +339,15 @@ UI-09結果：UAT-70兩尺寸先RED（內容高度0px）→GREEN；與UAT-31/37/
 140/140完整E2E通過後，補充selftest首次44/50：五項角色仍讀已移除的單字圓章；另有錄音計時與結果就緒檢查。五角色改查每則新回答的完整姓名＋核可圖路徑，等待實際回答數量增加，保留拒絕代寫。錄音保持1.8秒，但等待「哼完了」證明已收音後才計時；即時canvas可能早於結果存入，第二次49/50後改等待實際mic分析寫入，再要求結果圖可見及來源mic、長度>0。未把假音或無聲判成成功，未修改產品錄音程式。最終selftest **50/50**、exit0，完整輸出在uat/evidence/A-round7-selftest.txt。
 
 第7輪最終：2026-11-10T01-21-10-291Z完整140/140、逐案非空證據140/140、build pass、selftest50/50；全綠後自己的問題／原詞探索兩尺寸通過。UI08 `6c56432`、UI09 `dc26518`、selftest `a3c0022`。Final: fixed short-viewport reading — UAT-70 RED→GREEN, suite140/140。無未解Critical/Important、無deferred minor；4101/4102已停止。
+
+## 第8輪計畫：自己的素材手記與隨手記紙頁（2026-11-10）
+
+使用 writing-plans、executing-plans 與 verification-before-completion，直接沿用使用者已指定的設計與本工作目錄；React/CSS、既有核可 WebP、原資料格式不變。原 metadata 唯讀，已用 scripts/git-local.sh 確認 B 合併為 Already up to date；本機 index 乾淨。基準 build 通過。
+
+設計決定：素材預設收合，翻開才看自己留下的片段；不加另一顆主要按鈕。隨手記沿用原生 dialog 與所有媒體保存行為，只加紙頁層級和返回位置。保持六張核可圖與首屏素材大小。這兩項屬既有 R1–R6 的續作，依使用者授權直接實作。
+
+- [ ] UI-10 / UAT-71（R1/R2/R3）：新增 SongMaterials，讀 Project，顯示自己的一句靈感、主副歌和弦、旋律音名與歌詞短摘；空白有溫和提示、休止/延音不計入音名，只有一個 disclosure。先寫使用者操作／資料重整驗收，再實作、兩尺寸與深色截圖、相關回歸，獨立 commit。
+- [ ] UI-11 / UAT-72（R1/R2/R5）：InspirationHub capture/library 加水彩筆記頁標題、當前工作檯返回提示；文字／說／哼／拍、存檔／返回／草稿行為不變；空本子修正入口位置。先驗九檯位置與保存返回，再實作、兩尺寸截圖、相關回歸，獨立 commit。
+- [ ] 最後 build、selftest、完整 test:e2e，只有全矩陣通過才 ready=true；再做自寫長內容、深色、窄畫面與捕捉返回探索，審查與關閉自啟 preview。
+
+Review focus：長歌詞及長和弦不撐出紙頁；只有副歌、只有哼唱也能正確呈現；捕捉中手機軟鍵盤/矮視窗可捲動保存；聊天疊開捕捉回原草稿；空白及重整不自動添入示範素材。

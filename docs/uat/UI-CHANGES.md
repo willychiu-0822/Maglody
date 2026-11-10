@@ -105,3 +105,10 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 最後明確build通過，手機selftest **50/50**。selftest首次44/50、第二次49/50已如實記錄在清單與結果；只更新舊圓章定位與等待實際收音／分析，不改產品或降低要求。六份核可來源與壓縮圖雜湊均相符，審查無未解重大缺失。
 
 全綠後再用自己的句子做深色聊天、捕捉返回、未送出草稿、三行歌詞重整探索，桌面／手機均通過；手機另驗390×600矮畫面。證據：[桌面](evidence/A-UI-round7-explore-desktop.png)、[手機](evidence/A-UI-round7-explore-mobile.png)，已看手機截圖。4101由保留session關閉、4102由E2E關閉，兩埠已確認停止；無push、remote修改、部署或tunnel操作。
+
+## UI-10：手記裡真的有自己的詞與聲音（第8輪，R1/R2/R3、UAT-71）
+
+- 每一檯的工作室便箋下方多了「翻開素材手記」。平常收起，想看時才翻開，不增加主要按鈕。
+- 自己留的一句靈感、主副歌和弦、旋律開頭音名和詞句，分別放在赭黃、淡綠、淡藍與橫線紙上。改詞就跟著更新，重整還找得到；空白作品不放入假範例，只有哼唱時先收哼唱種子。
+- 畫面：[桌面](evidence/A-UI-10-journal-desktop.png)、[手機](evidence/A-UI-10-journal-mobile.png)；夜間紙面：[桌面](evidence/A-UI-10-dark-desktop.png)、[手機](evidence/A-UI-10-dark-mobile.png)。改前：[桌面](evidence/A-UI-10-before-desktop.png)、[手機](evidence/A-UI-10-before-mobile.png)。已人工看手機素材紙片與桌面夜間，中文與自己的素材清楚。
+- UAT-71先因缺少素材手記兩尺寸失敗，再與UAT-24/28/33/65/67/68共 **14/14通過**，自動build通過；保留唯一主動作、自由跳檯、小火花與重整保存。這是部分驗收，ready=false，完整矩陣仍待本輪最後重跑。

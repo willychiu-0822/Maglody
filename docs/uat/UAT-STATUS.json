@@ -1,14 +1,14 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 09:29",
-  "cases": 140,
-  "pass": 140,
+  "updated": "2026-11-10 09:33",
+  "cases": 14,
+  "pass": 14,
   "fail": 0,
   "blocked": 0,
-  "ready_for_user_test": true,
+  "ready_for_user_test": false,
   "requirements": {
     "R1": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-28",
         "UAT-57",
@@ -19,7 +19,7 @@
       ]
     },
     "R2": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-24",
         "UAT-56",
@@ -32,7 +32,7 @@
       ]
     },
     "R3": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-25",
         "UAT-30",
@@ -50,7 +50,7 @@
       ]
     },
     "R4": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-25",
         "UAT-29",
@@ -59,7 +59,7 @@
       ]
     },
     "R5": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-13",
         "UAT-14",
@@ -72,7 +72,7 @@
       ]
     },
     "R6": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-33",
         "UAT-58"
@@ -81,32 +81,32 @@
   },
   "novice_feedback": {
     "P0_context_coaching": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-53"
       ]
     },
     "P1_complete_demo": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-54"
       ]
     },
     "P1_denied_mic_demo": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-55"
       ]
     },
     "P1_one_primary": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-24",
         "UAT-56"
       ]
     },
     "P1_approved_characters": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-25",
         "UAT-29",
@@ -114,14 +114,14 @@
       ]
     },
     "P2_watercolor": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-28",
         "UAT-57"
       ]
     },
     "P2_knowledge_sparks": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-33",
         "UAT-58"
@@ -130,32 +130,32 @@
   },
   "exploration": {
     "A_N08_long_conversation": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-61"
       ]
     },
     "A_N09_role_waiting": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-62"
       ]
     },
     "A_N10_mic_limit_without_frames": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-52",
         "UAT-43"
       ]
     },
     "A_N11_new_song_conversation": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-63"
       ]
     },
     "text_first_song": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-64"
       ]
@@ -167,7 +167,7 @@
       ]
     },
     "studio_map": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-66"
       ]
@@ -180,30 +180,17 @@
       ]
     },
     "companion_paper_chat": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-69"
       ]
     },
     "short_viewport_chat": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-70"
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T01-21-10-291Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；第7輪UI08/09已獨立本機提交，selftest50/50，獨立審查缺失已修；探索與截圖已驗，4101/4102已停止；沒有push、部署或tunnel操作",
-  "supplementary_checks": {
-    "build": "PASS: explicit npm run build after final exploration, exit 0",
-    "selftest": "50/50 PASS, exit 0; first 44/50 and intermediate 49/50 retained in delivery notes",
-    "selftest_evidence": "docs/uat/evidence/A-round7-selftest.txt",
-    "approved_assets": "6/6 source hashes and 6/6 public WebP hashes match",
-    "review": "one Important: short-height chat reading area; UAT-70 RED (0px)→GREEN (>=96px), no remaining Critical/Important or deferred minors",
-    "post_matrix_exploration": "desktop/mobile: dark chat, own question, capture return, own lyrics after reload PASS; mobile also 390x600; no JS errors",
-    "screenshots": "140/140 per-case screenshots nonempty; UI08/09 and exploration images visually inspected",
-    "preview_servers": {
-      "4101": "stopped via retained session control",
-      "4102": "stopped automatically after full E2E"
-    }
-  }
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T01-33-27-114Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
 }

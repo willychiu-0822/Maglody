@@ -1,4 +1,4 @@
-import { test, expect, setup, go, primary } from './helpers'
+import { test, expect, setup, go, primary, finished } from './helpers'
 
 test('UAT-65 工作室手記隨自己的創作長出素材，跳檯與重整仍看得到', async ({ page }, info) => {
   await setup(page)
@@ -201,4 +201,33 @@ test('UAT-70 手機橫向或縮短視窗仍可讀夥伴回覆、繼續提問', a
   await page.getByRole('button', { name: '夾進本子', exact: true }).click()
   await expect(page.getByRole('dialog', { name: '跟作曲家聊', exact: true })).toBeVisible()
   await expect(page.locator('.msg-master .msg-speaker')).toHaveText(['作曲家', '作曲家'])
+})
+
+
+test('UAT-71 翻開素材手記能看自己的詞曲，更新及重整不混入範例', async ({ page }, info) => {
+  await setup(page)
+  const journal = page.getByRole('group', { name: '素材手記', exact: true })
+  await expect(journal).not.toHaveAttribute('open', '')
+  await journal.getByText('翻開素材手記', { exact: true }).click()
+  await expect(journal).toContainText('第一筆還在醞釀')
+  await expect(journal.locator('article')).toHaveCount(0)
+  await setup(page, finished)
+  await journal.getByText('翻開素材手記', { exact: true }).click()
+  await expect(journal.getByRole('article', { name: '一句靈感' })).toContainText('鑰匙留在門口')
+  await expect(journal.getByRole('article', { name: '和弦片段' })).toContainText('C → G → Am → F')
+  await expect(journal.getByRole('article', { name: '旋律片段' })).toContainText('C4 · D4 · E4 · G4')
+  await expect(journal.getByRole('article', { name: '詞句片段' })).toContainText('雨落在鞋櫃上')
+  await page.screenshot({ path: `docs/uat/evidence/A-UI-10-journal-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await expect(primary(page)).toHaveCount(1)
+  await go(page, '歌詞')
+  await page.locator('.lyric-input').fill('琴蓋上留著今晚的風\n窗邊還有我的腳步')
+  await journal.getByText('翻開素材手記', { exact: true }).click()
+  await expect(journal.getByRole('article', { name: '詞句片段' })).toContainText('琴蓋上留著今晚的風')
+  await expect(journal).not.toContainText('雨落在鞋櫃上')
+  await page.reload()
+  await journal.getByText('翻開素材手記', { exact: true }).click()
+  await expect(journal).toContainText('琴蓋上留著今晚的風')
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.screenshot({ path: `docs/uat/evidence/A-UI-10-dark-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 })
