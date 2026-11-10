@@ -1178,3 +1178,12 @@ body::before { opacity: .12; }
 .audio-file-notice { display: flex; align-items: center; gap: 14px; margin: 12px 0; padding: 12px 14px; border: 1px solid var(--grid-strong); border-radius: 3px 12px 5px 9px; background: radial-gradient(ellipse at 0 0, var(--wash-ochre), transparent 85%), var(--paper); }
 .audio-file-notice p { flex: 1; min-width: 0; margin: 0; font-size: .86rem; line-height: 1.9; overflow-wrap: anywhere; }
 .audio-file-notice button { flex: none; min-width: 48px; }
+
+/* UI-17 · adopting or removing a fragment is a choice made on its own paper. */
+.notebook-decision { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.notebook-decision .revision-snapshot { background: radial-gradient(ellipse at 0 0, var(--wash-sage), transparent 85%), var(--paper); }
+.notebook-decision .decision-words { max-height: 160px; overflow-y: auto; overscroll-behavior: contain; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-title); font-size: 1.12rem; line-height: 1.9; }
+.decision-effect { padding: 12px 14px; border-left: 2px solid var(--grid-strong); background: var(--wash-indigo); font-size: .85rem; line-height: 1.9; overflow-wrap: anywhere; }
+.decision-effect p { margin: 0 0 8px; }
+.decision-effect ul { margin: 0; padding-left: 22px; }
+.notebook-decision .primary-action { width: 100%; }

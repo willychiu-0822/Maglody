@@ -1,3 +1,4 @@
+import { NotebookDecisionPage, decisionTitle, type NotebookDecision } from './NotebookDecision'
 import { Modal } from '../components/Modal'
 import { useEffect, useRef, useState } from 'react'
 import { ac, audioGeneration, playMedia, tone } from '../lib/audio'
@@ -6,7 +7,7 @@ import { analyzeBuffer, toMono } from '../lib/pitch'
 import type { Project, Update } from '../lib/store'
 import { uid } from '../lib/store'
 import { keyName } from '../lib/theory'
-import { pullOptions, collageOptions } from './pull'
+import { pullOptions, collageOptions, type PullOption } from './pull'
 import { useRecorder, type Recording } from './recorder'
 import { DeskActions } from '../components/ui'
 import { TAG_ZH, type InspoApi, type InspoTag, type Inspiration } from './store'
@@ -84,6 +85,9 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const [expanded, setExpanded] = useState<string | null>(null)
   const [picked, setPicked] = useState<string[]>([])
   const [collage, setCollage] = useState(false)
+  const [decision, setDecision] = useState<NotebookDecision | null>(null)
+  const [decisionError, setDecisionError] = useState(false)
+  const decisionOpener = useRef<HTMLElement | null>(null)
   const [moreOpen, setMoreOpen] = useState<string | null>(null)
   const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((i) => i !== id) : [...x, id]))
   const [mediaSaveError, setMediaSaveError] = useState(false)
@@ -163,7 +167,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       if (!(saved.text.trim() || saved.voice || saved.hum || saved.images.length)) return
       const item = api.add({ ...saved, text: saved.text.trim(), fromStep: step })
       setDraft(emptyDraft())
-      setOpen(null)
+      setOpen(decision ? 'library' : null)
       flash(`收好了。你還在「${stepTitle}」。`)
       onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
     } catch { flash('本子還沒存好，草稿留在這裡。請釋出瀏覽器空間後再試。') }
@@ -173,24 +177,65 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const saveTextCopy = () => {
     try {
       const item = api.add({...emptyDraft(), text:draftRef.current.text.trim(), fromStep:step})
-      setOpen(null)
+      setOpen(decision ? 'library' : null)
       flash('文字先收好了。錄音仍留在草稿，回來可以重試。')
       onEvent('inspiration.saved',item.text)
     } catch { flash('文字還沒存好，草稿留在這裡。請釋出空間後重試。') }
   }
 
-  const pull = (x: Inspiration, opt: { label: string; how: string; apply: (p: Project, u: Update) => string | void }) => {
-    // 不默默覆蓋：目前的歌已有歌名或進度時，先問一聲
-    if (opt.how === 'start' && (p.idea.title || p.done.some(Boolean)) && p.idea.title !== x.text) {
-      const ok = confirm(`目前這首${p.idea.title ? `《${p.idea.title}》` : ''}已經有進度。\n\n確定：把「${x.text || '這則靈感'}」帶進這首（成為歌名與 vibe，其他內容都保留）。\n取消：先不要動。想開全新的一首，可以用頁面最下方「重新開始一首新歌」。`)
-      if (!ok) return
-    }
-    const goto = opt.apply(p, update)
+  const choose = (choice: NotebookDecision) => {
+    decisionOpener.current = document.activeElement as HTMLElement | null
+    setDecisionError(false)
+    setDecision(choice)
+  }
+  const cancelDecision = () => {
+    setDecision(null)
+    setDecisionError(false)
+    requestAnimationFrame(() => {
+      if (decisionOpener.current?.isConnected && decisionOpener.current.checkVisibility()) decisionOpener.current.focus()
+      else if (decision) {
+        const card = [...document.querySelectorAll<HTMLElement>('[data-inspiration-id]')].find(e => e.dataset.inspirationId === decision.item.id)
+        card?.querySelector<HTMLButtonElement>(decision.kind === 'start' ? '.primary-action' : '[data-notebook-remove]')?.focus()
+      }
+    })
+  }
+  const closeNotebook = () => {
+    if (decision && open === 'capture') setOpen('library')
+    else if (decision) cancelDecision()
+    else setOpen(null)
+  }
+  const applyPull = (x: Inspiration, opt: PullOption) => {
+    // Persist use history before applying; a full notebook must not silently change the song.
     api.markUsed(x.id, step, opt.how)
+    const goto = opt.apply(p, update)
+    setDecision(null)
     setOpen(null)
     flash(`已放進：${opt.label.replace(/^設為|^加進/, '')}`)
     onEvent(opt.how === 'start' ? 'inspiration.start' : 'inspiration.used', x.text || '')
     if (goto && goto !== step) onGo(goto)
+  }
+  const pull = (x: Inspiration, opt: PullOption) => {
+    const hasProgress = p.idea.title || p.idea.hook || p.idea.mood || p.idea.vibe || p.idea.image || p.idea.story || p.idea.theme || p.done.some(Boolean)
+      || [...p.harmony.verse, ...p.harmony.chorus, ...p.melody.verse, ...p.melody.chorus].some(n => n != null)
+      || p.hum || p.lyrics.some(s => s.text.trim()) || p.arrangement.length > 0
+    if (opt.how === 'start' && hasProgress) { choose({ kind: 'start', item: x, option: opt }); return }
+    try { applyPull(x, opt) } catch { flash('使用紀錄還沒存好，歌曲尚未更動。請釋出瀏覽器儲存空間後再試。') }
+  }
+  const confirmDecision = () => {
+    if (!decision) return
+    try {
+      if (decision.kind === 'start') applyPull(decision.item, decision.option)
+      else {
+        api.remove(decision.item.id)
+        setPicked(ids => ids.filter(id => id !== decision.item.id))
+        setExpanded(null)
+        setMoreOpen(null)
+        setDecision(null)
+        flash('紙片已從本子移除。歌曲與其他紙片留在原處。')
+        requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.notebook-tools .link-btn')?.focus())
+      }
+      setDecisionError(false)
+    } catch { setDecisionError(true) }
   }
 
   const collageChoices = collageOptions(api.list.filter(x => picked.includes(x.id)), p)
@@ -220,20 +265,20 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       {toast && !open && <div className="toast" role="status"><span>{toast}</span><button className="btn notice-ack" onClick={() => setToast(null)}>好</button></div>}
 
       {open && (
-        <Modal label="靈感" className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'}`} onClose={() => setOpen(null)}>
+        <Modal label={decision && open === 'library' ? decisionTitle(decision) : '靈感'} className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'}`} onClose={closeNotebook}>
             <div className="row between notebook-tools">
               {open === 'capture'
                 ? <button className="link-btn" onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
-                : <button className="link-btn" onClick={() => setOpen('capture')}>← 記新的</button>}
-              <button className="icon-btn" onClick={() => setOpen(null)} aria-label="關閉">✕</button>
+                : <button className="link-btn" onClick={() => setOpen('capture')}>{decision ? '✎ 記一下' : '← 記新的'}</button>}
+              <button className="icon-btn" onClick={closeNotebook} aria-label="關閉">✕</button>
             </div>
 
             {toast && <div className="toast" role="status"><span>{toast}</span><button className="btn notice-ack" onClick={() => setToast(null)}>好</button></div>}
 
             <div className="notebook-cover">
               <span className="notebook-kicker">{open === 'capture' ? '工作室的隨手記' : '收著，等一首歌長出來'}</span>
-              <h1>{open === 'capture' ? '先把這一點留下來' : '靈感本子'}</h1>
-              <p>{open === 'capture' ? '不用完整，一句話、一段哼唱都好。' : '翻開一張小紙片，就能帶回歌裡。'}</p>
+              <h1>{open === 'capture' ? '先把這一點留下來' : decision ? decisionTitle(decision) : '靈感本子'}</h1>
+              <p>{open === 'capture' ? '不用完整，一句話、一段哼唱都好。' : decision ? '先看清楚，決定後再動這一筆。' : '翻開一張小紙片，就能帶回歌裡。'}</p>
             </div>
 
             {open === 'capture' && (
@@ -274,8 +319,9 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
               </div>
             )}
 
+            {open === 'library' && decision && <NotebookDecisionPage decision={decision} project={p} error={decisionError} onConfirm={confirmDecision} onCancel={cancelDecision} />}
             {open === 'library' && (
-              <div className="inspo-list">
+              <div className="inspo-list" style={decision ? { display: 'none' } : undefined}>
                 {(collage ? picked.length < 2 : !api.list.some(x => x.id === expanded)) && <div className="library-entry"><DeskActions primary={{ label: '記下一點新靈感', onClick: () => setOpen('capture') }} /></div>}
                 <button className="link-btn" onClick={() => { setCollage(!collage); setPicked([]) }}>{collage ? '不拼了' : '拼貼：挑幾則拼成新東西'}</button>
                 {picked.length >= 2 && (
@@ -290,7 +336,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                   const { here, start } = pullOptions(x, step, p)
                   const isOpen = expanded === x.id
                   return (
-                    <article key={x.id} className={`inspo-card ${picked.includes(x.id) ? 'picked' : ''}`}>
+                    <article key={x.id} data-inspiration-id={x.id} className={`inspo-card ${picked.includes(x.id) ? 'picked' : ''}`}>
                       {collage && <label className="pick"><input type="checkbox" checked={picked.includes(x.id)} onChange={() => togglePick(x.id)} /> 拿來拼</label>}
                       <button className="inspo-card-head" onClick={() => setExpanded(isOpen ? null : x.id)}>
                         <strong className="inspo-text">{x.text || x.voice?.transcript || '（無文字）'}</strong>
@@ -314,7 +360,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                             secondary={moreOpen === x.id ? undefined : { label: '其他用法…', onClick: () => setMoreOpen(x.id) }} />
                           {moreOpen === x.id && <div className="inspo-more">
                             {here.map((o) => <button key={o.how + o.label} className="link-btn" onClick={() => pull(x, o)}>{o.label}</button>)}
-                            {x.id !== 'seed-fuzui-qianxing' && <button className="link-btn muted" onClick={() => { if (confirm('刪除這則靈感？')) api.remove(x.id) }}>刪除</button>}
+                            {x.id !== 'seed-fuzui-qianxing' && <button className="link-btn muted" data-notebook-remove onClick={() => choose({ kind: 'remove', item: x })}>刪除</button>}
                           </div>}
                         </div>
                       )}

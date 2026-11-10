@@ -211,3 +211,11 @@ UI-16最後build版定向10/10通過；錯誤與有效音檔雙尺寸截圖已�
 - 驗證範圍為本機Chrome（錄音假裝置、離線教練），真機/Safari與真LLM仍未驗；只本機commit，無push、部署或tunnel操作。
 
 第10輪結束：4101／4102／4103皆確認closed；只關閉本輪自己的preview／dev與E2E程序，保留本機分支。
+
+## UI-17：本子裡的決定，也是一張水彩紙頁（第11輪，UAT-79／80）
+
+- 把一則靈感帶進已有的歌曲時，先看選中的紙片與目前歌名，再讀這次要改的歌名、記憶點、Vibe或哼唱。按「帶進這首歌」才採用；按「先不帶入」回到原紙片，不動歌曲。沒有歌名但已寫和弦或歌詞，也會先問。
+- 移除紙片時先顯示原文，說明無法復原；「留在本子裡」可取消。保存失敗保留原片與原歌曲，按「重試移除／重試採用」即可。移除成功用「好」確認；共用照片與錄音仍留給其他拼貼紙片。
+- 這兩個操作已取代瀏覽器原生確認框。沿用全站紙纖維、墨框、柔和水彩與手寫字；一個可見主按鈕、44px以上、按下有回饋、點背景不收起。先聚焦取消按鈕，取消回到原操作；紙頁內可「記一下」，保存後回原決定。
+- 採用：[桌面](evidence/A-UI-17-adopt-desktop.png)、[手機](evidence/A-UI-17-adopt-mobile.png)；移除：[桌面](evidence/A-UI-17-remove-desktop.png)、[手機](evidence/A-UI-17-remove-mobile.png)；採用重試：[桌面](evidence/A-UI-17-adopt-retry-desktop.png)、[手機](evidence/A-UI-17-adopt-retry-mobile.png)；移除重試：[桌面](evidence/A-UI-17-remove-retry-desktop.png)、[手機](evidence/A-UI-17-remove-retry-mobile.png)。改前本子：[桌面](evidence/A-UI-17-before-desktop.png)、[手機](evidence/A-UI-17-before-mobile.png)。已人工檢視手機採用重試、移除及桌面移除重試，按鈕與內容清楚。
+- 相關UAT-17/42/64/79/80兩尺寸10/10通過，原照片拼貼與文字起步驗收不變。首次4個焦點斷言順序失誤與trace已留在failures.md；改為先驗初始焦點，再點背景驗不關閉。無新增圖片或外部請求；完整160次待重跑，ready=false。
