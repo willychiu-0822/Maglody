@@ -1,8 +1,8 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 08:26",
-  "cases": 128,
-  "pass": 128,
+  "updated": "2026-11-10 08:39",
+  "cases": 130,
+  "pass": 130,
   "fail": 0,
   "blocked": 0,
   "ready_for_user_test": true,
@@ -11,14 +11,16 @@
       "status": "pass",
       "cases": [
         "UAT-28",
-        "UAT-57"
+        "UAT-57",
+        "UAT-65"
       ]
     },
     "R2": {
       "status": "pass",
       "cases": [
         "UAT-24",
-        "UAT-56"
+        "UAT-56",
+        "UAT-65"
       ]
     },
     "R3": {
@@ -30,7 +32,8 @@
         "UAT-59",
         "UAT-61",
         "UAT-62",
-        "UAT-63"
+        "UAT-63",
+        "UAT-65"
       ]
     },
     "R4": {
@@ -140,24 +143,27 @@
       "cases": [
         "UAT-64"
       ]
+    },
+    "studio_song_journal": {
+      "status": "pass",
+      "cases": [
+        "UAT-65"
+      ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T00-22-16-291Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證",
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T00-35-47-150Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證",
   "checks": {
     "build": "pass",
     "selftest": {
       "pass": 50,
       "fail": 0
     },
-    "unit": {
-      "pass": 15,
-      "fail": 0
-    },
-    "logic": {
-      "pass": 10,
-      "fail": 0
-    },
-    "evidence_links": 128,
-    "preview_servers": "stopped"
+    "evidence_links": 130,
+    "approved_artwork": "6 source and 6 public hashes match",
+    "exploratory": "desktop/mobile dark mode, long title, capture after scrolling: pass",
+    "preview_servers": {
+      "4102": "stopped automatically after E2E",
+      "4101": "running; startup control ID was not retained, no broad process termination attempted"
+    }
   }
 }

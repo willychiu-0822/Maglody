@@ -27,3 +27,9 @@
 - 情緒材料的推薦小字加大，仍只凸顯一個大主動作。
 - 小火花收合：[桌面](evidence/A-UI-03-desktop.png)、[手機](evidence/A-UI-03-mobile.png)；展開：[桌面](evidence/A-UI-03-open-desktop.png)、[手機](evidence/A-UI-03-open-mobile.png)；記下念頭：[桌面](evidence/A-UI-03-capture-desktop.png)、[手機](evidence/A-UI-03-capture-mobile.png)。
 - 驗證：UAT-13/32/33/37/56/58 兩尺寸 12/12，包含九檯捕捉、聊天與選單裡捕捉、保存返回原處、知識預設收合、額外觀察一次一則。
+
+## 最終驗收
+
+完整 run `2026-11-10T00-35-47-150Z`：65 個旅程 × 兩尺寸，**130/130 通過**，0 fail／0 blocked；130 份非空案例截圖已逐一核對。build 通過、手機 selftest 50/50。R1–R6 與新手 P0→P2 均通過本機 Chrome 範圍，UAT-STATUS.json 已設 ready_for_user_test=true。
+
+全綠後再次以自己的長歌名／三行歌詞探索深色模式、開工具箱、捲動後記靈感與返回原稿：兩尺寸均通過，無新缺失、無水平溢出或 JS 錯誤。證據：[桌面](evidence/A-UI-explore-dark-desktop.png)、[手機](evidence/A-UI-explore-dark-mobile.png)。實體手機、Safari 與真 LLM 不在本次本機驗證範圍。
