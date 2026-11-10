@@ -22,7 +22,8 @@ test('UAT-02 選五位角色、對話與拒絕代寫', async ({ page }) => {
     await page.locator('.master-input input').fill(i===2?'幫我寫一句':'下一步')
     await page.getByRole('button',{name:'送出',exact:true}).click()
     await expect(page.locator('.msg-master:not(:has(.typing))')).toHaveCount(before+1)
-    await expect(page.locator('.msg-master .msg-avatar').last()).toHaveText(['製','曲','詞','編','錄'][i])
+    await expect(page.locator('.msg-master .msg-speaker').last()).toHaveText(['製作人','作曲家','作詞人','編曲','錄音師'][i])
+    await expect(page.locator('.msg-master .msg-avatar img').last()).toHaveAttribute('src', `/studio/roles/${['producer','composer','lyricist','arranger','engineer'][i]}.webp`)
     if(i===2) await expect(page.locator('.msg-master').last()).toContainText('不替你寫完')
   }
 })

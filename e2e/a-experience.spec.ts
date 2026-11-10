@@ -21,14 +21,15 @@ test('UAT-29 R4 五位角色圖與對應檯位', async ({page}, info) => {
 test('UAT-30 R3 人物待機、回應與減少動畫', async ({page},info) => {
   await expect(page.locator('.studio-presence')).toContainText('琴邊')
   await page.getByRole('button',{name:'跟作曲家聊', exact:true}).click()
-  const glyphs: Record<string,string> = {製作人:'製',作曲家:'曲',作詞人:'詞',編曲:'編',錄音師:'錄'}
+  const portraits: Record<string,string> = {製作人:'producer',作曲家:'composer',作詞人:'lyricist',編曲:'arranger',錄音師:'engineer'}
   for(const name of ['製作人','作曲家','作詞人','編曲','錄音師']) {
     const before = await page.locator('.msg-master').count()
     await page.getByRole('tab',{name,exact:true}).click()
     await page.getByRole('textbox',{name:'跟夥伴說的話'}).fill(name === '作詞人' ? '幫我寫一句' : '下一步')
     await page.getByRole('button',{name:'送出',exact:true}).click()
     await expect(page.locator('.msg-master')).toHaveCount(before+1)
-    await expect(page.locator('.msg-master .msg-avatar').last()).toHaveText(glyphs[name])
+    await expect(page.locator('.msg-master .msg-speaker').last()).toHaveText(name)
+    await expect(page.locator('.msg-master .msg-avatar img').last()).toHaveAttribute('src', `/studio/roles/${portraits[name]}.webp`)
     await expect(page.locator('.msg-master').last()).toContainText(/。|？/)
     if(name==='作詞人') await expect(page.locator('.msg-master').last()).toContainText('不替你寫完')
     await expect(page.locator('.typing')).toHaveCount(0)

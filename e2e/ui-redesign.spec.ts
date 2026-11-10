@@ -118,3 +118,50 @@ test('UAT-68 空白跳到打磨區，小任務先帶回需要的素材而不提�
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   await page.screenshot({ path: `docs/uat/evidence/A-UI-07-mix-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
 })
+
+
+test('UAT-69 紙箋對話保留每位回答者，長對話仍能輸入與隨手記', async ({ page }, info) => {
+  await setup(page)
+  await page.locator('.presence').click()
+  const speakers = [
+    ['製作人', 'producer'], ['作曲家', 'composer'], ['作詞人', 'lyricist'],
+    ['編曲', 'arranger'], ['錄音師', 'engineer'],
+  ]
+  for (const [name, id] of speakers) {
+    await page.getByRole('tab', { name, exact: true }).click()
+    await page.getByRole('textbox', { name: '跟夥伴說的話' }).fill('下一步')
+    await page.getByRole('button', { name: '送出', exact: true }).click()
+    const reply = page.locator('.msg-master:not(:has(.typing))').last()
+    await expect(reply.locator('.msg-speaker')).toHaveText(name)
+    await expect(reply.locator('.msg-avatar img')).toHaveAttribute('src', `/studio/roles/${id}.webp`)
+  }
+  // Switching the selected musician must never relabel previous replies.
+  await page.getByRole('tab', { name: '作詞人', exact: true }).click()
+  await expect(page.locator('.msg-master .msg-speaker')).toHaveText(speakers.map(([name]) => name))
+  for (const [i, [, id]] of speakers.entries()) {
+    const portrait = page.locator('.msg-master .msg-avatar img').nth(i)
+    await expect(portrait).toHaveAttribute('src', `/studio/roles/${id}.webp`)
+    await expect.poll(() => portrait.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0)).toBe(true)
+  }
+  await expect(page.locator('.chat-room')).toHaveAttribute('src', '/studio/room.webp')
+  await expect(page.locator('.chat-identity')).toContainText('作詞人')
+  await expect(page.locator('[data-character-portrait]')).toHaveAttribute('src', '/studio/roles/lyricist.webp')
+  await page.getByRole('textbox', { name: '跟夥伴說的話' }).fill('窗外的雨，要留給下一句')
+  const dialog = page.getByRole('dialog', { name: '跟作詞人聊', exact: true })
+  await expect(dialog.locator('.primary-action')).toHaveCount(1)
+  for (const element of [dialog.locator('.master-input'), dialog.locator('.modal-capture')]) {
+    const box = await element.boundingBox()
+    expect(box!.y).toBeGreaterThanOrEqual(0)
+    expect(box!.y + box!.height).toBeLessThanOrEqual(page.viewportSize()!.height)
+  }
+  await page.screenshot({ path: `docs/uat/evidence/A-UI-08-chat-${info.project.name}.png`, animations: 'disabled' })
+  await dialog.getByRole('button', { name: '✎ 記一下', exact: true }).click()
+  await page.locator('.inspo-capture textarea').fill('紙箋對話時想到：雨落在琴上')
+  await page.getByRole('button', { name: '夾進本子', exact: true }).click()
+  await expect(dialog).toBeVisible()
+  await expect(page.getByRole('textbox', { name: '跟夥伴說的話' })).toHaveValue('窗外的雨，要留給下一句')
+  await expect(page.locator('.msg-master .msg-speaker')).toHaveText(speakers.map(([name]) => name))
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.screenshot({ path: `docs/uat/evidence/A-UI-08-dark-${info.project.name}.png`, animations: 'disabled' })
+  expect(await dialog.locator('.chat-sheet').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)
+})

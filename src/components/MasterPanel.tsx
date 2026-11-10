@@ -44,7 +44,11 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
           <button className="link-btn modal-capture" onClick={onCapture}>✎ 記一下</button>
           <button className="icon-btn" onClick={onClose} aria-label="關閉">✕</button>
         </div>
-        <div className="chat-identity"><img data-character-portrait src={`/studio/roles/${role.id}.webp`} width="84" height="112" alt={`${role.name}，工作室夥伴`} /><div className="small muted">{role.name}　·　{role.focus}</div></div>
+        <div className="chat-identity">
+          <img className="chat-room" src="/studio/room.webp" width="1000" height="563" alt="" />
+          <img data-character-portrait src={`/studio/roles/${role.id}.webp`} width="84" height="112" alt={`${role.name}，工作室夥伴`} />
+          <div className="chat-companion-note"><span>工作室裡，慢慢聊</span><strong>{role.name}</strong><p>{role.focus}</p></div>
+        </div>
 
         <div className="master-list" ref={listRef}>
           {messages.length === 0 && <p className="muted small">想聊什麼都可以：靈感、卡住的地方、哪一版比較好。</p>}
@@ -52,8 +56,9 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
             const r = m.role_id ? ROLES[m.role_id as RoleId] : null
             return (
               <div key={m.id} className={`msg msg-${m.role}`}>
-                {m.role === 'master' && <div className="msg-avatar" aria-hidden>{r?.glyph ?? '師'}</div>}
+                {m.role === 'master' && <div className="msg-avatar" aria-hidden="true">{r && <img src={`/studio/roles/${r.id}.webp`} width="40" height="48" alt="" />}</div>}
                 <div className="msg-body">
+                  {m.role === 'master' && <strong className="msg-speaker">{r?.name ?? '工作室夥伴'}</strong>}
                   {m.text && <div>{m.text}</div>}
                   {m.reply?.learned && <div className="msg-learned">{m.reply.learned}</div>}
                   {m.reply?.next && <div className="msg-next">{m.reply.next}</div>}
@@ -77,7 +82,7 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
               </div>
             )
           })}
-          {busy && <div className="msg msg-master"><div className="msg-avatar">{role.glyph}</div><div className="msg-body typing">想一下……</div></div>}
+          {busy && <div className="msg msg-master"><div className="msg-avatar" aria-hidden="true"><img src={`/studio/roles/${role.id}.webp`} width="40" height="48" alt="" /></div><div className="msg-body typing"><strong className="msg-speaker">{role.name}</strong>想一下……</div></div>}
         </div>
 
         <div className="master-quick">

@@ -578,5 +578,23 @@
     "fail": 0,
     "blocked": 0,
     "ready_for_user_test": true
+  },
+  {
+    "updated": "2026-11-10 09:12",
+    "run": "2026-11-10T01-12-10-671Z",
+    "cases": 2,
+    "pass": 0,
+    "fail": 2,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 09:13",
+    "run": "2026-11-10T01-13-13-210Z",
+    "cases": 16,
+    "pass": 16,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": false
   }
 ]

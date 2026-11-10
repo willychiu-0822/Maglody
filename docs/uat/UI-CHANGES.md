@@ -79,3 +79,12 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 全綠後再從長歌名、深色地圖、自由跳檯、捲動後捕捉、重整後找回自己的三行歌詞做探索，手機／桌面均通過，無新增缺失、無 JS 錯誤與水平溢出。證據：[桌面紙頁](evidence/A-UI-round6-explore-desktop.png)、[手機紙頁](evidence/A-UI-round6-explore-mobile.png)、[桌面地圖](evidence/A-UI-round6-explore-map-desktop.png)、[手機地圖](evidence/A-UI-round6-explore-map-mobile.png)。已看手機紙頁與桌面地圖。
 
 自己啟動的4101已用保留的session控制關閉，4102由E2E自動關閉，兩埠均確認停止。無push、remote修改、部署、tunnel或其他運維process操作。放行範圍為本機Chrome與本機教練；實體手機、Safari、真LLM與主觀音樂品質仍待使用者親自驗收。
+
+
+## UI-08：和夥伴在工作室裡交換紙箋（第 7 輪，R1–R5、UAT-69）
+
+- 打開任何一位夥伴的聊天，頂部就是核可的木窗工作室與那位樂手，姓名和專長寫在一張小紙片上。沿用既有六張 WebP，不另加大圖。
+- 回答不再只蓋「曲／詞／錄」單字章：每則紙箋都有說話者的核可 idle-v2 小像與完整姓名。換人聊時，前一位說的話仍保留自己的名字和人物；等待回覆也顯示正確樂手。
+- 對話變長時只捲動中間的紙箋，輸入與「送出」留在下方；送出仍是唯一主動作。從聊天「記一下」回來，未送出的問題和原對話都還在。
+- 實際畫面：[桌面](evidence/A-UI-08-chat-desktop.png)、[手機](evidence/A-UI-08-chat-mobile.png)；夜間紙面：[桌面](evidence/A-UI-08-dark-desktop.png)、[手機](evidence/A-UI-08-dark-mobile.png)。改前：[桌面](evidence/A-UI-08-before-desktop.png)、[手機](evidence/A-UI-08-before-mobile.png)。已人工檢視桌面、手機及手機夜間截圖，人物、姓名、紙墨與輸入位置清楚。
+- UAT-69 兩尺寸先因缺少說話者姓名失敗，再通過；UAT-02/30/37/53/59/61/62/69 共 **16/16**，build 通過。舊單字章斷言升級成「完整姓名＋核可圖路徑」，角色脈絡、拒絕代寫、等待隔離等原斷言保留。這是部分驗收，ready=false，待本輪完整矩陣。

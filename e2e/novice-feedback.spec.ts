@@ -164,7 +164,8 @@ test('UAT-59 新手提問後立刻換檯，作詞人不沿用作曲家旁白',as
   await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
   await page.locator('.presence').click()
   await expect(page.locator('.msg-master').last()).toContainText('鑰匙留在門口')
-  await expect(page.locator('.msg-master .msg-avatar').last()).toHaveText('曲')
+  await expect(page.locator('.msg-master .msg-speaker').last()).toHaveText('作曲家')
+  await expect(page.locator('.msg-master .msg-avatar img').last()).toHaveAttribute('src', '/studio/roles/composer.webp')
 })
 
 test('UAT-60 新手先救文字再回草稿救錄音，兩份成果都保留',async({page},info)=>{
