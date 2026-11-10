@@ -30,9 +30,9 @@ import type { StepDef } from './steps/types'
 // 工作室：發想 → 成形 → 打磨。每一檯都能隨時進出，沒有關卡。
 const STEPS: StepDef[] = [humStep, ideationStep, harmonyStep, melodyStep, lyricsStep, arrangementStep, recordingStep, mixStep, reviewStep]
 const PHASES = [
-  { name: '發想', keys: ['hum', 'idea'] },
-  { name: '成形', keys: ['harmony', 'melody', 'lyrics', 'arrange'] },
-  { name: '打磨', keys: ['record', 'mix', 'review'] },
+  { name: '發想', note: '找到一顆歌的種子', keys: ['hum', 'idea'] },
+  { name: '成形', note: '讓聲音長出形狀', keys: ['harmony', 'melody', 'lyrics', 'arrange'] },
+  { name: '打磨', note: '留下自己的第一版', keys: ['record', 'mix', 'review'] },
 ]
 
 export default function App() {
@@ -160,20 +160,29 @@ export default function App() {
       {menu && (
         <Modal label="工作室" className="menu-sheet" onClose={() => setMenu(false)}>
             <div className="row between"><strong className="menu-title">工作室</strong><button className="link-btn modal-capture" onClick={() => setInspoOpen('capture')}>✎ 記一下</button><button className="icon-btn" onClick={() => setMenu(false)} aria-label="關閉">✕</button></div>
-            {PHASES.map((ph) => (
-              <div key={ph.name} className="menu-phase">
-                <div className="menu-phase-name">{ph.name}</div>
+            <nav className="studio-map" aria-label="創作地圖">
+            <div className="map-intro"><p>一首歌的探險地圖</p><span>可以跳著走，隨時回來。每一檯，都有人陪你。</span></div>
+            <div className="map-regions">
+            {PHASES.map((ph, phaseIndex) => (
+              <div key={ph.name} className="map-region" data-phase={phaseIndex}>
+                <div className="map-region-heading"><span aria-hidden="true">0{phaseIndex + 1}</span><div><strong>{ph.name}</strong><small>{ph.note}</small></div></div>
+                <div className="map-stops">
                 {ph.keys.map((k) => {
                   const i = STEPS.findIndex((s) => s.key === k)
+                  const companion = ROLES[DESK_ROLE[k]]
                   return (
-                    <button key={k} className={`menu-desk ${i === cur ? 'on' : ''}`} onClick={() => go(i)}>
-                      <span>{STEPS[i].title}</span>
-                      <span className="muted small">{p.done[i] ? '✓' : ROLES[DESK_ROLE[k]].name}</span>
+                    <button key={k} className={`menu-desk map-stop ${i === cur ? 'on' : ''}`} aria-current={i === cur ? 'location' : undefined} onClick={() => go(i)}>
+                      <img src={`/studio/roles/${companion.id}.webp`} alt="" width="40" height="48" />
+                      <span className="map-stop-copy"><span>{STEPS[i].title}</span><small>{companion.name}陪你</small></span>
+                      <span className="map-stop-mark">{i === cur ? '你在這裡' : p.done[i] ? '留過足跡' : '隨時來坐'}</span>
                     </button>
                   )
                 })}
+                </div>
               </div>
             ))}
+            </div>
+            </nav>
             <div className="menu-phase">
               <div className="menu-phase-name">我的歌</div>
               {demoAvailable(p) && <button className="menu-desk" onClick={() => { setMenu(false); stopAll(); playDemo(p) }}><span>▶ 聽目前的 Demo</span></button>}
