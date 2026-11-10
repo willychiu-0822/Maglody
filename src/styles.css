@@ -1093,3 +1093,30 @@ body::before { opacity: .12; }
 .material-note p small { display: block; font-family: var(--font-body); color: var(--muted); font-size: .75rem; }
 .journal-empty { color: var(--muted); font-size: .84rem; line-height: 1.8; margin: 0; }
 @media (max-width: 760px) { .material-journal { margin-top: 8px; } .material-journal > summary { padding-top: 6px; } .material-note { padding: 10px 12px 12px; } }
+
+/* UI-11: one notebook follows you back to the desk where an idea arrived. */
+.notebook-sheet {
+  position: relative; max-width: 600px; max-height: 92dvh; padding: 26px 26px 22px 34px;
+  border: 1px solid var(--grid-strong); border-radius: 5px 22px 7px 16px;
+  background-image: radial-gradient(circle at 12px 10px, var(--bg) 4px, transparent 5px), radial-gradient(ellipse at 100% 0, var(--wash-sage), transparent 55%), linear-gradient(color-mix(in srgb, var(--paper) 82%, transparent), color-mix(in srgb, var(--paper) 82%, transparent)), url('/paper-fibers.svg');
+  background-size: 28px 20px, 100% 100%, 100% 100%, auto; background-repeat: repeat-x, no-repeat, no-repeat, repeat;
+  box-shadow: 5px 5px 0 -1px var(--bg), 5px 5px 0 var(--line);
+}
+.notebook-sheet::before { content: ''; position: absolute; top: 30px; bottom: 18px; left: 17px; border-left: 1px solid var(--line); pointer-events: none; }
+.notebook-tools { gap: 12px; }
+.notebook-cover { padding: 8px 0 12px; border-bottom: 1px dashed var(--grid-strong); }
+.notebook-kicker { display: block; color: var(--accent); font-size: .76rem; letter-spacing: .12em; }
+.notebook-cover h1 { margin: 8px 0 4px; font-family: var(--font-title); font-size: 1.65rem; line-height: 1.6; font-weight: 400; }
+.notebook-cover p { margin: 0; color: var(--muted); font-size: .84rem; line-height: 1.8; }
+.notebook-sheet .inspo-capture { gap: 12px; }
+.notebook-sheet .inspo-capture textarea { padding: 6px 2px; min-height: 108px; }
+.notebook-sheet .inspo-media { padding: 4px 0; }
+.capture-return { margin: 0; padding: 8px 10px; border-left: 2px solid var(--grid-strong); background: var(--wash-ochre); color: var(--ink); font-size: .8rem; line-height: 1.7; }
+.notebook-sheet .inspo-card { padding: 14px 14px 12px; border: 1px solid var(--grid-strong); border-radius: 3px 9px 5px 8px; background: var(--paper); box-shadow: 2px 3px 0 var(--line); }
+.notebook-sheet .inspo-card:nth-of-type(3n+1) { background: radial-gradient(ellipse at 0 0, var(--wash-ochre), transparent 80%), var(--paper); }
+.notebook-sheet .inspo-card:nth-of-type(3n+2) { background: radial-gradient(ellipse at 100% 0, var(--wash-indigo), transparent 80%), var(--paper); }
+.notebook-sheet .inspo-card.picked { border-color: var(--ink); background: var(--wash-sage); }
+.notebook-sheet .inspo-card-head { min-height: 44px; }
+.notebook-sheet .inspo-text { line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+.notebook-sheet .inspo-list { gap: 14px; padding: 4px 3px 4px 0; }
+@media (max-width: 640px) { .notebook-sheet { padding: 24px 18px calc(18px + env(safe-area-inset-bottom)) 26px; border-radius: 12px 18px 0 0; } .notebook-sheet::before { left: 12px; } .notebook-cover h1 { font-size: 1.4rem; } }

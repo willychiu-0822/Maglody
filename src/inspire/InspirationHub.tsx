@@ -220,12 +220,18 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       {toast && <div className="toast" role="status">{toast}</div>}
 
       {open && (
-        <Modal label="靈感" onClose={() => setOpen(null)}>
-            <div className="row between">
+        <Modal label="靈感" className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'}`} onClose={() => setOpen(null)}>
+            <div className="row between notebook-tools">
               {open === 'capture'
                 ? <button className="link-btn" onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
                 : <button className="link-btn" onClick={() => setOpen('capture')}>← 記新的</button>}
               <button className="icon-btn" onClick={() => setOpen(null)} aria-label="關閉">✕</button>
+            </div>
+
+            <div className="notebook-cover">
+              <span className="notebook-kicker">{open === 'capture' ? '工作室的隨手記' : '收著，等一首歌長出來'}</span>
+              <h1>{open === 'capture' ? '先把這一點留下來' : '靈感本子'}</h1>
+              <p>{open === 'capture' ? '不用完整，一句話、一段哼唱都好。' : '翻開一張小紙片，就能帶回歌裡。'}</p>
             </div>
 
             {open === 'capture' && (
@@ -261,6 +267,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                     ))}
                   </div>
                 </details>
+                <p className="capture-return" aria-label="記下後的返回位置">收好後，回到「{stepTitle}」繼續。</p>
                 <DeskActions primary={{ label: busy ? '收好中…' : '夾進本子', onClick: () => void save(), disabled: busy || rec.pending || (!hasContent && !rec.recording && !rec.completed && !pendingRecording.current) }} secondary={mediaSaveError && draft.text.trim() ? {label:'先另存文字，錄音留著', onClick:saveTextCopy} : undefined} />
               </div>
             )}
@@ -275,7 +282,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                     {collageChoices.some(o => o.how !== 'collage.new') && <details className="collage-more"><summary>其他拼法</summary>{collageChoices.filter(o => o.how !== 'collage.new').map(o => <button key={o.how} className="link-btn" onClick={() => performCollage(o)}>{o.label}</button>)}</details>}
                   </div>
                 )}
-                {api.list.length === 0 && <p className="muted">本子還是空的。任何時候按右下角那張小紙條就能記。</p>}
+                {api.list.length === 0 && <p className="muted">本子還是空的。隨時按右上角「記一下」，或上方「記新的」，留幾個字就好。</p>}
                 {api.list.map((x) => {
                   const { here, start } = pullOptions(x, step, p)
                   const isOpen = expanded === x.id

@@ -231,3 +231,30 @@ test('UAT-71 翻開素材手記能看自己的詞曲，更新及重整不混入�
   await page.screenshot({ path: `docs/uat/evidence/A-UI-10-dark-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 })
+
+
+test('UAT-72 隨手記紙頁顯示原工作檯，九檯保存與返回不迷路', async ({ page }, info) => {
+  await setup(page)
+  const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
+  for (const desk of desks) {
+    await go(page, desk)
+    await page.getByRole('button', { name: '記一下靈感' }).click()
+    const capture = page.getByRole('dialog', { name: '靈感', exact: true })
+    await expect(capture.getByRole('heading', { name: '先把這一點留下來', exact: true })).toBeVisible()
+    await expect(capture.getByLabel('記下後的返回位置')).toHaveText(`收好後，回到「${desk}」繼續。`)
+    await capture.getByRole('textbox', { name: '靈感文字' }).fill(`${desk}途中，想到窗邊的一陣風`)
+    await expect(capture.locator('.primary-action')).toHaveCount(1)
+    if (desk === '歌詞') await page.screenshot({ path: `docs/uat/evidence/A-UI-11-capture-${info.project.name}.png`, animations: 'disabled' })
+    await capture.getByRole('button', { name: '夾進本子', exact: true }).click()
+    await expect(capture).toBeHidden()
+    await expect(page.locator('.desk-name')).toContainText(desk)
+  }
+  await page.reload()
+  await page.getByRole('button', { name: '記一下靈感' }).click()
+  await page.getByRole('button', { name: /翻翻本子/ }).click()
+  const notebook = page.getByRole('dialog', { name: '靈感', exact: true })
+  await expect(notebook.getByRole('heading', { name: '靈感本子', exact: true })).toBeVisible()
+  for (const desk of desks) await expect(notebook).toContainText(`${desk}途中，想到窗邊的一陣風`)
+  await page.screenshot({ path: `docs/uat/evidence/A-UI-11-library-${info.project.name}.png`, animations: 'disabled' })
+  expect(await notebook.locator('.inspo-sheet').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)
+})

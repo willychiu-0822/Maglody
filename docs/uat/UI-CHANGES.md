@@ -112,3 +112,11 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 - 自己留的一句靈感、主副歌和弦、旋律開頭音名和詞句，分別放在赭黃、淡綠、淡藍與橫線紙上。改詞就跟著更新，重整還找得到；空白作品不放入假範例，只有哼唱時先收哼唱種子。
 - 畫面：[桌面](evidence/A-UI-10-journal-desktop.png)、[手機](evidence/A-UI-10-journal-mobile.png)；夜間紙面：[桌面](evidence/A-UI-10-dark-desktop.png)、[手機](evidence/A-UI-10-dark-mobile.png)。改前：[桌面](evidence/A-UI-10-before-desktop.png)、[手機](evidence/A-UI-10-before-mobile.png)。已人工看手機素材紙片與桌面夜間，中文與自己的素材清楚。
 - UAT-71先因缺少素材手記兩尺寸失敗，再與UAT-24/28/33/65/67/68共 **14/14通過**，自動build通過；保留唯一主動作、自由跳檯、小火花與重整保存。這是部分驗收，ready=false，完整矩陣仍待本輪最後重跑。
+
+## UI-11：想到什麼，先留在水彩本子裡（第8輪，R1/R2/R5、UAT-72）
+
+- 「記一下」現在打開一張有孔洞、墨線頁邊、淡綠水彩與手寫標題的筆記紙。先看到「先把這一點留下來」，不用猜要寫多少。
+- 保存按鈕上方會寫「收好後，回到『歌詞』繼續」這類位置提示，九個工作檯都跟著目前位置變化。文字、說、哼、拍與原本的保存方式保留，仍只有一顆主要保存按鈕。
+- 翻本子時有清楚的「靈感本子」標題，自己的碎片變成一張張淡彩紙片；更多用法照樣收起。空本子的提示也修正為右上角入口。
+- 記下念頭：[桌面](evidence/A-UI-11-capture-desktop.png)、[手機](evidence/A-UI-11-capture-mobile.png)；翻本子：[桌面](evidence/A-UI-11-library-desktop.png)、[手機](evidence/A-UI-11-library-mobile.png)。改前：[桌面](evidence/A-UI-11-before-desktop.png)、[手機](evidence/A-UI-11-before-mobile.png)。已人工檢視手機捕捉、桌面本子，紙墨、返回位置與唯一保存按鈕清楚。
+- UAT-72先因缺少紙頁標題兩尺寸失敗，再實作；首輪定向20/22因Chrome環境中斷失敗，保留trace與診斷於failures.md，未放寬斷言。隔離暫時桌面session bus後，用正常指令重跑相關UAT-13/14/15/16/19/31/37/49/60/69/72 **22/22通過**；自動build通過，手機selftest **50/50**。獨立唯讀審查無未解重大或細項；矮視窗與長內容探索通過。完整144次仍待最後重跑，ready=false。

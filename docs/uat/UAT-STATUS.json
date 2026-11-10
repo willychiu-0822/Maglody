@@ -1,8 +1,8 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 09:33",
-  "cases": 14,
-  "pass": 14,
+  "updated": "2026-11-10 09:44",
+  "cases": 22,
+  "pass": 22,
   "fail": 0,
   "blocked": 0,
   "ready_for_user_test": false,
@@ -10,6 +10,8 @@
     "R1": {
       "status": "not_verified",
       "cases": [
+        "UAT-71",
+        "UAT-72",
         "UAT-28",
         "UAT-57",
         "UAT-65",
@@ -21,6 +23,8 @@
     "R2": {
       "status": "not_verified",
       "cases": [
+        "UAT-71",
+        "UAT-72",
         "UAT-24",
         "UAT-56",
         "UAT-65",
@@ -34,6 +38,7 @@
     "R3": {
       "status": "not_verified",
       "cases": [
+        "UAT-71",
         "UAT-25",
         "UAT-30",
         "UAT-53",
@@ -61,6 +66,7 @@
     "R5": {
       "status": "not_verified",
       "cases": [
+        "UAT-72",
         "UAT-13",
         "UAT-14",
         "UAT-15",
@@ -161,7 +167,7 @@
       ]
     },
     "studio_song_journal": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-65"
       ]
@@ -173,14 +179,14 @@
       ]
     },
     "companion_mission": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-67",
         "UAT-68"
       ]
     },
     "companion_paper_chat": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-69"
       ]
@@ -190,7 +196,19 @@
       "cases": [
         "UAT-70"
       ]
+    },
+    "personal_materials": {
+      "status": "not_verified",
+      "cases": [
+        "UAT-71"
+      ]
+    },
+    "capture_notebook": {
+      "status": "pass",
+      "cases": [
+        "UAT-72"
+      ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T01-33-27-114Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T01-43-36-925Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
 }
