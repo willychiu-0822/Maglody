@@ -1,0 +1,3 @@
+PASS 1280x800: dark paper, long note, capture return, Escape cancel/focus, optional empty note, explicit success, original lyrics; no overflow/JS errors
+PASS 320x568: dark paper, long note, capture return, Escape cancel/focus, optional empty note, explicit success, original lyrics; no overflow/JS errors
+PASS 390x400: dark paper, long note, capture return, Escape cancel/focus, optional empty note, explicit success, original lyrics; no overflow/JS errors

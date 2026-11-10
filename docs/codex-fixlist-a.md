@@ -395,7 +395,7 @@ UI-14以主頁sticky通知修復，UAT-75先0/2再2/2，相關14/14通過；兩�
 - [x] 先加 UAT-77：儲存故障不新增版本、不假報成功，說明保留且可重試；長說明、捕捉返回、重整保留版本、窄畫面無溢出。
 - [x] 觀察兩案例紅燈後實作；更新既有UAT-22/41/63的實際紙頁操作，不刪減內容驗收。
 - [x] 定向驗證、桌面＋手機截圖自查，記入 UI-CHANGES 並獨立 feat(UI-15) commit。
-- [ ] 完整重跑所有E2E、build、selftest，更新UAT交付；全綠後新手探索，發現缺失續修。
+- [x] 完整重跑所有E2E、build、selftest，更新UAT交付；全綠後新手探索，發現缺失續修。
 
 Review focus：儲存錯誤時不可先更新版本列表；雙重modal捕捉後保留說明及焦點；取消不可改歌或清對話；長歌名／說明與矮畫面按鈕可見；還原與新歌後不套用過期對話。
 
@@ -408,3 +408,14 @@ UI-15定向20/20、手機selftest51/51、build通過，獨立唯讀審查無待�
 - 計畫：先UAT-78紅燈，再把label改button+ref，選檔後清空input.value；用紙頁內可確認的status取代alert。UAT-07/74/78相關驗證、截圖自查、獨立feat(UI-16)提交；最後完整156次驗收。
 
 UI-16：UAT-78桌面／手機2/2紅→開發2/2綠→build版相關10/10綠。已檢視雙尺寸錯誤／有效音檔圖，並修正截圖捲動；獨立唯讀審查無待修。等待最後完整156次，ready=false。
+
+## 第10輪最終驗收（2026-11-10 11:04 台北）
+
+- 可見改造已各自本機提交：UI-15 `db9ebb2`（水彩改稿紙頁、確認／取消／重試），UI-16 `ff6bd6c`（真音檔按鈕、紙條錯誤、相同檔重試）。
+- 最後完整run `2026-11-10T02-57-11-749Z`：**156/156通過，0 fail／0 blocked，ready_for_user_test=true**。156份同輪PNG、九檯18張與改稿／音檔雙尺寸圖皆核對；R1–R6、新手P0→P2及UAT-76～78全部pass。UI-15的154/154、部分重跑與紅燈紀錄均保留，不用不同輪次pass拼成全綠。
+- 最後明確 `npm run build` 通過、手機 `npm run selftest` **51/51**。selftest補跑曾因4101預覽已結束（exit143）而連線失敗；只重啟自己的預覽後重跑51/51，原失敗保存在 [連線記錄](uat/evidence/A-round10-selftest-unavailable-preview.txt)，沒有改斷言或timeout。
+- 全綠後以自己的詞句、5100字版本說明、捕捉返回、Escape取消／焦點還原、空白說明保存與按好確認做夜間探索：1280×800、320×568、390×400均通過，無JS錯誤或水平溢出。截圖：[桌面](uat/evidence/A-round10-explore-1280x800.png)、[窄手機](uat/evidence/A-round10-explore-320x568.png)、[矮手機](uat/evidence/A-round10-explore-390x400.png)；已人工看桌面與窄手機，字與確認鈕清楚。
+- 保存／還原／新歌、地圖、聊天、捕捉、本子及九檯皆重新看過兩尺寸截圖；還原紙頁：[桌面](uat/evidence/A-UI-15-restore-desktop.png)、[手機](uat/evidence/A-UI-15-restore-mobile.png)。核可六份來源／public雜湊一致，首屏圖片仍113,766bytes。
+- 驗證範圍為本機Chrome（錄音假裝置、離線教練），真機/Safari與真LLM仍未驗；只本機commit，無push、部署或tunnel操作。
+
+第10輪結束：4101／4102／4103皆確認closed；只關閉本輪自己的preview／dev與E2E程序，保留本機分支。

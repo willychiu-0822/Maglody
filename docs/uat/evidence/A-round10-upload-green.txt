@@ -1,0 +1,11 @@
+
+Running 2 tests using 1 worker
+
+(node:31) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 (6.3s)
+(node:194) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [mobile] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 (3.5s)
+
+  2 passed (11.9s)

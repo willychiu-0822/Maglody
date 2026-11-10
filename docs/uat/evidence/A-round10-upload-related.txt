@@ -1,0 +1,27 @@
+
+> maglody@0.1.0 test:e2e
+> playwright test --grep UAT-(04|24|55|74|78)
+
+
+Running 10 tests using 2 workers
+
+(node:115) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:116) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 (3.5s)
+  ✓   3 [desktop] › e2e/journey.spec.ts:80:1 › UAT-04 麥克風哼唱停止與分析 (2.5s)
+  ✓   4 [desktop] › e2e/novice-feedback.spec.ts:57:1 › UAT-55 P1 拒麥後直接聽有聲示範並繼續 (1.9s)
+  ✓   2 [desktop] › e2e/explicit-controls.spec.ts:42:1 › UAT-74 九檯與彈窗的墨線按鈕至少44px，按下有回饋且只有一主動作 (11.5s)
+(node:597) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   6 [mobile] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 (2.4s)
+  ✓   5 [desktop] › e2e/resilience.spec.ts:244:1 › UAT-24 R1紙墨、R2每檯恰一主動作與寬度 (7.5s)
+(node:804) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   8 [mobile] › e2e/journey.spec.ts:80:1 › UAT-04 麥克風哼唱停止與分析 (2.6s)
+  ✓   9 [mobile] › e2e/novice-feedback.spec.ts:57:1 › UAT-55 P1 拒麥後直接聽有聲示範並繼續 (1.5s)
+  ✓   7 [mobile] › e2e/explicit-controls.spec.ts:42:1 › UAT-74 九檯與彈窗的墨線按鈕至少44px，按下有回饋且只有一主動作 (7.5s)
+  ✓  10 [mobile] › e2e/resilience.spec.ts:244:1 › UAT-24 R1紙墨、R2每檯恰一主動作與寬度 (5.1s)
+
+  10 passed (30.0s)

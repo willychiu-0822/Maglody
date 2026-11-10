@@ -200,3 +200,14 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 - UAT-78雙尺寸先2/2失敗（沒有button語意），再在4103開發預覽2/2通過；不以開發預覽取代最終build驗收。獨立唯讀審查無待修項。UI-15的154次全過，但當時新增UAT-78尚未納入、缺失仍OPEN，因此ready維持false；最後須完整156次重跑。
 
 UI-16最後build版定向10/10通過；錯誤與有效音檔雙尺寸截圖已重截、人工檢視，固定頁首位於圖頂，文字及好按鈕清楚。完整156次待重跑，ready=false。
+
+## 第10輪最終驗收（2026-11-10 11:04 台北）
+
+- 可見改造已各自本機提交：UI-15 `db9ebb2`（水彩改稿紙頁、確認／取消／重試），UI-16 `ff6bd6c`（真音檔按鈕、紙條錯誤、相同檔重試）。
+- 最後完整run `2026-11-10T02-57-11-749Z`：**156/156通過，0 fail／0 blocked，ready_for_user_test=true**。156份同輪PNG、九檯18張與改稿／音檔雙尺寸圖皆核對；R1–R6、新手P0→P2及UAT-76～78全部pass。UI-15的154/154、部分重跑與紅燈紀錄均保留，不用不同輪次pass拼成全綠。
+- 最後明確 `npm run build` 通過、手機 `npm run selftest` **51/51**。selftest補跑曾因4101預覽已結束（exit143）而連線失敗；只重啟自己的預覽後重跑51/51，原失敗保存在 [連線記錄](evidence/A-round10-selftest-unavailable-preview.txt)，沒有改斷言或timeout。
+- 全綠後以自己的詞句、5100字版本說明、捕捉返回、Escape取消／焦點還原、空白說明保存與按好確認做夜間探索：1280×800、320×568、390×400均通過，無JS錯誤或水平溢出。截圖：[桌面](evidence/A-round10-explore-1280x800.png)、[窄手機](evidence/A-round10-explore-320x568.png)、[矮手機](evidence/A-round10-explore-390x400.png)；已人工看桌面與窄手機，字與確認鈕清楚。
+- 保存／還原／新歌、地圖、聊天、捕捉、本子及九檯皆重新看過兩尺寸截圖；還原紙頁：[桌面](evidence/A-UI-15-restore-desktop.png)、[手機](evidence/A-UI-15-restore-mobile.png)。核可六份來源／public雜湊一致，首屏圖片仍113,766bytes。
+- 驗證範圍為本機Chrome（錄音假裝置、離線教練），真機/Safari與真LLM仍未驗；只本機commit，無push、部署或tunnel操作。
+
+第10輪結束：4101／4102／4103皆確認closed；只關閉本輪自己的preview／dev與E2E程序，保留本機分支。

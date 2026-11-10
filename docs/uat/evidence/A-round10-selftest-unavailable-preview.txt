@@ -1,0 +1,7 @@
+
+> maglody@0.1.0 selftest
+> node scripts/mobile-selftest.cjs
+
+page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4101/
+Call log:
+  - navigating to "http://127.0.0.1:4101/", waiting until "load"

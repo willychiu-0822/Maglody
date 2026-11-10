@@ -20,7 +20,7 @@ Repo：<https://github.com/willychiu-0822/Maglody>
 - 本機 Chrome 的手機 390×844／桌面 1280×800 驗收：[UAT 計畫](docs/uat/UAT-PLAN.md)、[最新結果與截圖](docs/uat/UAT-RESULTS.md)、[機器狀態](docs/uat/UAT-STATUS.json)。
 - `npm run build`、`npm run selftest`、`npm run test:logic` 是補充檢查；範圍與修正記錄見 [Session A 清單](docs/codex-fixlist-a.md)。
 - 尚未驗證：實體手機、iOS Safari 的麥克風/靜音鍵/聽寫/PWA 安裝，以及真實 OpenAI/Gemini/Vertex 金鑰。預設使用離線 mock，測試不需要金鑰。
-- 已接手 session B，正式矩陣為 UAT-01～75 × 手機／桌面共150次。第9輪補齊彈窗明確按鈕、44px墨線操作與長頁保存確認；[九檯與彈窗桌面／手機截圖](docs/uat/UI-CHANGES.md)。最後完整150/150、手機selftest51/51、build通過；放行以最新狀態檔為準。原worktree metadata唯讀，提交使用 `scripts/git-local.sh`；無push、部署或tunnel操作。
+- 已接手 session B，正式矩陣為 UAT-01～78 × 手機／桌面共156次。第10輪把版本保存／還原／新歌改成水彩紙頁，並修正音檔真按鈕與失敗提示；[逐頁雙尺寸截圖](docs/uat/UI-CHANGES.md)。最後完整156/156、手機selftest51/51、build通過，另完成夜間與矮視窗探索；放行以最新狀態檔為準。原worktree metadata唯讀，提交使用 `scripts/git-local.sh`；無push、部署或tunnel操作。
 
 本機完整驗收（自動 build，在 4102 啟動 preview，跑完關閉）：
 

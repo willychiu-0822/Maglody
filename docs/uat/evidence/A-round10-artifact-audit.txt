@@ -1,0 +1,1 @@
+PASS run=2026-11-10T02-57-11-749Z: 156/156 same-run nonempty PNGs; 35 UI/exploration PNGs; R1–R6 + novice + exploration all pass; approved source/public hashes match

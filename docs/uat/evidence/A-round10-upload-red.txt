@@ -1,0 +1,88 @@
+
+Running 2 tests using 1 worker
+
+(node:31) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 (9.5s)
+(node:210) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [mobile] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 (9.0s)
+
+
+  1) [desktop] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 ──────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: '上傳音檔', exact: true })
+    Expected: visible
+    Timeout: 7000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: '上傳音檔', exact: true }) with timeout 7000ms
+      - waiting for getByRole('button', { name: '上傳音檔', exact: true })
+
+
+      25 |   await page.locator('.toolbox > summary').click()
+      26 |   const upload = page.getByRole('button', { name: '上傳音檔', exact: true })
+    > 27 |   await expect(upload).toBeVisible()
+         |                        ^
+      28 |   const bounds = await upload.boundingBox()
+      29 |   expect(bounds!.height).toBeGreaterThanOrEqual(44)
+      30 |   expect(bounds!.width).toBeGreaterThanOrEqual(44)
+        at /workspace/codex-burn/wt-a/e2e/audio-upload.spec.ts:27:24
+
+    attachment #1: uat-screenshot (image/png) ──────────────────────────────────────────────────────
+    ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-desktop/attachments/uat-screenshot-74848dd9c4239cfdf9a58f8dfee1969f07b89845.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 ───────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: '上傳音檔', exact: true })
+    Expected: visible
+    Timeout: 7000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: '上傳音檔', exact: true }) with timeout 7000ms
+      - waiting for getByRole('button', { name: '上傳音檔', exact: true })
+
+
+      25 |   await page.locator('.toolbox > summary').click()
+      26 |   const upload = page.getByRole('button', { name: '上傳音檔', exact: true })
+    > 27 |   await expect(upload).toBeVisible()
+         |                        ^
+      28 |   const bounds = await upload.boundingBox()
+      29 |   expect(bounds!.height).toBeGreaterThanOrEqual(44)
+      30 |   expect(bounds!.width).toBeGreaterThanOrEqual(44)
+        at /workspace/codex-burn/wt-a/e2e/audio-upload.spec.ts:27:24
+
+    attachment #1: uat-screenshot (image/png) ──────────────────────────────────────────────────────
+    ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-mobile/attachments/uat-screenshot-1c2cb2dbeeded4e95f4f99b4648f9f7e6ccb1928.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../../tmp/maglody-upload-red-results/audio-upload-UAT-78-音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 ───────────────────
+    [mobile] › e2e/audio-upload.spec.ts:17:1 › UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保留原稿 ────────────────────
