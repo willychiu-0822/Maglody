@@ -1060,3 +1060,19 @@ body::before { opacity: .12; }
 @media (prefers-color-scheme: dark) {
   .chat-identity .chat-room { filter: brightness(.7); }
 }
+
+/* UI-09 · a small room postcard leaves space to read when the phone turns. */
+@media (max-height: 600px) {
+  .chat-sheet {
+    height: 98dvh; max-height: 98dvh; padding-top: 12px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom)); gap: 6px;
+    grid-template-rows: auto auto minmax(112px, 1fr) auto auto; overflow-y: auto;
+  }
+  .chat-identity { min-height: 64px; height: 64px; padding: 0 10px; gap: 10px; }
+  .chat-identity [data-character-portrait] { width: 48px; height: 64px; }
+  .chat-companion-note { margin: 0; padding: 4px 12px; }
+  .chat-companion-note > span, .chat-companion-note p { display: none; }
+  .chat-companion-note strong { font-size: 1.15rem; }
+  .chat-sheet .master-list { gap: 10px; }
+  .chat-sheet .master-input { padding-top: 6px; }
+}

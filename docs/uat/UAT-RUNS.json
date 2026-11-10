@@ -596,5 +596,42 @@
     "fail": 0,
     "blocked": 0,
     "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 09:19",
+    "run": "2026-11-10T01-14-35-322Z",
+    "cases": 138,
+    "pass": 138,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": false,
+    "review_gate": "UAT-70 short viewport reading area"
+  },
+  {
+    "updated": "2026-11-10 09:19",
+    "run": "2026-11-10T01-19-37-581Z",
+    "cases": 2,
+    "pass": 0,
+    "fail": 2,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 09:20",
+    "run": "2026-11-10T01-19-56-242Z",
+    "cases": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": false
+  },
+  {
+    "updated": "2026-11-10 09:20",
+    "run": "2026-11-10T01-20-38-235Z",
+    "cases": 2,
+    "pass": 2,
+    "fail": 0,
+    "blocked": 0,
+    "ready_for_user_test": false
   }
 ]

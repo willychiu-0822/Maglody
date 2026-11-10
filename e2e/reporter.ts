@@ -31,13 +31,13 @@ export default class UatReporter implements Reporter {
     const allEvidence = rows.every(row => row.evidence && fs.existsSync(row.evidence))
     const visualOpen = fs.existsSync('docs/uat/failures.md') && fs.readFileSync('docs/uat/failures.md','utf8').includes('狀態：OPEN')
     const passed = (ids: string[]) => ids.every(id=>['desktop','mobile'].every(viewport=>rows.some(r=>r.case===id&&r.viewport===viewport&&r.status==='pass')))
-    const checks = {R1:['UAT-28','UAT-57','UAT-65','UAT-66','UAT-69'],R2:['UAT-24','UAT-56','UAT-65','UAT-66','UAT-67','UAT-68'],R3:['UAT-25','UAT-30','UAT-53','UAT-59','UAT-61','UAT-62','UAT-63','UAT-65','UAT-66','UAT-67','UAT-68'],R4:['UAT-25','UAT-29','UAT-57','UAT-69'],R5:['UAT-13','UAT-14','UAT-15','UAT-16','UAT-49','UAT-60'],R6:['UAT-33','UAT-58']}
+    const checks = {R1:['UAT-28','UAT-57','UAT-65','UAT-66','UAT-69','UAT-70'],R2:['UAT-24','UAT-56','UAT-65','UAT-66','UAT-67','UAT-68','UAT-69','UAT-70'],R3:['UAT-25','UAT-30','UAT-53','UAT-59','UAT-61','UAT-62','UAT-63','UAT-65','UAT-66','UAT-67','UAT-68','UAT-69','UAT-70'],R4:['UAT-25','UAT-29','UAT-57','UAT-69'],R5:['UAT-13','UAT-14','UAT-15','UAT-16','UAT-49','UAT-60','UAT-69','UAT-70'],R6:['UAT-33','UAT-58']}
     const novice = {P0_context_coaching:['UAT-53'],P1_complete_demo:['UAT-54'],P1_denied_mic_demo:['UAT-55'],P1_one_primary:['UAT-24','UAT-56'],P1_approved_characters:['UAT-25','UAT-29','UAT-57'],P2_watercolor:['UAT-28','UAT-57'],P2_knowledge_sparks:['UAT-33','UAT-58']}
     const outcomes = (mapping:Record<string,string[]>)=>Object.fromEntries(Object.entries(mapping).map(([key,ids])=>[key,{status:passed(ids)?'pass':'not_verified',cases:ids}]))
     const status = { project: 'Maglody', updated, cases: rows.length, pass, fail, blocked,
       ready_for_user_test: result.status === 'passed' && fullMatrix && !fail && !blocked && allEvidence && !visualOpen,
       requirements:outcomes(checks), novice_feedback:outcomes(novice),
-      exploration:outcomes({A_N08_long_conversation:['UAT-61'],A_N09_role_waiting:['UAT-62'],A_N10_mic_limit_without_frames:['UAT-52','UAT-43'],A_N11_new_song_conversation:['UAT-63'],text_first_song:['UAT-64'],studio_song_journal:['UAT-65'],studio_map:['UAT-66'],companion_mission:['UAT-67','UAT-68'],companion_paper_chat:['UAT-69']}),
+      exploration:outcomes({A_N08_long_conversation:['UAT-61'],A_N09_role_waiting:['UAT-62'],A_N10_mic_limit_without_frames:['UAT-52','UAT-43'],A_N11_new_song_conversation:['UAT-63'],text_first_song:['UAT-64'],studio_song_journal:['UAT-65'],studio_map:['UAT-66'],companion_mission:['UAT-67','UAT-68'],companion_paper_chat:['UAT-69'],short_viewport_chat:['UAT-70']}),
       notes: `Chrome；desktop 1280x800/mobile 390x844；run=${run}；${fullMatrix ? '完整矩陣' : '部分重跑，不能作為整體通過依據'}；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證${visualOpen ? '；A 尚有未結缺失待驗收' : ''}${allEvidence ? '' : '；有案例缺少截圖證據'}` }
     fs.mkdirSync(`docs/uat/evidence/${run}`, { recursive: true })
     fs.writeFileSync(`docs/uat/evidence/${run}/results.json`, JSON.stringify({ ...status, rows }, null, 2)+'\n')

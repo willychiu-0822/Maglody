@@ -88,3 +88,11 @@ UI-06 相關 UAT-48/66/67 兩尺寸 6/6 通過，build 通過。部分重跑仍 
 - 對話變長時只捲動中間的紙箋，輸入與「送出」留在下方；送出仍是唯一主動作。從聊天「記一下」回來，未送出的問題和原對話都還在。
 - 實際畫面：[桌面](evidence/A-UI-08-chat-desktop.png)、[手機](evidence/A-UI-08-chat-mobile.png)；夜間紙面：[桌面](evidence/A-UI-08-dark-desktop.png)、[手機](evidence/A-UI-08-dark-mobile.png)。改前：[桌面](evidence/A-UI-08-before-desktop.png)、[手機](evidence/A-UI-08-before-mobile.png)。已人工檢視桌面、手機及手機夜間截圖，人物、姓名、紙墨與輸入位置清楚。
 - UAT-69 兩尺寸先因缺少說話者姓名失敗，再通過；UAT-02/30/37/53/59/61/62/69 共 **16/16**，build 通過。舊單字章斷言升級成「完整姓名＋核可圖路徑」，角色脈絡、拒絕代寫、等待隔離等原斷言保留。這是部分驗收，ready=false，待本輪完整矩陣。
+
+
+## UI-09：手機轉橫向，仍能讀完夥伴的話（R1/R2/R3/R5、UAT-70）
+
+- 手機轉橫向或視窗變矮時，房間改成一張較矮的工作室小景，核可樂手和名字仍在；留更多位置給回覆紙箋，捲動能讀到最後。直向與桌面原有的大場景保留。
+- 對話區至少留下數行閱讀空間；輸入、送出、隨手記和關閉仍可直接操作。非常矮的畫面也允許整張紙捲動，避免內容被裁掉。
+- 修後橫向：[桌面瀏覽器](evidence/A-UI-09-landscape-desktop.png)、[手機瀏覽器](evidence/A-UI-09-landscape-mobile.png)。修前：[桌面](evidence/A-UI-09-before-desktop.png)、[手機](evidence/A-UI-09-before-mobile.png)。已人工看兩尺寸截圖，人物、紙墨、回覆與輸入清楚。
+- 這是獨立審查發現的Important缺失，已自己用UAT-70重現：844×390的閱讀內容原為0px；修後兩project皆通過844×390、390×400、390×600，對話內容至少96px，實際送第二題、捕捉後返回。UAT-31/37/62/69/70定向 **10/10**，build通過；再截圖驗證UAT-70為2/2。完整矩陣擴為140次，尚未完成前ready=false。

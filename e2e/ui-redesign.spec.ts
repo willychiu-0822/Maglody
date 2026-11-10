@@ -165,3 +165,40 @@ test('UAT-69 紙箋對話保留每位回答者，長對話仍能輸入與隨手�
   await page.screenshot({ path: `docs/uat/evidence/A-UI-08-dark-${info.project.name}.png`, animations: 'disabled' })
   expect(await dialog.locator('.chat-sheet').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)
 })
+
+
+test('UAT-70 手機橫向或縮短視窗仍可讀夥伴回覆、繼續提問', async ({ page }, info) => {
+  await setup(page)
+  await page.locator('.presence').click()
+  await page.getByRole('textbox', { name: '跟夥伴說的話' }).fill('先從哪裡開始？')
+  await page.getByRole('button', { name: '送出', exact: true }).click()
+  await expect(page.locator('.msg-master:not(:has(.typing))')).toHaveCount(1)
+  for (const viewport of [{ width: 844, height: 390 }, { width: 390, height: 400 }, { width: 390, height: 600 }]) {
+    await page.setViewportSize(viewport)
+    const list = page.locator('.master-list')
+    const contentHeight = await list.evaluate(e => {
+      const css = getComputedStyle(e)
+      return e.clientHeight - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom)
+    })
+    expect(contentHeight, `${viewport.width}×${viewport.height} 應可讀到數行回覆`).toBeGreaterThanOrEqual(96)
+    await list.evaluate(e => { e.scrollTop = e.scrollHeight })
+    const listBox = await list.boundingBox()
+    const replyBox = await page.locator('.msg-master').last().boundingBox()
+    expect(replyBox!.y + replyBox!.height).toBeLessThanOrEqual(listBox!.y + listBox!.height + 1)
+    if (viewport.width === 844) await page.screenshot({ path: `docs/uat/evidence/A-UI-09-landscape-${info.project.name}.png`, animations: 'disabled' })
+    for (const element of [page.locator('.master-input'), page.locator('.chat-sheet .modal-capture'), page.getByRole('button', { name: '關閉', exact: true })]) {
+      const box = await element.boundingBox()
+      expect(box!.y).toBeGreaterThanOrEqual(0)
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height)
+    }
+    expect(await page.locator('.chat-sheet').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)
+  }
+  await page.getByRole('textbox', { name: '跟夥伴說的話' }).fill('副歌還能怎麼開始？')
+  await page.getByRole('button', { name: '送出', exact: true }).click()
+  await expect(page.locator('.msg-master:not(:has(.typing))')).toHaveCount(2)
+  await page.getByRole('button', { name: '✎ 記一下', exact: true }).click()
+  await page.locator('.inspo-capture textarea').fill('橫向也要留住這一點靈感')
+  await page.getByRole('button', { name: '夾進本子', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: '跟作曲家聊', exact: true })).toBeVisible()
+  await expect(page.locator('.msg-master .msg-speaker')).toHaveText(['作曲家', '作曲家'])
+})
