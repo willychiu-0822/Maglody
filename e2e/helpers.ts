@@ -9,6 +9,8 @@ export async function shot(page: Page, info: TestInfo, suffix = '') {
   const id = info.title.match(/UAT-\d+/)![0]
   const file = path.resolve(`docs/uat/evidence/${process.env.UAT_RUN_ID}/${info.project.name}/${id}${suffix ? '-'+suffix : ''}.png`)
   fs.mkdirSync(path.dirname(file), { recursive: true })
+  // Full-page screenshots otherwise pin the sticky header at the last scroll offset.
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   await page.screenshot({ path: file, fullPage: true, animations: 'disabled' })
   if (!suffix) await info.attach('uat-screenshot', { path: file, contentType: 'image/png' })
 }
