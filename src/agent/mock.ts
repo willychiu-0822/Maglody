@@ -19,7 +19,7 @@ function fromFeedback(fb: Feedback[], learned: string, fallbackNext: string, ext
   const good = pick(fb, 'good')
   const fix = pick(fb, 'bad') ?? pick(fb, 'warn')
   return {
-    text: [good ? `你做到了：${good.text}` : '', fix ? `我聽到一個可以再試的地方：${fix.text}` : ''].filter(Boolean).join(' ') || '我聽到了，繼續往下走。',
+    text: [good?.text, fix ? `再聽聽這裡：${fix.text}` : ''].filter(Boolean).join(' ') || '嗯，我聽到了。再往下試試看。',
     learned,
     next: fix?.tip ?? fallbackNext,
     suggestions: extra,
@@ -37,12 +37,12 @@ export function learnedFor(step: string, p: Project): string {
   const c = chordsOf(p)
   switch (step) {
     case 'hum': return p.hum ? `你停留最久的音 ${NOTE_NAMES[p.hum.keyRoot]} 就是「主音」——整首歌的家；一段旋律常用的 7 個音，就構成「${keyName(p.hum.keyRoot, p.hum.keyMode)}」。` : '主音與調性。'
-    case 'idea': { const m = MOODS.find((x) => x.id === p.idea.mood); return `情緒決定參數：你選的「${m?.name ?? '—'}」對應${m?.mode === 'minor' ? '小調' : '大調'}與 ${p.idea.bpm} BPM；Hook「${p.idea.hook}」會是副歌的錨點。` }
+    case 'idea': { const m = MOODS.find((x) => x.id === p.idea.mood); return `「${m?.name ?? '這個心情'}」配上${m?.mode === 'minor' ? '小調' : '大調'}和 ${p.idea.bpm} BPM，是個可以試聽的起點。${p.idea.hook ? `「${p.idea.hook}」也先留在這裡。` : ''}` }
     case 'harmony': { const last = p.harmony.chorus[3]; return `級數讓和弦有「角色」：你的副歌 ${progName(p, p.harmony.chorus)} 最後停在 ${last != null ? `${c[last].name}（${c[last].roman}）` : '?'}——${last === 4 ? '屬和弦製造「想回家」的張力，這叫半終止。' : last === 0 ? '回到主和弦，像句號，這叫正格終止。' : '它決定了循環時的「推進感」。'}` }
     case 'melody': return '強拍放和弦音、弱拍放經過音，旋律就會和伴奏黏在一起；副歌拉高，情緒就往上推。'
     case 'lyrics': return '主歌用畫面「演」、副歌用 Hook「說」；句尾同韻、上下句字數對稱，旋律才能重複、聽眾才記得住。'
     case 'arrange': return '編曲是能量設計：你讓不同段落的樂器數量不同，副歌才會比主歌「大」。'
-    case 'record': return '留 headroom（峰值 -6 dB 以下）是錄音唯一不能後悔的事；音準以「音分」衡量，±25 以內耳朵就覺得準。'
+    case 'record': return '錄音時留點音量空間，唱到大聲的地方也比較不容易破音。音準可以用「音分」當參考，再用耳朵聽聽。'
     case 'mix': return '混音是讓每個聲音有位置：主唱最清楚、低頻放中間、非低音樂器切低頻，這叫頻率與空間分工。'
     case 'review': return '你建立了自己的判斷標準——規則是起點，你的耳朵才是最後的裁判。'
     default: return ''
@@ -150,7 +150,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
     case 'step.complete': {
       const i = STEP_ORDER.indexOf(step)
       const nxt = STEP_ORDER[i + 1]
-      return { text: learnedFor(step, p), next: nxt ? `下一檯「${STEP_ZH[nxt]}」會直接用到你剛做的東西。` : '你完成了第一首歌。下一版會更好。', suggestions: [{ label: '▶ 聽聽目前的成果', action: { type: 'playResult' } }] }
+      return { text: learnedFor(step, p), next: nxt ? `想繼續的話，去「${STEP_ZH[nxt]}」坐坐。` : '先聽聽這一版，想改的地方隨時都能回來。', suggestions: [{ label: '▶ 聽聽目前的成果', action: { type: 'playResult' } }] }
     }
     default:
       return { text: '我聽到了。' }
