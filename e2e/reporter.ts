@@ -37,7 +37,7 @@ export default class UatReporter implements Reporter {
     const status = { project: 'Maglody', updated, cases: rows.length, pass, fail, blocked,
       ready_for_user_test: result.status === 'passed' && fullMatrix && !fail && !blocked && allEvidence && !visualOpen,
       requirements:outcomes(checks), novice_feedback:outcomes(novice),
-      exploration:outcomes({A_N08_long_conversation:['UAT-61'],A_N09_role_waiting:['UAT-62'],A_N10_mic_limit_without_frames:['UAT-52','UAT-43'],A_N11_new_song_conversation:['UAT-63']}),
+      exploration:outcomes({A_N08_long_conversation:['UAT-61'],A_N09_role_waiting:['UAT-62'],A_N10_mic_limit_without_frames:['UAT-52','UAT-43'],A_N11_new_song_conversation:['UAT-63'],text_first_song:['UAT-64']}),
       notes: `Chrome；desktop 1280x800/mobile 390x844；run=${run}；${fullMatrix ? '完整矩陣' : '部分重跑，不能作為整體通過依據'}；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證${visualOpen ? '；A 尚有未結缺失待驗收' : ''}${allEvidence ? '' : '；有案例缺少截圖證據'}` }
     fs.mkdirSync(`docs/uat/evidence/${run}`, { recursive: true })
     fs.writeFileSync(`docs/uat/evidence/${run}/results.json`, JSON.stringify({ ...status, rows }, null, 2)+'\n')

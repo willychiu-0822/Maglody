@@ -1,4 +1,4 @@
-import { test, expect, setup, go, act, finished } from './helpers'
+import { test, expect, setup, go, act, finished, captureText, library, harmony, primary, readProject, shot } from './helpers'
 
 // Observe real Web Audio scheduled sources; do not replace their playback.
 test('UAT-26 離開工作檯立即停止鼓與延遲預聽', async ({page}) => {
@@ -55,4 +55,52 @@ test('UAT-27 首次進入後即可離線重開且保留同源其他快取', asyn
     await expect(page.locator('main .primary-action')).toHaveText(/哼一段/)
     expect(await page.evaluate(async()=>!!await (await caches.open('unrelated-app-uat')).match('/unrelated-uat')),'不能刪除同源其他應用快取').toBe(true)
   } finally { await context.setOffline(false) }
+})
+
+test('UAT-64 不開麥克風，從自己的文字靈感做成可聽草稿', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    Object.assign(window, { microphoneRequests: 0, demoSources: 0 })
+    navigator.mediaDevices.getUserMedia = async () => {
+      const state = window as unknown as { microphoneRequests: number }
+      state.microphoneRequests++
+      throw new DOMException('No microphone', 'NotAllowedError')
+    }
+    const start = OscillatorNode.prototype.start
+    OscillatorNode.prototype.start = function (...args: Parameters<OscillatorNode['start']>) {
+      const state = window as unknown as { demoSources: number }
+      state.demoSources++
+      return start.apply(this, args)
+    }
+  })
+  await setup(page)
+  await captureText(page, '把雨留在窗外')
+  await library(page)
+  const card = page.locator('.inspo-card').filter({ hasText: '把雨留在窗外' })
+  await card.locator('.inspo-card-head').click()
+  await card.getByRole('button', { name: '從這則靈感開始一首歌', exact: true }).click()
+  await expect(page.locator('.desk-name')).toContainText('構想')
+  await primary(page).click()
+  await expect(page.getByRole('textbox', { name: '這首歌的一句話' })).toHaveValue('把雨留在窗外')
+  await act(page, /和聲/)
+  await harmony(page)
+  await act(page, /旋律/)
+  for (const part of ['主歌', '副歌']) {
+    await page.locator('.seg-quiet button').filter({ hasText: part }).click()
+    for (let i = 0; i < 4; i++) await page.locator('.roll-row').first().locator('.cell').nth(i).click()
+  }
+  await act(page, /歌詞/)
+  await page.getByRole('textbox', { name: '主歌歌詞' }).fill('杯子還有一點暖\n你說過天會放晴')
+  await page.locator('.seg-quiet button').filter({ hasText: '副歌' }).click()
+  await page.getByRole('textbox', { name: '副歌歌詞' }).fill('把雨留在窗外\n我把燈留給你')
+  await go(page, '總檢討')
+  await expect(page.locator('.demo-missing')).toHaveCount(0)
+  await page.evaluate(() => { (window as unknown as { demoSources: number }).demoSources = 0 })
+  await act(page, /從頭聽我的歌/)
+  await expect(primary(page)).toHaveText('■ 停')
+  await expect.poll(() => page.evaluate(() => (window as unknown as { demoSources: number }).demoSources)).toBeGreaterThan(0)
+  await act(page, /停/)
+  await expect(page.locator('main')).toContainText('把雨留在窗外')
+  expect((await readProject(page)).hum).toBeNull()
+  expect(await page.evaluate(() => (window as unknown as { microphoneRequests: number }).microphoneRequests)).toBe(0)
+  await shot(page, info, 'text-first-demo')
 })
