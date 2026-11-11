@@ -106,7 +106,7 @@ export function useMic(opts: { record?: boolean; maxSec?: number; onFrame?: (mid
     } catch {
       if (token !== generation.current) return false
       setAudioSession('playback')
-      setState((s) => ({ ...s, pending: false, running: false, error: '無法使用麥克風：請確認瀏覽器已允許麥克風權限，並使用 https 或 localhost 開啟。' }))
+      setState((s) => ({ ...s, pending: false, running: false, error: '這次沒能用上麥克風。看看瀏覽器有沒有允許使用麥克風，也確認網址是 https 或 localhost，再試一次。' }))
       return false
     } finally { if (token === generation.current) requesting.current = false }
   }, [stop])

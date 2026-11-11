@@ -92,7 +92,7 @@ export function useRecorder() {
       if (token !== generation.current) return
       r.current.stream?.getTracks().forEach(t => t.stop())
       setAudioSession('playback')
-      setError('無法使用麥克風：請在瀏覽器網址列旁允許「麥克風」，並確認是用 https 或 localhost 開啟；也可以直接寫文字。')
+      setError('這次沒能用上麥克風。看看網址列旁有沒有允許使用麥克風，網址也要是 https 或 localhost。想先寫下來也可以。')
     } finally {
       if (token === generation.current) { requesting.current = false; setPending(false) }
     }

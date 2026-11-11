@@ -99,7 +99,7 @@ export class RecordingSession {
   private fail() {
     this.cleanup()
     this.resolve?.(null); this.resolve = undefined
-    this.publish({ recording: null, error: '無法使用麥克風：請在瀏覽器網址列旁允許「麥克風」，並確認是用 https 開啟。' })
+    this.publish({ recording: null, error: '這次沒能用上麥克風。看看網址列旁有沒有允許使用麥克風，也確認網址是 https 或 localhost，再試一次。' })
   }
   dispose() {
     this.changed = () => {}
