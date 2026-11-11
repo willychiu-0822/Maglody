@@ -17,12 +17,12 @@ export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
   const fb: Feedback[] = []
   const others = (['chords', 'bass', 'drums'] as TrackId[]).map((id) => t[id].mute ? 0 : t[id].vol)
   const loudest = Math.max(...others)
-  fb.push(!t.melody.mute && t.melody.vol > 0 && t.melody.vol >= loudest * 0.9 ? { level: 'good', text: '主旋律夠突出，聽眾能跟著唱。' } : { level: 'bad', text: '主旋律被伴奏蓋過了。', tip: '流行歌混音第一原則：人聲（主旋律）最清楚。把伴奏拉低，而不是一直把人聲拉高。' })
-  fb.push(Math.abs(t.bass.pan) <= 0.15 ? { level: 'good', text: '貝斯在正中間，低頻穩。' } : { level: 'bad', text: '貝斯偏到一邊了。', tip: '低頻沒有方向感，偏一邊只會讓一個喇叭特別累、耳機聽起來歪。放中間。' })
-  fb.push(Math.abs(t.melody.pan) <= 0.15 ? { level: 'good', text: '主旋律在中間，像歌手站在舞台中央。' } : { level: 'warn', text: '主旋律偏離中間。', tip: '主唱幾乎永遠放中間。' })
-  fb.push(Math.abs(t.chords.pan) >= 0.2 ? { level: 'good', text: '和弦稍微偏一側，為主旋律讓出中間的空間。' } : { level: 'warn', text: '所有東西都擠在中間。', tip: '把和弦往左或右推一點（20–50%），聲音會變寬，主旋律也更清楚。' })
-  fb.push(t.chords.hp && t.melody.hp ? { level: 'good', text: '和弦與主旋律都切掉了不需要的低頻，貝斯更乾淨。' } : { level: 'warn', text: '還有軌道沒有切低頻。', tip: '打開「低頻切除」：鋼琴和人聲的超低頻沒什麼用，卻會和貝斯混成一團（混濁）。' })
-  if (t.bass.hp) fb.push({ level: 'warn', text: '貝斯也開了低頻切除。', tip: '貝斯的低頻是它的工作，通常只切 40Hz 以下的極低頻（這裡已經做了），影響不大，但注意聽聽是否變薄。' })
+  fb.push(!t.melody.mute && t.melody.vol > 0 && t.melody.vol >= loudest * 0.9 ? { level: 'good', text: '主旋律的音量和伴奏差不多，聽聽喜不喜歡。' } : { level: 'bad', text: '主旋律的音量比伴奏小，或是靜音了。', tip: '想讓旋律靠近一點？試著把伴奏調小，再聽聽看。' })
+  fb.push(Math.abs(t.bass.pan) <= 0.15 ? { level: 'good', text: '貝斯靠近中間，聽聽這個位置。' } : { level: 'bad', text: '貝斯偏在一邊。', tip: '也試試把貝斯放回中間，聽聽兩邊有什麼不同。' })
+  fb.push(Math.abs(t.melody.pan) <= 0.15 ? { level: 'good', text: '主旋律在中間，像站在舞台中央。' } : { level: 'warn', text: '主旋律靠近一邊。', tip: '也可以試著放回中間，聽聽你喜歡哪裡。' })
+  fb.push(Math.abs(t.chords.pan) >= 0.2 ? { level: 'good', text: '和弦偏在一邊，聽聽跟旋律的距離。' } : { level: 'warn', text: '和弦靠近中間。', tip: '試著往左或右移一點，聽聽空間有沒有變化。' })
+  fb.push(t.chords.hp && t.melody.hp ? { level: 'good', text: '和弦和主旋律都開了低頻切除。' } : { level: 'warn', text: '有些軌道還沒開低頻切除。', tip: '試著打開「低頻切除」，再關掉比較，聽聽聲音有什麼不同。' })
+  if (t.bass.hp) fb.push({ level: 'warn', text: '貝斯也開了低頻切除。', tip: '聽聽低音有沒有變薄；喜歡原本的聲音也可以關掉。' })
   if (peakDb != null) fb.push(peakDb > -1 ? { level: 'bad', text: `總輸出峰值 ${peakDb.toFixed(0)} dB，接近破音。`, tip: '每軌都往下拉一點，而不是把總音量推到底。' } : { level: 'good', text: `總輸出峰值 ${peakDb.toFixed(0)} dB，有餘裕。` })
   return fb
 }
@@ -141,14 +141,14 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
         <FeedbackList items={fb} />
       </Card>
 
-      <Why ready={p.mix.listened} hint="先按播放。" title="為什麼主旋律最重要？" apply="Podcast 對話、影片旁白配樂，都要讓「說話」最清楚。">
+      <Why ready={p.mix.listened} hint="先按播放。" title="想讓旋律靠近一點？" apply="Podcast 對話或影片旁白，也可以試著調整和配樂的距離。">
         <p>想讓人聲靠近一點的話，先把它調到喜歡的音量，再慢慢加回其他聲音。聽聽這樣的距離喜不喜歡。</p>
       </Why>
-      <Why ready={p.mix.listened} title="左右聲像（Pan）的邏輯" apply="戴耳機聽喜歡的歌：鼓、吉他、和聲各在哪個位置？">
-        <p>想像一個舞台：主唱、貝斯、大鼓站中間；吉他、鋼琴、和聲分站左右。把不同樂器放在不同位置，就算音量一樣，也能聽得更清楚。</p>
+      <Why ready={p.mix.listened} title="聲音要站在哪裡？" apply="戴耳機聽喜歡的歌：鼓、吉他、和聲各在哪個位置？">
+        <p>把聲音想成站在舞台上。試著讓樂器分站左右，再聽聽和原來有什麼不同。</p>
       </Why>
-      <Why ready={tracks.chords.hp || tracks.melody.hp} hint="先在任一軌打開「低頻切除」聽聽差別。" title="為什麼要切低頻？" apply="手機錄影的風切聲、冷氣低鳴，也都用 High-pass 濾掉。">
-        <p>每個樂器都會產生一點點低頻，疊起來就變成「悶、糊」。只讓貝斯和大鼓負責低頻，其他軌切掉 150Hz 以下，整體就會清楚很多。這叫「頻率分工」。</p>
+      <Why ready={tracks.chords.hp || tracks.melody.hp} hint="先在任一軌打開「低頻切除」聽聽差別。" title="切掉一些低音，會怎樣？" apply="錄到風聲或冷氣聲時，也可以試試低頻切除。">
+        <p>聲音裡的低頻疊在一起，有時會聽起來比較悶。試著切掉一些，再聽聽你比較喜歡哪一種。</p>
       </Why>
       <Why ready={p.mix.listened} title="為什麼要 A/B 比較？" apply="修照片、改文章時，也要常常和原稿比較。">
         <p>耳朵會很快「習慣」聲音，調久了就不知道自己變好還是變差。回到原始狀態聽一下，是混音師最常用的校準方法。</p>
