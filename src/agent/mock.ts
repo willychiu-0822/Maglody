@@ -39,11 +39,11 @@ export function learnedFor(step: string, p: Project): string {
     case 'hum': return p.hum ? `你停留最久的音 ${NOTE_NAMES[p.hum.keyRoot]} 就是「主音」——整首歌的家；一段旋律常用的 7 個音，就構成「${keyName(p.hum.keyRoot, p.hum.keyMode)}」。` : '主音與調性。'
     case 'idea': { const m = MOODS.find((x) => x.id === p.idea.mood); return `「${m?.name ?? '這個心情'}」配上${m?.mode === 'minor' ? '小調' : '大調'}和 ${p.idea.bpm} BPM，是個可以試聽的起點。${p.idea.hook ? `「${p.idea.hook}」也先留在這裡。` : ''}` }
     case 'harmony': { const last = p.harmony.chorus[3]; return `級數讓和弦有「角色」：你的副歌 ${progName(p, p.harmony.chorus)} 最後停在 ${last != null ? `${c[last].name}（${c[last].roman}）` : '?'}——${last === 4 ? '屬和弦製造「想回家」的張力，這叫半終止。' : last === 0 ? '回到主和弦，像句號，這叫正格終止。' : '它決定了循環時的「推進感」。'}` }
-    case 'melody': return '強拍放和弦音、弱拍放經過音，旋律就會和伴奏黏在一起；副歌拉高，情緒就往上推。'
-    case 'lyrics': return '主歌用畫面「演」、副歌用 Hook「說」；句尾同韻、上下句字數對稱，旋律才能重複、聽眾才記得住。'
-    case 'arrange': return '編曲是能量設計：你讓不同段落的樂器數量不同，副歌才會比主歌「大」。'
+    case 'melody': return '想讓旋律靠近伴奏，可以試著在強拍放和弦裡的音。副歌唱高一點，也會有不一樣的感覺。'
+    case 'lyrics': return '主歌可以留一個畫面，副歌再回到你最想說的話。唸唸看，哪句最像你？'
+    case 'arrange': return '試著讓主歌少一件樂器，再聽副歌進來的感覺。'
     case 'record': return '錄音時留點音量空間，唱到大聲的地方也比較不容易破音。音準可以用「音分」當參考，再用耳朵聽聽。'
-    case 'mix': return '混音是讓每個聲音有位置：主唱最清楚、低頻放中間、非低音樂器切低頻，這叫頻率與空間分工。'
+    case 'mix': return '混音時，先聽聽最想讓人注意的聲音，再慢慢調整其他聲音的位置。'
     case 'review': return '你建立了自己的判斷標準——規則是起點，你的耳朵才是最後的裁判。'
     default: return ''
   }
@@ -58,12 +58,12 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
         hum: '先哼給我聽。不用在意好不好聽，我要聽的是你腦中「本來就有」的旋律。',
         idea: p.hum ? `你的哼唱在 ${keyName(p.hum.keyRoot, p.hum.keyMode)}。現在決定它要說什麼情緒——選完我會用你的調放給你聽。` : '先決定這首歌的情緒和速度。',
         harmony: `依你的「${MOODS.find((m) => m.id === p.idea.mood)?.name ?? '情緒'}」和哼唱，我把調設好了。點和弦聽聽它們的個性，排完 4 格我會告訴你這個走向在做什麼。`,
-        melody: `和弦地板鋪好了（副歌 ${progName(p, p.harmony.chorus)}）。把哼唱匯入當草稿，按播放，聽聽哪幾格跟和弦打架。`,
+        melody: `和弦選好了（副歌 ${progName(p, p.harmony.chorus)}）。把哼唱拿來當草稿，聽聽旋律和和弦搭不搭。`,
         lyrics: `旋律有了，現在讓字「住進」音符裡。副歌旋律有 ${p.melody.chorus.filter((m) => m != null && m >= 0).length} 個音，前兩句大約就是這麼多字。`,
         arrange: '詞曲都在了。現在當導演：哪一段要安靜、哪一段要全員到齊？',
-        record: '作品準備要錄成 Demo 了。先測音量、暖嗓，這兩件事做對，錄音就成功一半。',
+        record: '準備錄一版了。先暖暖嗓，再試一下音量，我陪你聽。',
         mix: '我故意把混音弄亂了：主旋律太小。播放，用耳朵把它們放回該在的位置。',
-        review: '從頭聽一次你的歌。這次我不回饋規則，換你當老師。',
+        review: '來，從頭聽聽這一版。哪一段讓你想再多聽一次？',
       }
       return { text: bridge[step] ?? '', next: prev ? `（上一檯：${STEP_ZH[prev]}，隨時可以回去改）` : undefined }
     }
@@ -212,7 +212,7 @@ function questionReply(p: Project, step: string, q: string): AgentReply {
   if (/(太高|唱不上去|音域)/.test(q)) {
     const notes = [...p.melody.chorus, ...p.melody.verse].filter((m): m is number => m != null && m >= 0)
     const hi = notes.length ? Math.max(...notes) : null
-    return { text: hi != null ? `你旋律最高是 ${noteNameOct(hi)}${p.hum ? `，哼唱時最舒服的上限是 ${noteNameOct(p.hum.rangeHigh)}` : ''}。` : '還沒有旋律。', next: '改和聲的調性設定不會搬動已寫的旋律。請到旋律格把最高那一句往下點幾格，再跟唱確認音域。', learned: '移調（換 Key）不會改變旋律的形狀，只改變高低。' }
+    return { text: hi != null ? `旋律最高到 ${noteNameOct(hi)}${p.hum ? `，剛才哼的最高音是 ${noteNameOct(p.hum.rangeHigh)}` : ''}。` : '旋律還沒寫下來。', next: '改和聲的調性不會搬動已寫的旋律。可以回旋律格，把最高那句往下點幾格，再唱唱看。', learned: '移調（換 Key）會改變音的高低，旋律的形狀還在。' }
   }
   return { text: '先只改一件事，再聽聽差別。', next: '告訴我想改哪一句、哪一段，我陪你試。' }
 

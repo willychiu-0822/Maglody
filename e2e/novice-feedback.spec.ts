@@ -185,7 +185,7 @@ test('UAT-60 新手先救文字再回草稿救錄音，兩份成果都保留',as
   await expect(page.locator('.inspo-big.rec')).toBeVisible()
   await page.waitForTimeout(700)
   await page.locator('.inspo-big.rec').click()
-  await expect(page.locator('.inspo-capture')).toContainText('儲存失敗')
+  await expect(page.locator('.inspo-capture')).toContainText('錄音還沒收好')
   await page.getByRole('button',{name:'先另存文字，錄音留著',exact:true}).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page.evaluate(()=>{(window as unknown as {noviceDisk:{fail:boolean}}).noviceDisk.fail=false})

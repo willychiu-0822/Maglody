@@ -151,7 +151,7 @@ function hintChords(notes: HumNote[], root: number, mode: Mode, duration: number
       end: e,
       chord: best.name,
       roman: best.roman,
-      why: `這段你唱最久的音裡有 ${top.join('、')}，剛好都是 ${best.name} 和弦的組成音（覆蓋 ${Math.round(bestScore * 100)}%）。`,
+      why: `這段停留較久的音有 ${top.join('、')}，也是 ${best.name} 和弦裡的音（覆蓋 ${Math.round(best.pcs.reduce((sum, p) => sum + w[p], 0) / total * 100)}%）。`,
     })
   }
   return hints

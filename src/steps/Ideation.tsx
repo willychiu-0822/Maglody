@@ -95,7 +95,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
           <p>{mood?.why} 速度越接近休息時的心跳（60–80），聽起來越放鬆；越接近跑步，越激動。</p>
         </Why>
         <Why ready={!!idea.hook} title="什麼是 Hook？">
-          <p>聽一次就卡在腦中的那句話。流行歌通常把它放進副歌，重複 2–4 次。</p>
+          <p>那句讓人聽過還想再哼的話。可以試著放進副歌，看看你喜不喜歡。</p>
         </Why>
       </Toolbox>
     </>

@@ -16,19 +16,19 @@ const DIMENSIONS: { id: string; q: string; source: (p: Project) => Feedback[] }[
   { id: 'story', q: '歌詞有讓我看見畫面嗎？', source: (p) => p.lyrics.flatMap((s) => analyzeSection(s, p.idea.hook).fb) },
   { id: 'hook', q: '副歌那句會卡在腦中嗎？', source: (p) => p.lyrics.filter((s) => s.kind === 'chorus').flatMap((s) => analyzeSection(s, p.idea.hook).fb.slice(-2)) },
   { id: 'harmony', q: '和弦有支撐住情緒嗎？', source: (p) => [...progressionFeedback(p.harmony.verse, p.harmony.mode, '主歌'), ...progressionFeedback(p.harmony.chorus, p.harmony.mode, '副歌')] },
-  { id: 'melody', q: '旋律好唱又好記嗎？', source: (p) => [...melodyFeedback(p, 'verse'), ...melodyFeedback(p, 'chorus')] },
-  { id: 'arc', q: '整首歌有起伏、有高潮嗎？', source: arrangementFeedback },
+  { id: 'melody', q: '旋律唱起來順嗎？有哪段留在心裡？', source: (p) => [...melodyFeedback(p, 'verse'), ...melodyFeedback(p, 'chorus')] },
+  { id: 'arc', q: '整首歌的起伏，是你喜歡的樣子嗎？', source: arrangementFeedback },
   { id: 'mix', q: '每個聲音都聽得清楚嗎？', source: (p) => mixFeedback(p, null) },
   { id: 'me', q: '這首歌像「我」嗎？我想再聽一次嗎？', source: () => [] },
 ]
 
 const FINAL_CHECKS = [
-  { id: 'sing', label: '跟著伴奏從頭到尾大聲唱一遍', why: '紙上寫得再好，唱出來才知道哪個字卡、哪裡換不了氣。' },
-  { id: 'tone', label: '檢查倒字：每個字的聲調跟旋律走向不衝突', why: '中文是聲調語言，倒字會讓聽眾聽錯詞。' },
-  { id: 'sleep', label: '隔一天再聽一次', why: '剛寫完時大腦會自動美化。新鮮的耳朵最誠實。' },
-  { id: 'friend', label: '給一個朋友聽，只問「哪一句你記得？」', why: '對方記得的，就是你真正的 Hook。' },
-  { id: 'demo', label: '用手機錄下一版 Demo', why: '有錄音才有作品，也才能比較下一版有沒有更好。' },
-  { id: 'three', label: '寫下下一版要改的 3 件事', why: '好歌是改出來的，不是一次寫出來的。' },
+  { id: 'sing', label: '跟著伴奏唱一遍', why: '聽聽有沒有哪個字卡住，或哪裡想換口氣。' },
+  { id: 'tone', label: '聽聽字和旋律合不合', why: '如果有字聽起來不太清楚，可以換個唱法試試。' },
+  { id: 'sleep', label: '明天再聽一次', why: '歇一晚，說不定會聽見新的地方。' },
+  { id: 'friend', label: '放給朋友聽，問問「你記得哪一句？」', why: '聽聽別人帶走了哪一句，也挺有趣。' },
+  { id: 'demo', label: '用手機錄一版', why: '留住現在的樣子，以後想比較時就能拿出來聽。' },
+  { id: 'three', label: '記下想再試的地方', why: '一個也好，三個也好，留給下次慢慢玩。' },
 ]
 
 function summarize(items: Feedback[]): Level | null {
@@ -97,7 +97,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
       <SongSheet p={p} />
       {missing.length > 0 && <p className="demo-missing small muted">草稿還缺：{missing.map(item=>item.label).join('、')}。{hasScore ? '可以先聽已有的部分。' : '先留下一點聲音。'}</p>}
 
-      <textarea aria-label="我對這首歌的想法" className="one-line" rows={3} value={r.verdict} placeholder="這首歌好嗎？最喜歡哪裡？下一版想改什麼？" onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
+      <textarea aria-label="我對這首歌的想法" className="one-line" rows={3} value={r.verdict} placeholder="哪裡讓你想再聽一次？想留什麼給下次？" onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
 
       {!hasScore ? (
         <DeskActions primary={{label:'先去挑幾個和弦',onClick:()=>goTo?.('harmony')}} />
@@ -108,7 +108,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
       )}
 
       <Toolbox>
-      <Card title="聽完的心情（1 = 想再調整，5 = 我很喜歡）">
+      <Card title="聽完覺得呢？（1 想再試試，5 很喜歡）">
         {DIMENSIONS.map((d) => {
           const items = d.source(p)
           const lvl = summarize(items)
@@ -143,11 +143,11 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
         </ul>
       </Card>
 
-      <Card title="匯出">
+      <Card title="把歌帶走">
         <div className="row wrap">
           <button className="btn" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
           <button className="btn" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
-          <button className="btn btn-ghost" onClick={() => download('music-lab-project.json', JSON.stringify(p, null, 2), 'application/json')}>備份專案（.json）</button>
+          <button className="btn btn-ghost" onClick={() => download('music-lab-project.json', JSON.stringify(p, null, 2), 'application/json')}>備份這首歌（.json）</button>
         </div>
       </Card>
 
@@ -162,10 +162,10 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
 export const reviewStep: StepDef = {
   key: 'review',
   title: '總檢討',
-  subtitle: '由你判斷這首歌好不好',
+  subtitle: '聽聽這首歌現在的樣子',
   glyph: '成',
   Component: ReviewStep,
   requirements: (p) => [
-    { label: '寫下你自己的判斷', ok: p.review.verdict.trim().length >= 4 },
+    { label: '記下你聽完的想法', ok: p.review.verdict.trim().length >= 4 },
   ],
 }

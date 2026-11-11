@@ -210,7 +210,7 @@ test('UAT-50 沒辨識到音符也能播放原始哼唱，換檯會停止',async
   })
   await visit(page,'哼唱解析');await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click()
   await expect(primary(page)).toContainText('構想');await page.locator('.toolbox > summary').click()
-  await page.getByRole('button',{name:'▶ 原始錄音',exact:true}).click()
+  await page.getByRole('button',{name:'▶ 再聽示範',exact:true}).click()
   await visit(page,'歌詞')
   expect(await page.evaluate(()=>(window as unknown as {startedSources:number}).startedSources)).toBe(2)
   expect(await page.evaluate(()=>(window as unknown as {stoppedSources:number}).stoppedSources)).toBe(2)

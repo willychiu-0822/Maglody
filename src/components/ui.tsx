@@ -82,7 +82,7 @@ export function Why({ title, children, apply, ready = true, hint, listen }: {
   )
 }
 
-export function FeedbackList({ items: raw, empty = '開始動手後，老師會在這裡即時回饋。' }: { items: Feedback[]; empty?: string }) {
+export function FeedbackList({ items: raw, empty = '動手試試，夥伴會在這裡留下小發現。' }: { items: Feedback[]; empty?: string }) {
   const gentle = useContext(GentleContext)
   const items = gentle ? raw.map((f) => (f.level === 'bad' ? { ...f, level: 'warn' as const } : f)) : raw
   const [extra, setExtra] = useState(0)

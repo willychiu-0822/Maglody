@@ -23,7 +23,7 @@ export function analyzeSection(s: LyricSection, hook: string) {
   let sym = 0
   for (let i = 0; i < pairs; i++) if (Math.abs(lens[2 * i] - lens[2 * i + 1]) <= 2) sym++
   const symR = pairs ? sym / pairs : 1
-  fb.push(symR >= 0.75 ? { level: 'good', text: '上下句字數接近，旋律可以重複使用，好唱好記。' } : symR >= 0.5 ? { level: 'warn', text: '有些上下句字數差很多。', tip: '同一段裡第 1、2 句字數接近（相差 2 字以內），旋律才能「對稱」。' } : { level: 'bad', text: '句子長短不一，旋律會很難套。', tip: '先數字數，讓成對的句子長度接近。' })
+  fb.push(symR >= 0.75 ? { level: 'good', text: '這幾句字數接近，可以試著用同一段旋律唱唱看。' } : symR >= 0.5 ? { level: 'warn', text: '有些上下句字數差很多。', tip: '想用同一段旋律的話，可以試著調整字數，再唱唱看。' } : { level: 'bad', text: '這幾句長短不太一樣。', tip: '可以試試不同的唱法，或調整句子的長度。' })
   // 2. 押韻
   const known = ends.filter(Boolean)
   const counts = new Map<number, number>()
@@ -31,20 +31,20 @@ export function analyzeSection(s: LyricSection, hook: string) {
   const top = Math.max(0, ...counts.values())
   const rr = ls.length ? top / ls.length : 0
   const target = s.kind === 'chorus' ? 0.5 : 0.4
-  fb.push(rr >= target ? { level: 'good', text: `${top}/${ls.length} 句押同一個韻，聽起來有「收」的感覺。` } : known.length < ls.length / 2 ? { level: 'warn', text: '有幾個句尾字不在老師的韻表裡。', tip: '大聲唸句尾字，聽韻母（a、ang、i…）是不是一樣。' } : { level: 'warn', text: '押韻偏少。', tip: s.kind === 'chorus' ? '副歌最好每句或隔句押韻，讓人一聽就記住。' : '主歌可以隔句押韻，不用每句都押。' })
+  fb.push(rr >= target ? { level: 'good', text: `${top}/${ls.length} 句押同一個韻，聽起來有「收」的感覺。` } : known.length < ls.length / 2 ? { level: 'warn', text: '有幾個句尾字，我還認不出它們的韻。', tip: '大聲唸句尾字，聽韻母（a、ang、i…）是不是一樣。' } : { level: 'warn', text: '這幾句的句尾聽起來不太一樣。', tip: '想試試押韻的話，可以挑幾句換個相近的句尾。' })
   // 3. 具體 vs 抽象
   const abs = countHits(s.text, ABSTRACT_WORDS)
   const con = countHits(s.text, CONCRETE_HINTS)
-  if (s.kind === 'verse') fb.push(con >= abs ? { level: 'good', text: '主歌有畫面，負責「演」故事。' } : { level: 'warn', text: `主歌抽象詞較多（${abs}）。`, tip: '主歌負責交代場景和細節，情緒的結論留給副歌。' })
+  if (s.kind === 'verse') fb.push(con >= abs ? { level: 'good', text: '唸唸這段，看看有沒有你想留下的畫面。' } : { level: 'warn', text: `主歌抽象詞較多（${abs}）。`, tip: '想讓畫面更清楚的話，可以加一個當時的細節。' })
   // 4. 副歌包含 hook
   if (s.kind === 'chorus') {
     const h = cleanLine(hook)
     const has = h && cleanLine(s.text).includes(h)
-    fb.push(has ? { level: 'good', text: '副歌包含你的記憶點。' } : { level: 'bad', text: '副歌裡找不到記憶點那一句。', tip: `把「${hook || '你的 Hook'}」放進副歌第一句或最後一句（或兩者）。` })
+    fb.push(has ? { level: 'good', text: '副歌包含你的記憶點。' } : { level: 'bad', text: '副歌裡找不到記憶點那一句。', tip: `想繼續往下一頁，可以先把「${hook || '你那句話'}」放進副歌。` })
   }
   // 5. 句長
   const long = lens.filter((n) => n > 14).length
-  if (long) fb.push({ level: 'warn', text: `${long} 句超過 14 個字。`, tip: '太長的句子唱的時候換不了氣，試著從中間切成兩句。' })
+  if (long) fb.push({ level: 'warn', text: `${long} 句超過 14 個字。`, tip: '唱唱看哪裡想換氣；也可以把句子分開。' })
   return { ls, lens, ends, fb }
 }
 
@@ -142,7 +142,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
           </div>
         </details>
         <Why ready={secs.some((s) => lines(s.text).length >= 2)} title="右邊的數字和顏色是什麼？">
-          <p>數字是字數，旁邊的色塊是句尾的韻。上下兩句字數差不多，旋律才能重複；同一個顏色代表押韻，聽起來會有回音。唱一遍時，注意有沒有字被旋律唱歪了，這叫「倒字」。</p>
+          <p>數字是字數，色塊幫你看句尾有沒有押韻。兩句字數接近時，可以試著唱同一段旋律；不一樣也沒關係，唱唱看順不順。字調聽起來變了，叫做「倒字」。</p>
         </Why>
       </Toolbox>
     </>
@@ -152,13 +152,13 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
 export const lyricsStep: StepDef = {
   key: 'lyrics',
   title: '歌詞',
-  subtitle: '主歌演故事，副歌說結論',
+  subtitle: '用你的話，把心裡的畫面唱出來',
   glyph: '詞',
   Component: LyricsStep,
   requirements: (p) => [
     { label: '至少一段主歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'verse' && lines(s.text).length >= 2) },
     { label: '至少一段副歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'chorus' && lines(s.text).length >= 2) },
-    { label: '副歌包含記憶點', ok: !cleanLine(p.idea.hook) || p.lyrics.some((s) => s.kind === 'chorus' && !!cleanLine(p.idea.hook) && cleanLine(s.text).includes(cleanLine(p.idea.hook))) },
+    { label: '把那句話放進副歌', ok: !cleanLine(p.idea.hook) || p.lyrics.some((s) => s.kind === 'chorus' && !!cleanLine(p.idea.hook) && cleanLine(s.text).includes(cleanLine(p.idea.hook))) },
   ],
 }
 

@@ -127,13 +127,13 @@ function HumStep({ p, update, notify, next }: StepProps) {
   if (hum) {
     const n = hum.notes.length
     const total = hum.notes.reduce((s, x) => s + x.dur, 0)
-    fb.push(n >= 8 ? { level: 'good', text: `抓到 ${n} 個音，素材夠用。` } : n >= 3 ? { level: 'warn', text: `只抓到 ${n} 個音。`, tip: '用「嗯～」或「啦～」哼長一點（8 秒以上），每個音都撐住一下。' } : { level: 'bad', text: '幾乎沒偵測到穩定的音。', tip: '靠近麥克風一個拳頭的距離，環境安靜一點，聲音穩住不要用氣音。' })
+    fb.push(n >= 8 ? { level: 'good', text: `我聽到 ${n} 個音。來聽聽看吧。` } : n >= 3 ? { level: 'warn', text: `我聽到 ${n} 個音。`, tip: '想多留一點的話，可以用「嗯～」或「啦～」哼長一點，試試超過 8 秒。' } : { level: 'bad', text: '這次沒聽清楚幾個音。', tip: '可以靠近麥克風一個拳頭的距離，找個安靜的地方，再用清楚的聲音試試。' })
     const inK = hum.notes.filter((x) => inScale(x.midi, hum.keyRoot, hum.keyMode)).reduce((s, x) => s + x.dur, 0)
     const ratio = total ? inK / total : 0
-    fb.push(ratio > 0.85 ? { level: 'good', text: `${Math.round(ratio * 100)}% 的時間都落在 ${keyName(hum.keyRoot, hum.keyMode)} 裡，你的耳朵天生就有調性感。` } : ratio > 0.65 ? { level: 'warn', text: `${Math.round(ratio * 100)}% 落在調內。`, tip: '紅色的音可能是故意的色彩，也可能是唱偏了；播放「整理後的音」聽聽看是不是你要的。' } : { level: 'bad', text: '調性不太明確。', tip: '試著哼一段你很熟的旋律（例如生日快樂歌）先暖耳，再哼自己的。' })
+    fb.push(ratio > 0.85 ? { level: 'good', text: `這段有 ${Math.round(ratio * 100)}% 落在 ${keyName(hum.keyRoot, hum.keyMode)} 裡。` } : ratio > 0.65 ? { level: 'warn', text: `這段有 ${Math.round(ratio * 100)}% 落在選的調裡。`, tip: '紅色的音也許正是你想要的色彩。播放「整理後的音」，聽聽看吧。' } : { level: 'bad', text: '這段的調，我還不太確定。', tip: '可以先哼一段熟悉的旋律暖暖耳朵，再試自己的。' })
     const range = hum.rangeHigh - hum.rangeLow
-    fb.push(range <= 12 && range >= 4 ? { level: 'good', text: `音域 ${noteNameOct(hum.rangeLow)}–${noteNameOct(hum.rangeHigh)}（${range} 個半音），很好唱。` } : range > 12 ? { level: 'warn', text: `音域跨了 ${range} 個半音，超過一個八度。`, tip: '對新手來說，主歌待在中低音、副歌再往上，會比較好唱也比較有層次。' } : { level: 'warn', text: '音域很窄，旋律可能有點平。', tip: '試著讓某一句往上「衝」一下，製造高點。' })
-    fb.push(hum.confidence > 0.08 ? { level: 'good', text: '調性判斷信心高。' } : { level: 'warn', text: '有兩個調都很像，判斷信心偏低。', tip: '可以在下方改選第二候選，或到「和聲」章節用耳朵決定。' })
+    fb.push(range <= 12 && range >= 4 ? { level: 'good', text: `這段從 ${noteNameOct(hum.rangeLow)} 到 ${noteNameOct(hum.rangeHigh)}，跨了 ${range} 個半音。` } : range > 12 ? { level: 'warn', text: `這段跨了 ${range} 個半音，超過一個八度。`, tip: '唱起來如果有點吃力，可以試試把某一句放低，聽聽喜不喜歡。' } : { level: 'warn', text: '這段的音靠得滿近。', tip: '想換個感覺的話，可以試著讓某一句往上走。' })
+    fb.push(hum.confidence > 0.08 ? { level: 'good', text: '這個調聽起來滿貼近這段旋律。' } : { level: 'warn', text: '有兩個調聽起來都很像。', tip: '可以在下方換個調聽聽，或到「和聲」用耳朵決定。' })
   }
 
   const hist = ana?.hist
@@ -170,14 +170,14 @@ function HumStep({ p, update, notify, next }: StepProps) {
             e.target.value = ''
             if (file) void onFile(file)
           }} />
-          {ana && <button className="btn small" onClick={playOriginal}>▶ 原始錄音</button>}
+          {ana && <button className="btn small" onClick={playOriginal}>▶ {analysisSource === 'demo' ? '再聽示範' : analysisSource === 'file' ? '再聽音檔' : '再聽錄音'}</button>}
           {hum && <button className="btn small" onClick={() => playNotes(false)}>▶ 只聽旋律</button>}
         </div>
-        {fileError && <div className="audio-file-notice" role="status" aria-label="音檔提示"><p>這個檔案還讀不出聲音。原本的哼唱留著，請改用 mp3 / wav / m4a，再按「上傳音檔」試一次。</p><button className="btn" onClick={() => { setFileError(false); uploadRef.current?.focus() }}>好</button></div>}
+        {fileError && <div className="audio-file-notice" role="status" aria-label="音檔提示"><p>這個檔案還讀不出聲音，原本的哼唱還在。換成 mp3 / wav / m4a，再按「上傳音檔」試試看。</p><button className="btn" onClick={() => { setFileError(false); uploadRef.current?.focus() }}>好</button></div>}
         {hum && (
           <div className="result-grid">
             <div className="result"><div className="muted small">調</div><div className="result-big">{keyName(hum.keyRoot, hum.keyMode)}</div></div>
-            <div className="result"><div className="muted small">舒服的音域</div><div className="result-big">{noteNameOct(hum.rangeLow)}–{noteNameOct(hum.rangeHigh)}</div></div>
+            <div className="result"><div className="muted small">這段的音域</div><div className="result-big">{noteNameOct(hum.rangeLow)}–{noteNameOct(hum.rangeHigh)}</div></div>
             <div className="result"><div className="muted small">可能適合的和弦</div><div className="result-big">{[...new Set(hum.chordHints)].slice(0, 4).join(' · ') || '—'}</div></div>
           </div>
         )}
@@ -204,15 +204,15 @@ function HumStep({ p, update, notify, next }: StepProps) {
         )}
         <FeedbackList items={fb} empty="哼完之後，這裡會有幾句觀察。" />
         <Why ready={!!hum} title="我怎麼聽出你的「家」？" listen={{ label: '只聽主音', play: () => hum && playNote(60 + hum.keyRoot, 1.5) }}>
-          <p>我把你每個音「唱了多久」加起來（上面的長條圖）。停留最久、最常回去的音，通常就是這首歌的家，也就是主音。再拿這個分佈去比對 24 個調的典型樣子，最像的那個就是你的調。</p>
+          <p>上面的長條圖記下每個音停留了多久。我用這些音猜猜看哪個調可能適合；不一定猜得準，換個調聽聽，挑你喜歡的就好。</p>
           {ana && ana.chordHints.length > 0 && (
             <ol className="hint-list">
               {ana.chordHints.slice(0, 4).map((h, i) => <li key={i}><strong>{h.start.toFixed(1)}–{h.end.toFixed(1)} 秒 → {h.chord}</strong><div className="muted small">{h.why}</div></li>)}
             </ol>
           )}
         </Why>
-        <Why ready={!!hum} title="電腦怎麼知道我唱什麼音？">
-          <p>唱 A 音時，空氣每秒振動 440 次。程式把聲波跟「往後挪一點的自己」比較，重疊最好的位移量就是一次振動的長度，換算成頻率就是音高。</p>
+        <Why ready={!!hum} title="怎麼聽出音的高低？">
+          <p>聲音振動得快慢不同，聽起來就有不同的高低。這裡會找聲波重複的節奏，猜猜這段裡有哪些音；有時也會聽錯。</p>
         </Why>
       </Toolbox>
     </>
@@ -226,7 +226,7 @@ export const humStep: StepDef = {
   glyph: '哼',
   Component: HumStep,
   requirements: (p) => [
-    { label: '完成一段哼唱分析（錄音、上傳或示範皆可）', ok: !!p.hum },
-    { label: '至少偵測到 3 個音', ok: (p.hum?.notes.length ?? 0) >= 3 },
+    { label: '先留一段聲音：自己哼、上傳，或聽示範都可以', ok: !!p.hum },
+    { label: '讓我聽見至少 3 個音', ok: (p.hum?.notes.length ?? 0) >= 3 },
   ],
 }

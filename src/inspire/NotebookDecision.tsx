@@ -28,7 +28,7 @@ export function NotebookDecisionPage({ decision, project, error, onConfirm, onCa
         <li>已有的歌詞、和弦格與編曲會保留；採用後回到構想檯。</li>
       </ul>
     </div> : <p className="revision-effect">這張紙片會從本子移除，無法復原。已帶進歌曲的內容，以及其他拼貼紙片共用的錄音與照片，會繼續留著。</p>}
-    {error && <p className="revision-error" role="status">{decision.kind === 'remove' ? '還沒移除，紙片仍在本子裡。請釋出瀏覽器儲存空間後，按「重試移除」。' : '使用紀錄還沒存好，歌曲尚未更動。請釋出瀏覽器儲存空間後，按「重試採用」。'}</p>}
+    {error && <p className="revision-error" role="status">{decision.kind === 'remove' ? '還沒移除，紙片仍在本子裡。騰出一點瀏覽器空間，再按「重試移除」吧。' : '本子還沒記好這次使用，歌曲尚未更動。騰出一點瀏覽器空間，再按「重試採用」吧。'}</p>}
     <button className="primary-action" onClick={onConfirm}>{decision.kind === 'start' ? error ? '重試採用' : '帶進這首歌' : error ? '重試移除' : '確定移除這張紙片'}</button>
     <button ref={cancelRef} className="link-btn revision-cancel" onClick={onCancel}>{decision.kind === 'start' ? '先不帶入' : '留在本子裡'}</button>
   </div>

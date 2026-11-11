@@ -1,8 +1,8 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-10 18:10",
-  "cases": 4,
-  "pass": 4,
+  "updated": "2026-11-11 20:35",
+  "cases": 0,
+  "pass": 0,
   "fail": 0,
   "blocked": 0,
   "ready_for_user_test": false,
@@ -112,7 +112,7 @@
   },
   "novice_feedback": {
     "P0_context_coaching": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-53"
       ]
@@ -284,19 +284,5 @@
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-10T10-10-25-688Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；A 尚有未結缺失待驗收；第12輪selftest中止，未完成；文案及部署圖片驗證尚未完成。上次完整162項為156 pass／6 fail，執行停頓未解，詳見第11輪紀錄。",
-  "validation_blocker": {
-    "status": "open",
-    "kind": "execution_pauses_and_incomplete_copy",
-    "failed_cases_previous_full": [
-      "UAT-25 desktop",
-      "UAT-49 desktop",
-      "UAT-32 mobile",
-      "UAT-74 mobile",
-      "UAT-52 mobile",
-      "UAT-72 mobile"
-    ],
-    "evidence": "docs/uat/evidence/A-round11-runtime-pauses.json",
-    "next_acceptance": "完成文案與部署圖片驗證後，以原斷言完整重跑所有案例。"
-  }
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-11T12-35-12-549Z；部分重跑，不能作為整體通過依據；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；A 尚有未結缺失待驗收"
 }

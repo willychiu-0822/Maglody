@@ -60,7 +60,7 @@ test('UAT-67 夥伴的小任務隨素材更新，保持唯一主動作與自由�
   await setup(page)
   const mission = page.getByRole('status', { name: '當下的小任務' })
   await expect(mission).toContainText('作曲家陪你')
-  await expect(mission).toContainText('完成一段哼唱分析')
+  await expect(mission).toContainText('先留一段聲音')
   await page.screenshot({ path: `docs/uat/evidence/A-UI-05-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   await go(page, '構想')
   await expect(mission).toContainText('製作人陪你')

@@ -91,7 +91,7 @@ test('UAT-77 版本保存失敗保留說明可重試，捕捉返回與重整不�
   await expect(dialog.getByRole('textbox', { name: '這一版的說明（選填）' })).toHaveValue(note)
   await page.screenshot({ path: `docs/uat/evidence/A-UI-15-retry-${info.project.name}.png`, animations: 'disabled' })
   await page.evaluate(() => (window as any).__restoreVersionStorage())
-  await dialog.getByRole('button', { name: '重試保存', exact: true }).click()
+  await dialog.getByRole('button', { name: '再存一次', exact: true }).click()
   await expect(dialog).toContainText('存好了：Demo v1')
   await page.screenshot({ path: `docs/uat/evidence/A-UI-15-saved-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '好，回到工作室', exact: true }).click()

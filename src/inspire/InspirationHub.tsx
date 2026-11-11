@@ -130,7 +130,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       }
         pendingRecording.current = null
         setMediaSaveError(false)
-      } catch (e) { setMediaSaveError(true); flash('錄音還沒收好：儲存失敗，聲音還留在這頁，請釋出空間後重試。'); throw e }
+      } catch (e) { setMediaSaveError(true); flash('錄音還沒收好，聲音暫時留在這頁。騰出一些空間後，再試一次。'); throw e }
       finally { setBusy(false) }
     } else {
       if (pendingRecording.current) await toggleRec(pendingRecording.current.kind)
@@ -170,7 +170,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       setOpen(decision ? 'library' : null)
       flash(`收好了。你還在「${stepTitle}」。`)
       onEvent('inspiration.saved', item.text || '（沒有文字的靈感）')
-    } catch { flash('本子還沒存好，草稿留在這裡。請釋出瀏覽器空間後再試。') }
+    } catch { flash('本子還沒存好，草稿留在這裡。騰出一些瀏覽器空間後，再試一次。') }
     finally { operation.current = false; setBusy(false) }
   }
 
@@ -219,7 +219,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       || [...p.harmony.verse, ...p.harmony.chorus, ...p.melody.verse, ...p.melody.chorus].some(n => n != null)
       || p.hum || p.lyrics.some(s => s.text.trim()) || p.arrangement.length > 0
     if (opt.how === 'start' && hasProgress) { choose({ kind: 'start', item: x, option: opt }); return }
-    try { applyPull(x, opt) } catch { flash('使用紀錄還沒存好，歌曲尚未更動。請釋出瀏覽器儲存空間後再試。') }
+    try { applyPull(x, opt) } catch { flash('本子還沒記好這次使用，歌曲尚未更動。騰出一點瀏覽器空間，再試一次吧。') }
   }
   const confirmDecision = () => {
     if (!decision) return
@@ -294,7 +294,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages(e.target.files); e.target.value = '' }} />
                 </div>
-                {mediaSaveError && <p className="small muted">錄音儲存失敗，聲音暫留在這頁。可重試收好，或先另存文字。</p>}
+                {mediaSaveError && <p className="small muted">錄音還沒收好，聲音暫留在這頁。可以再試一次，或先另存文字。</p>}
                 {rec.completed && <p className="small muted" role="status">剛才的錄音還在，按「夾進本子」收好。</p>}
                 {rec.pending && <p className="small muted" role="status">等麥克風許可……也可以先寫文字。</p>}
                 {rec.error && <p className="error small">{rec.error}</p>}

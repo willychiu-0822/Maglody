@@ -40,7 +40,7 @@ export function progressionFeedback(degs: (number | null)[], mode: Mode, label: 
   const uniq = new Set(d).size
   fb.push(uniq >= 3 ? { level: 'good', text: `用了 ${uniq} 種和弦，有變化。` } : uniq === 2 ? { level: 'warn', text: '只有 2 種和弦，可能有點單調。', tip: '加一個 IV 或 vi 試試。' } : { level: 'bad', text: '只有一種和弦，聽不出走向。' })
   if (!d.includes(4) && !d.includes(3)) fb.push({ level: 'warn', text: '沒有 IV 或 V。', tip: 'IV（離家）和 V（想回家）是推動歌曲前進的引擎。' })
-  if (d.includes(6)) fb.push({ level: 'warn', text: '用了 vii°（減和弦），很緊張。', tip: '它通常只出現一瞬間，確認這是你想要的效果。' })
+  if (d.includes(6)) fb.push({ level: 'warn', text: '這裡用了 vii°（減和弦），聽起來有點懸。', tip: '聽聽看，這是你想要的感覺嗎？' })
   return fb
 }
 
@@ -92,7 +92,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
   const fb = [...progressionFeedback(h.verse, h.mode, '主歌'), ...progressionFeedback(h.chorus, h.mode, '副歌')]
   const vd = h.verse.join(','), cd = h.chorus.join(',')
   if (!h.verse.includes(null) && !h.chorus.includes(null))
-    fb.push(vd !== cd ? { level: 'good', text: '主歌和副歌的和弦不同，副歌出現時會有「換場景」的感覺。' } : { level: 'warn', text: '主歌和副歌和弦一模一樣。', tip: '這可以，但副歌就要靠旋律變高、編曲變滿來拉開差距。或試著讓副歌從 IV 開始。' })
+    fb.push(vd !== cd ? { level: 'good', text: '主歌和副歌的和弦不同，副歌出現時會有「換場景」的感覺。' } : { level: 'warn', text: '主歌和副歌和弦一模一樣。', tip: '這樣也很好。如果想讓副歌換個感覺，可以試試不同的旋律或樂器。' })
   if (p.hum && (p.hum.keyRoot !== h.root || p.hum.keyMode !== h.mode))
     fb.push({ level: 'warn', text: `你換了調（哼唱是 ${keyName(p.hum.keyRoot, p.hum.keyMode)}）。`, tip: '換調沒問題，但之後寫旋律要用新調來寫，記得唱唱看音域是否舒服。' })
 
@@ -138,7 +138,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
       {player ? (
         <DeskActions primary={{ label: '■ 停', onClick: stop }} />
       ) : bothFull && next ? (
-        <DeskActions primary={{ label: <>地板鋪好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }} />
+        <DeskActions primary={{ label: <>和弦選好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }} />
       ) : full ? (
         <DeskActions primary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }}
           secondary={part === 'verse' && h.chorus.includes(null) ? { label: '換副歌 →', onClick: () => setTarget({ part: 'chorus', i: 0 }) } : undefined} />
@@ -191,7 +191,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
             </div>
           )}
         </details>
-        <Why ready={full} title="為什麼這幾個和弦放在一起都好聽？" listen={{ label: '聽「想回家 → 到家」', play: () => { playChord(chordVoicing(chords[4]), 1); afterSound(() => playChord(chordVoicing(chords[0]), 1.4), 1000) } }}>
+        <Why ready={full} title="這幾個和弦放在一起，聽起來像什麼？" listen={{ label: '聽「想回家 → 到家」', play: () => { playChord(chordVoicing(chords[4]), 1); afterSound(() => playChord(chordVoicing(chords[0]), 1.4), 1000) } }}>
           <p>它們都是從同一組 7 個音堆出來的，說同一種語言。每個和弦有自己的角色：「家」最穩，「想回家」最緊，耳朵聽到它就會等著回家。</p>
         </Why>
       </Toolbox>

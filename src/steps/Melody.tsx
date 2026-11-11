@@ -47,7 +47,7 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   const prog = p.harmony[part]
   const notes = cells.map((m, i) => ({ m, i })).filter((x): x is { m: number; i: number } => x.m != null && x.m >= 0)
   const fb: Feedback[] = []
-  if (notes.length < 4) return [{ level: 'warn', text: '再多放幾個音，老師才能給建議。' }]
+  if (notes.length < 4) return [{ level: 'warn', text: '再放幾個音，我們就能一起聽聽這段旋律。' }]
   // 強拍和弦音
   const strong = notes.filter((n) => n.i % 4 === 0)
   const chordAt = (i: number) => { const d = prog[Math.floor(i / 8)]; return d != null ? chords[d] : null }
@@ -57,10 +57,10 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   // 音域
   const ms = notes.map((n) => n.m)
   const range = Math.max(...ms) - Math.min(...ms)
-  fb.push(range <= 12 ? { level: 'good', text: `音域 ${range} 個半音，在一個八度內，好唱。` } : { level: 'warn', text: `音域 ${range} 個半音，超過一個八度。`, tip: '新手歌手會唱得很辛苦。試著把最高或最低的幾個音往中間收。' })
+  fb.push(range <= 12 ? { level: 'good', text: `這段跨了 ${range} 個半音，在一個八度內。唱唱看，感覺如何？` } : { level: 'warn', text: `這段跨了 ${range} 個半音，超過一個八度。`, tip: '唱唱看；如果有點吃力，可以把最高或最低的音往中間收。' })
   if (p.hum) {
     const hi = Math.max(...ms), lo = Math.min(...ms)
-    if (hi > p.hum.rangeHigh + 2 || lo < p.hum.rangeLow - 2) fb.push({ level: 'warn', text: `有音超出你哼唱時的舒適音域（${noteNameOct(p.hum.rangeLow)}–${noteNameOct(p.hum.rangeHigh)}）。`, tip: '可以留著當挑戰，但錄音前要確認唱得上去。' })
+    if (hi > p.hum.rangeHigh + 2 || lo < p.hum.rangeLow - 2) fb.push({ level: 'warn', text: `有些音比剛才哼的範圍（${noteNameOct(p.hum.rangeLow)}–${noteNameOct(p.hum.rangeHigh)}）更高或更低。`, tip: '跟著唱唱看，留意這些音唱起來舒不舒服。' })
   }
   // 大跳
   let leaps = 0
@@ -254,7 +254,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
         <p className="muted small">左邊的數字是簡譜，點一下可以試聽。淡綠底的格子是當下和弦裡的音。</p>
         <FeedbackList items={fb} />
         <Why ready={notes >= 4} title="為什麼綠色的音特別穩？" listen={{ label: '再聽一次', play }}>
-          <p>綠色是當下和弦裡的音。放在每拍的開頭，旋律和伴奏會融在一起；黃色的音放在中間，會變成兩個綠色之間的過門，讓旋律流動。</p>
+          <p>綠色是和弦裡的音，黃色可以幫旋律走到下一個音。試著把綠色放在拍子的開頭，聽聽和伴奏搭起來的感覺。</p>
         </Why>
       </Toolbox>
     </>

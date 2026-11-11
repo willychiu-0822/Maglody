@@ -6,10 +6,10 @@ import { sectionAudio } from './Arrangement'
 import type { StepDef, StepProps } from './types'
 
 const TRACKS: { id: TrackId; name: string; role: string }[] = [
-  { id: 'melody', name: '主旋律（代替人聲）', role: '主角，要清楚聽見每個字' },
-  { id: 'chords', name: '和弦（鋼琴＋鋪底）', role: '舞台布景，撐住但不搶戲' },
-  { id: 'bass', name: '貝斯', role: '地基，放中間' },
-  { id: 'drums', name: '鼓', role: '心跳，底鼓和小鼓放中間' },
+  { id: 'melody', name: '主旋律（代替人聲）', role: '像站在前面唱歌的主角' },
+  { id: 'chords', name: '和弦（鋼琴＋鋪底）', role: '在後面輕輕托住旋律' },
+  { id: 'bass', name: '貝斯', role: '替這首歌打個底' },
+  { id: 'drums', name: '鼓', role: '帶著大家一起走' },
 ]
 
 export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
@@ -137,7 +137,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
         })}
       </div>
 
-      <Card title="即時回饋">
+      <Card title="一起看看">
         <FeedbackList items={fb} />
       </Card>
 
@@ -165,7 +165,7 @@ export const mixStep: StepDef = {
   glyph: '混',
   Component: MixStep,
   requirements: (p) => [
-    { label: '播放並聆聽混音', ok: p.mix.listened && p.melody.chorus.some(m => m != null && m >= 0) },
-    { label: '回饋中沒有紅燈', ok: !mixFeedback(p, null).some((f) => f.level === 'bad') },
+    { label: '聽聽這段混音', ok: p.mix.listened && p.melody.chorus.some(m => m != null && m >= 0) },
+    { label: '把紅燈調到消失', ok: !mixFeedback(p, null).some((f) => f.level === 'bad') },
   ],
 }

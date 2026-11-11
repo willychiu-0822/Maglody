@@ -140,7 +140,7 @@ export default function App() {
         onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
         open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
 
-      {storageError && <div className="storage-notice" role="status"><span>這首歌還沒存進瀏覽器，請先留在這頁。釋出儲存空間後，按「重試保存」。</span><button className="btn" onClick={() => setProject({ ...p })}>重試保存</button></div>}
+      {storageError && <div className="storage-notice" role="status"><span>這首歌還沒存好，先別離開這頁。騰出瀏覽器的儲存空間，再按「再存一次」。</span><button className="btn" onClick={() => setProject({ ...p })}>再存一次</button></div>}
       <main className="desk" key={step.key}>
         <div className="studio-corner">
         <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.isBusy(step.key, role.id)} onChat={() => openChat(role.id)} />
