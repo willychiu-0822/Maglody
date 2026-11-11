@@ -85,7 +85,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
 
   return (
     <>
-      <Coach short={!hasMelody ? '先留下幾個副歌的音，回來就能聽到自己的混音。' : !p.mix.listened ? '按播放，聽聽每個聲音在哪。' : '把主旋律推到最清楚，其他往後站。'} />
+      <Coach short={!hasMelody ? '先留下幾個副歌的音，回來就能聽到自己的混音。' : !p.mix.listened ? '按播放，聽聽每個聲音在哪。' : '想先聽見哪個聲音？試著把它推近一點。'} />
 
       <div className="mix-simple">
         {TRACKS.map((tr) => (
@@ -142,7 +142,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
       </Card>
 
       <Why ready={p.mix.listened} hint="先按播放。" title="為什麼主旋律最重要？" apply="Podcast 對話、影片旁白配樂，都要讓「說話」最清楚。">
-        <p>聽眾哼的是主旋律、記的是歌詞。伴奏再好聽，蓋過人聲就失敗了。專業混音師常先把人聲調好，再把其他東西「放到它周圍」。</p>
+        <p>想讓人聲靠近一點的話，先把它調到喜歡的音量，再慢慢加回其他聲音。聽聽這樣的距離喜不喜歡。</p>
       </Why>
       <Why ready={p.mix.listened} title="左右聲像（Pan）的邏輯" apply="戴耳機聽喜歡的歌：鼓、吉他、和聲各在哪個位置？">
         <p>想像一個舞台：主唱、貝斯、大鼓站中間；吉他、鋼琴、和聲分站左右。把不同樂器放在不同位置，就算音量一樣，也能聽得更清楚。</p>

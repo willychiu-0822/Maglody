@@ -106,7 +106,7 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
   }
   const ready = arrangementStep.requirements(p).every((r) => r.ok)
   const say = a.length === 0 ? '先排出段落，再決定每一段誰上場。'
-    : !ready ? '點一段，決定誰上場。副歌要比主歌熱鬧。'
+    : !ready ? '點一段，決定誰上場。也試試讓主歌和副歌有點不同。'
     : '能量有起伏了。聽聽看。'
   return (
     <>
@@ -161,8 +161,8 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
         )}
         {a.length > 0 && <p className="muted small">長條越高越熱鬧，越寬越長。全長約 {fmtTime(songSeconds(p))}。</p>}
         <FeedbackList items={fb} />
-        <Why ready={a.length >= 3} title="為什麼主歌要少一點樂器？">
-          <p>耳朵對「變化」比對「多」敏感。主歌先收著，副歌全員進來，才聽得出爆發。</p>
+        <Why ready={a.length >= 3} title="主歌收一點，會是什麼感覺？">
+          <p>試試讓主歌安靜一點，副歌再多加個聲音。兩段聽起來有什麼不同？</p>
         </Why>
       </Toolbox>
     </>

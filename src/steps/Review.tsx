@@ -92,7 +92,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
 
   return (
     <>
-      <Coach short={!hasScore ? '歌還是一張空白紙。先挑幾個和弦，或去旋律檯寫幾個音。' : playing >= 0 ? `正在播：${KIND_ZH[p.arrangement[playing]?.kind ?? (playing === 0 ? 'verse' : 'chorus')]}` : r.verdict.trim() ? '寫下來了。這是你的歌。' : '從頭聽一次。這次換你當老師：哪一句你最想再聽？'} />
+      <Coach short={!hasScore ? '歌還是一張空白紙。先挑幾個和弦，或去旋律檯寫幾個音。' : playing >= 0 ? `正在播：${KIND_ZH[p.arrangement[playing]?.kind ?? (playing === 0 ? 'verse' : 'chorus')]}` : r.verdict.trim() ? '寫下來了。這是你的歌。' : '一起從頭聽聽。哪一句你最想再聽？'} />
 
       <SongSheet p={p} />
       {missing.length > 0 && <p className="demo-missing small muted">草稿還缺：{missing.map(item=>item.label).join('、')}。{hasScore ? '可以先聽已有的部分。' : '先留下一點聲音。'}</p>}
@@ -108,7 +108,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
       )}
 
       <Toolbox>
-      <Card title="自我評量（1 = 還不行，5 = 我很滿意）">
+      <Card title="聽完的心情（1 = 想再調整，5 = 我很喜歡）">
         {DIMENSIONS.map((d) => {
           const items = d.source(p)
           const lvl = summarize(items)
@@ -117,7 +117,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
             <div key={d.id} className="dim">
               <div className="row between">
                 <strong>{d.q}</strong>
-                {lvl && <span className="row small muted"><Light level={lvl} />老師觀察</span>}
+                {lvl && <span className="row small muted"><Light level={lvl} />夥伴的小發現</span>}
               </div>
               <div className="stars">
                 {[1, 2, 3, 4, 5].map((v) => (
@@ -130,7 +130,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
         })}
       </Card>
 
-      <Card title="完成前的最後檢查">
+      <Card title="再聽聽這些地方">
         <ul className="checklist">
           {FINAL_CHECKS.map((c) => (
             <li key={c.id}>
@@ -151,9 +151,8 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
         </div>
       </Card>
 
-      <Why title="為什麼要自己評分，而不是讓電腦評分？" apply="任何創作、報告、作品集，都需要先建立自己的判斷標準。">
-        <p>電腦只能檢查「規則」：有沒有押韻、強拍是不是和弦音。但一首歌會不會打動人，取決於它有沒有說出你真正想說的話。規則是起點，不是終點——很多名曲故意打破規則。</p>
-        <p>學會評價自己的作品，才是從學生變成創作者的那一步。</p>
+      <Why title="為什麼留一點自己的想法？" apply="下次回來聽，也能想起當時喜歡哪裡。">
+        <p>小提示可以陪你找找不同的地方；喜不喜歡，還是交給你的耳朵。先記下一處你想再聽的地方就好。</p>
       </Why>
       </Toolbox>
     </>
