@@ -28,7 +28,7 @@ export function ProjectDialog({ decision, project, onSave, onRestore, onReset, o
       <button className="link-btn" onClick={onCapture}>✎ 記一下</button>
       <button className="icon-btn" aria-label="關閉" onClick={onClose}>✕</button>
     </div>
-    <div className="notebook-cover"><h1>{title}</h1><p>{decision.kind === 'save' ? '先留住現在的聲音，下一筆就能放心試。' : decision.kind === 'restore' ? '再聽一次那時的心情，決定要不要回去。' : '把桌面留給下一個念頭。'}</p></div>
+    <div className="notebook-cover"><h1>{title}</h1><p>{decision.kind === 'save' ? '先收好這一版，接著放心試。' : decision.kind === 'restore' ? '再聽一次那時的心情，決定要不要回去。' : '把桌面留給下一個念頭。'}</p></div>
     <article className="revision-snapshot" aria-label="這次的作品">
       <small>{decision.kind === 'restore' ? decision.version.name : '現在這首歌'}</small>
       <strong>{song.idea.title || song.idea.hook || '還沒取名字的歌'}</strong>
