@@ -27,7 +27,7 @@
 - 實機字型：Iansui 只是 UI 子集，使用者自己打的字會退回系統字型，實機表現需要看。
 
 ## 下一批
-1. 總檢討的作品表（SongSheet）改成像樂譜邊的手寫清單。
+1. ~~總檢討的作品表（SongSheet）改成像樂譜邊的手寫清單。~~ 已做：標籤用墨紅手寫字、虛線分行，截圖 after/sheet-review-mobile.png。
 2. 聊天夥伴列：切換夥伴時角色頭像做簡單的換姿態。
 3. 旋律琴格上方加一行夥伴口吻的操作提示，取代說明段落。
 4. 載入與錯誤狀態逐頁截圖稽核，補角色插圖。
@@ -36,3 +36,9 @@
 ## 驗收
 定向 e2e（workers=1，各一次）：UAT-15/18/19/34/60/79/80/81 desktop+mobile 共 16 項。第一次 desktop UAT-34 在冷啟動時 click 逾時（主機停頓），同項單獨重跑 desktop+mobile 皆過，其餘 15 項第一次即過。未重跑完整矩陣，UAT-STATUS／RESULTS 維持上次完整矩陣的紀錄，未被這次定向執行覆寫。
 截圖只留代表性的十二張與量測 report.json，完整九頁截圖不入庫（約 60MB）。
+
+## 動態文案掃描與 Web Audio
+- 文案：掃過錯誤、載入、權限、儲存失敗字串（mic、recorder、Hum 檔案、儲存空間、LLM 備援），都已是夥伴口吻且有下一步，這輪不需改動；「想一下……」等待句也維持。
+- `npm run test:webaudio`（scripts/webaudio-check.mjs）：真 Chrome AudioContext（無喇叭）4/4 通過：混音圖有聲、靜音軌為 0、OfflineAudioContext 渲染峰值 0.5 不削波、四條 bus。
+- `test:logic` 全 PASS、`selftest:unit` 17/17。LLM 離線備援由 logic-regression A-08 與 providers/server 單元測試覆蓋。
+- WIP（需真實環境）：真實麥克風、真實 LLM API、實機喇叭／耳機播放、行動瀏覽器音訊解鎖。
