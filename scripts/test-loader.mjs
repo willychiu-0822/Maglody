@@ -14,6 +14,8 @@ registerHooks({
     return next(specifier, context)
   },
   load(url, context, next) {
+    // 樣式檔在 Node 測試中不需要內容，回傳空模組即可。
+    if (/\.css$/.test(new URL(url).pathname)) return { format: 'module', source: 'export {}', shortCircuit: true }
     if (/\.tsx?$/.test(new URL(url).pathname)) {
       const source = ts.transpileModule(readFileSync(new URL(url), 'utf8'), {
         fileName: new URL(url).pathname,
