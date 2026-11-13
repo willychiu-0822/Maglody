@@ -796,7 +796,7 @@ dialog.inspo-overlay::backdrop { background: transparent; }
 .master-input input { min-width: 0; }
 .modal-capture { font-size: .8rem; margin-left: auto; }
 .role-switch { gap: 4px; }
-.role-dot { width: 40px; height: 40px; }
+.role-dot { width: 44px; height: 44px; }
 .knowledge-spark { order: 2; color: var(--muted); border-left: 2px solid var(--grid-strong); padding: 4px 12px; font-size: .88rem; }
 .knowledge-spark > summary { cursor: pointer; list-style: none; }
 .spark-invite { display: block; color: var(--accent); font-size: .8rem; margin-top: 4px; }
@@ -1220,3 +1220,8 @@ body::before { opacity: .12; }
 .sheet dt { font-family: var(--font-title); color: var(--accent); font-size: .82rem; letter-spacing: .12em; }
 .sheet dd { font-family: var(--font-title); font-size: .95rem; }
 .sheet dd.mono { font-family: var(--font-body); }
+
+/* 夥伴列：被選到的夥伴向前站一步（姿態），其他人退後 */
+.role-dot { transition: transform .18s, opacity .18s; opacity: .72; }
+.role-dot.on { opacity: 1; transform: translateY(-3px) scale(1.06); box-shadow: 0 3px 0 var(--ink); }
+.role-dot.on img { object-position: 50% 18%; }
