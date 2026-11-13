@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Card, Coach, DeskActions, FeedbackList, Light, Meter, Toolbox, Why, type Feedback, type Level } from '../components/ui'
+import { Card, Coach, StageSketch, DeskActions, FeedbackList, Light, Meter, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { ac, click, playNote } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { jianpu, noteNameOct } from '../lib/theory'
@@ -86,7 +86,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
             <Meter value={(mic.levelDb + 60) / 60} level={lvl} />
             <div className="meter-scale small muted"><span>小聲</span><span>剛好</span><span>太滿</span></div>
           </div>
-        ) : <div className="stage-empty"><span aria-hidden>◎</span><small>錄音師把麥克風架好了，等你開口。</small></div>}
+        ) : <div className="stage-empty"><StageSketch kind="mic" /><small>錄音師把麥克風架好了，等你開口。</small></div>}
         {mic.error && <p className="error small">{mic.error}</p>}
       </div>
 

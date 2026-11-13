@@ -135,3 +135,27 @@ export function scoreOf(items: Feedback[]) {
   const g = items.filter((f) => f.level === 'good').length
   return items.length ? Math.round((g / items.length) * 100) : 0
 }
+
+/** Ink sketch for an idle stage: the companion has set things up and is waiting. */
+export function StageSketch({ kind }: { kind: 'piano' | 'mic' }) {
+  return (
+    <svg className="stage-sketch" viewBox="0 0 120 84" width="120" height="84" aria-hidden="true" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse className="sketch-wash" cx="60" cy="46" rx="50" ry="30" />
+      {kind === 'piano' ? (
+        <g className="sketch-ink">
+          <path d="M22 52 C40 50, 80 50, 99 52 L97 66 C78 68, 42 68, 24 66 Z" />
+          <path d="M33 52 L32 66 M44 51.5 L43.5 67 M55 51 L55 67.5 M66 51 L66.5 67.5 M77 51.5 L77.5 67 M88 52 L89 66" />
+          <path d="M24 50 C30 30, 58 20, 96 26 L99 50" />
+          <path className="sketch-accent" d="M48 36 q5 -6 10 0 t10 0 t10 0" />
+        </g>
+      ) : (
+        <g className="sketch-ink">
+          <path d="M52 20 C52 10, 68 10, 68 20 L68 36 C68 46, 52 46, 52 36 Z" />
+          <path d="M53 24 L67 24 M53 30 L67 30" />
+          <path d="M45 34 C46 52, 74 52, 75 34 M60 49 L60 66 M46 68 C54 65, 66 65, 74 68" />
+          <path className="sketch-accent" d="M84 20 q7 9 0 18 M92 15 q11 14 0 28 M36 20 q-7 9 0 18 M28 15 q-11 14 0 28" />
+        </g>
+      )}
+    </svg>
+  )
+}

@@ -1,14 +1,14 @@
 {
   "project": "Maglody",
-  "updated": "2026-11-13 15:55",
-  "cases": 166,
-  "pass": 161,
-  "fail": 5,
+  "updated": "2026-11-13 19:01",
+  "cases": 164,
+  "pass": 160,
+  "fail": 4,
   "blocked": 0,
   "ready_for_user_test": false,
   "requirements": {
     "R1": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-81",
         "UAT-79",
@@ -29,7 +29,7 @@
       ]
     },
     "R2": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-81",
         "UAT-79",
@@ -161,7 +161,7 @@
   },
   "exploration": {
     "A_N08_long_conversation": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-61"
       ]
@@ -173,14 +173,14 @@
       ]
     },
     "A_N10_mic_limit_without_frames": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-52",
         "UAT-43"
       ]
     },
     "A_N11_new_song_conversation": {
-      "status": "pass",
+      "status": "not_verified",
       "cases": [
         "UAT-63"
       ]
@@ -223,7 +223,7 @@
       ]
     },
     "personal_materials": {
-      "status": "not_verified",
+      "status": "pass",
       "cases": [
         "UAT-71"
       ]
@@ -284,5 +284,5 @@
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=2026-11-13T07-33-32-592Z；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=matrix-1113-evening；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
 }
