@@ -32,21 +32,21 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
   if (idea.mood) {
     const humMode = p.hum?.keyMode
     if (mood && humMode && mood.mode !== humMode)
-      fb.push({ level: 'warn', text: `你選了「${mood.name}」，但哼唱偏${humMode === 'major' ? '大' : '小'}調。`, tip: '這不是錯！「用開心的旋律唱悲傷的詞」反差很動人。只要你是刻意的就好。' })
+      fb.push({ level: 'warn', text: `你選了「${mood.name}」，但哼唱偏${humMode === 'major' ? '大' : '小'}調。`, tip: '這不是錯！「用開心的旋律唱悲傷的詞」反差很動人，你覺得對就留著。' })
     else if (mood) fb.push({ level: 'good', text: `情緒「${mood.name}」和你的哼唱調性一致。` })
   }
   const story = cleanLine(idea.story)
   if (idea.story) {
     const abs = countHits(idea.story, ABSTRACT_WORDS)
     const con = countHits(idea.story + idea.image, CONCRETE_HINTS)
-    if (story.length < 15) fb.push({ level: 'bad', text: '故事太短，還看不見畫面。', tip: '試著回答：誰？在哪裡？發生什麼事？之後怎麼了？' })
-    else if (abs > con + 1) fb.push({ level: 'warn', text: `抽象詞（${abs} 個）比具體畫面多。`, tip: '「我很想你」→「你的外套還掛在門後」。讓聽眾自己感受，不要直接說破。' })
+    if (story.length < 15) fb.push({ level: 'bad', text: '故事還很短，畫面剛冒出一點點。', tip: '想多看見一些，可以問問自己：誰？在哪裡？發生什麼事？之後呢？' })
+    else if (abs > con + 1) fb.push({ level: 'warn', text: `心情的字（${abs} 個）比看得見的畫面多。`, tip: '可以試試把心情換成一個小細節：「我很想你」→「你的外套還掛在門後」，讓聽的人自己感覺到。' })
     else fb.push({ level: 'good', text: '故事有具體的人事物，聽眾容易代入。' })
   }
-  if (idea.image) fb.push(cleanLine(idea.image).length >= 6 ? { level: 'good', text: '有一個核心畫面，等一下寫歌詞時可以一直回來看它。' } : { level: 'warn', text: '核心畫面再具體一點。', tip: '加上顏色、天氣、時間或物品。' })
+  if (idea.image) fb.push(cleanLine(idea.image).length >= 6 ? { level: 'good', text: '有一個核心畫面，等一下寫歌詞時可以一直回來看它。' } : { level: 'warn', text: '核心畫面還有點模糊。', tip: '想更清楚的話，可以加上顏色、天氣、時間或一樣東西。' })
   if (idea.hook) {
     const n = cleanLine(idea.hook).length
-    fb.push(n >= 4 && n <= 12 ? { level: 'good', text: `記憶點 ${n} 個字，長度剛好，好記又好唱。` } : n < 4 ? { level: 'warn', text: '記憶點有點短。', tip: '4–12 個字最好：一口氣唱得完，又能說出一件事。' } : { level: 'warn', text: `記憶點 ${n} 個字，偏長。`, tip: '副歌最重要的那句要能一口氣唱完，試著刪掉形容詞。' })
+    fb.push(n >= 4 && n <= 12 ? { level: 'good', text: `記憶點 ${n} 個字，長度剛好，好記又好唱。` } : n < 4 ? { level: 'warn', text: '記憶點有點短。', tip: '4–12 個字通常順口：一口氣唱得完，又能說出一件事。' } : { level: 'warn', text: `記憶點 ${n} 個字，有點長。`, tip: '副歌最想讓人記住的那句，最好一口氣唱得完，可以試著拿掉幾個形容詞。' })
   }
   if (idea.title && idea.hook && (idea.hook.includes(idea.title) || idea.title.includes(cleanLine(idea.hook).slice(0, 2))))
     fb.push({ level: 'good', text: '歌名出現在記憶點裡，聽眾聽完就知道歌名。' })

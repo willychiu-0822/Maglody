@@ -70,11 +70,11 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
   const fb: Feedback[] = []
   if (r.levelPeakDb != null) {
     const pk = r.levelPeakDb
-    fb.push(pk > -3 ? { level: 'bad', text: `峰值 ${pk} dB，離上限很近了。`, tip: '把麥克風或錄音介面的增益調小一點，或退後一些，再唱一次。太大聲可能會破音。' } : pk >= -18 ? { level: 'good', text: `峰值 ${pk} dB，這次還留有空間。` } : { level: 'warn', text: `峰值 ${pk} dB，聲音有點小。`, tip: '試著把增益調大一點，或靠近麥克風。錄得太小聲，放大時雜音也可能跟著變大。' })
+    fb.push(pk > -3 ? { level: 'bad', text: `峰值 ${pk} dB，快頂到上限了。`, tip: '把增益調小一點，或往後退一步，再唱一次，聲音就不容易破。' } : pk >= -18 ? { level: 'good', text: `峰值 ${pk} dB，這次還留有空間。` } : { level: 'warn', text: `峰值 ${pk} dB，聲音有點小。`, tip: '可以把增益調大一點，或靠近麥克風一些。聲音太小的話，之後放大雜音也會跟著出來。' })
   }
   const nChecked = REC_CHECKS.filter((c) => r.checks[c.id]).length
   fb.push(nChecked >= 6 ? { level: 'good', text: `錄音前的小準備，勾了 ${nChecked}/${REC_CHECKS.length} 項。` } : { level: 'warn', text: `錄音前的小準備，勾了 ${nChecked}/${REC_CHECKS.length} 項。` })
-  if (r.pitchHits) fb.push(r.pitchHits >= 3 ? { level: 'good', text: `音準練習命中 ${r.pitchHits} 次，聲音準備好了。` } : { level: 'warn', text: `音準練習命中 ${r.pitchHits} 次，再多練幾次。` })
+  if (r.pitchHits) fb.push(r.pitchHits >= 3 ? { level: 'good', text: `音準練習命中 ${r.pitchHits} 次，聲音準備好了。` } : { level: 'warn', text: `音準練習命中 ${r.pitchHits} 次，想再暖暖聲的話，可以多唱幾次。` })
 
   return (
     <>

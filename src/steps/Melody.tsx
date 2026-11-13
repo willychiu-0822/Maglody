@@ -53,7 +53,7 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   const chordAt = (i: number) => { const d = prog[Math.floor(i / 8)]; return d != null ? chords[d] : null }
   const fit = strong.filter((n) => chordAt(n.i)?.pcs.includes(pc(n.m))).length
   const r = strong.length ? fit / strong.length : 1
-  fb.push(r >= 0.7 ? { level: 'good', text: `強拍上 ${Math.round(r * 100)}% 是和弦音，旋律和伴奏很「黏」。` } : r >= 0.45 ? { level: 'warn', text: `強拍上只有 ${Math.round(r * 100)}% 是和弦音。`, tip: '紅色格子在強拍上和和弦打架。移到上下相鄰的綠色格，或把它放到弱拍當「經過音」。' } : { level: 'bad', text: '強拍上的音大多不在和弦裡，聽起來會很不穩。', tip: '每小節第 1 格先放和弦音（綠色），再用其他音連接。' })
+  fb.push(r >= 0.7 ? { level: 'good', text: `強拍上 ${Math.round(r * 100)}% 是和弦音，旋律和伴奏很「黏」。` } : r >= 0.45 ? { level: 'warn', text: `強拍上只有 ${Math.round(r * 100)}% 是和弦音。`, tip: '紅色格子在強拍上和和弦有點不合拍。可以挪到上下相鄰的綠色格，或放到弱拍當「經過音」，聽聽差別。' } : { level: 'bad', text: '強拍上的音大多不在和弦裡，聽起來會有點飄。', tip: '想踏實一點，可以讓每小節第 1 格先放和弦音（綠色），再用其他音接起來。' })
   // 音域
   const ms = notes.map((n) => n.m)
   const range = Math.max(...ms) - Math.min(...ms)
@@ -65,26 +65,26 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   // 大跳
   let leaps = 0
   for (let k = 1; k < notes.length; k++) if (Math.abs(notes[k].m - notes[k - 1].m) > 7) leaps++
-  fb.push(leaps === 0 ? { level: 'good', text: '沒有超過五度的大跳，旋律走得流暢。' } : leaps <= 2 ? { level: 'good', text: `有 ${leaps} 次大跳：適量的大跳很有戲劇性。`, tip: '大跳之後，往反方向「級進」（一步一步走）回來會更自然。' } : { level: 'warn', text: `大跳 ${leaps} 次，偏多。`, tip: '大部分的好旋律以級進（相鄰音）為主，大跳是調味料。' })
+  fb.push(leaps === 0 ? { level: 'good', text: '沒有超過五度的大跳，旋律走得流暢。' } : leaps <= 2 ? { level: 'good', text: `有 ${leaps} 次大跳：適量的大跳很有戲劇性。`, tip: '大跳之後，往反方向一步一步走回來，通常會順耳。' } : { level: 'warn', text: `大跳有 ${leaps} 次，旋律跳來跳去很有個性。`, tip: '如果唱起來有點喘，可以讓幾處改成相鄰音一步一步走，大跳留給最想強調的地方。' })
   // 換氣
   const restHalves = [0, 1].map((h) => cells.slice(h * 16, h * 16 + 16).some((c) => c == null))
-  fb.push(restHalves.every(Boolean) ? { level: 'good', text: '每兩小節都有休止，歌手可以換氣。' } : { level: 'warn', text: '有兩小節完全沒留空。', tip: '唱歌要換氣，聽眾也需要「消化」——在句尾留一兩格空白。' })
+  fb.push(restHalves.every(Boolean) ? { level: 'good', text: '每兩小節都有休止，歌手可以換氣。' } : { level: 'warn', text: '有兩小節從頭唱到尾，沒有留空。', tip: '唱唱看會不會喘；想換氣的話，在句尾留一兩格空白，聽的人也有時間回味。' })
   // 結尾
   const last = notes[notes.length - 1]
   const tonic = pc(last.m - p.harmony.root) === 0
-  if (part === 'chorus') fb.push(tonic ? { level: 'good', text: '副歌結尾落在主音，有「說完了」的完整感。' } : { level: 'warn', text: '副歌結尾沒有回到主音。', tip: `停在 ${noteNameOct(last.m)} 會有「未完」的感覺。如果想要收尾，試試最後一個音放主音（簡譜 ${jianpu(p.harmony.root + 60, p.harmony.root, p.harmony.mode)}）。` })
+  if (part === 'chorus') fb.push(tonic ? { level: 'good', text: '副歌結尾落在主音，有「說完了」的完整感。' } : { level: 'warn', text: '副歌結尾沒有回到主音。', tip: `停在 ${noteNameOct(last.m)} 會有「還沒說完」的感覺，這可以是你要的。想收得完整一點，可以試試最後一個音放主音（簡譜 ${jianpu(p.harmony.root + 60, p.harmony.root, p.harmony.mode)}）。` })
   // 副歌比主歌高
   const other = p.melody[part === 'verse' ? 'chorus' : 'verse'].filter((m): m is number => m != null && m >= 0)
   if (other.length >= 4) {
     const vMax = Math.max(...(part === 'verse' ? ms : other)), cMax = Math.max(...(part === 'chorus' ? ms : other))
-    fb.push(cMax > vMax ? { level: 'good', text: '副歌的最高音比主歌高，情緒有往上推。' } : { level: 'warn', text: '副歌沒有比主歌高。', tip: '最常見的副歌技巧：整體往上移 3–5 度，讓情緒爆發。' })
+    fb.push(cMax > vMax ? { level: 'good', text: '副歌的最高音比主歌高，情緒有往上推。' } : { level: 'warn', text: '副歌的高度和主歌差不多。', tip: '想讓副歌更有爆發力的話，可以試試把整段往上移 3–5 度，聽聽感覺。' })
   }
   // 動機：第 1 小節的節奏型是否在後面重複出現（重複＋變化）
   const rhythm = (b: number) => cells.slice(b * 8, b * 8 + 8).map((c) => (c != null && c >= 0 ? 'x' : c === HOLD ? '-' : '.')).join('')
   const r0 = rhythm(0)
   if (r0.includes('x')) {
     const rep = [1, 2, 3].filter((b) => rhythm(b) === r0).length
-    fb.push(rep >= 1 && rep <= 2 ? { level: 'good', text: `第 1 小節的節奏在後面重複了 ${rep} 次：這叫「動機」，重複讓人記住、變化讓人不膩。` } : rep === 3 ? { level: 'warn', text: '四個小節節奏完全一樣。', tip: '重複很好，但第 4 小節換個節奏（例如拉長最後一個音）當作句尾。' } : { level: 'warn', text: '每小節的節奏都不一樣，聽眾比較難記。', tip: '試試把第 1 小節的節奏照抄到第 2 小節，只改音高——這就是「動機重複」。' })
+    fb.push(rep >= 1 && rep <= 2 ? { level: 'good', text: `第 1 小節的節奏在後面重複了 ${rep} 次：這叫「動機」，重複讓人記住、變化讓人不膩。` } : rep === 3 ? { level: 'warn', text: '四個小節的節奏都一樣。', tip: '重複很好記；想要一點變化，可以讓第 4 小節換個節奏（例如拉長最後一個音）當作句尾。' } : { level: 'warn', text: '每小節的節奏都不太一樣，旋律很自由。', tip: '想更好記的話，試試把第 1 小節的節奏照抄到第 2 小節，只改音高，聽聽看。' })
   }
   // 歌詞對位
   const sec = p.lyrics.find((s) => s.kind === part)
@@ -92,7 +92,7 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
     const ls = lyricLines(sec.text)
     const syl = ls.slice(0, 2).reduce((a, l) => a + cleanLine(l).length, 0)
     const onsets = notes.length
-    if (syl) fb.push(Math.abs(syl - onsets) <= 3 ? { level: 'good', text: `${part === 'verse' ? '主歌' : '副歌'}前兩句共 ${syl} 字，旋律有 ${onsets} 個音，一字一音剛好。` } : { level: 'warn', text: `前兩句 ${syl} 字，但旋律有 ${onsets} 個音。`, tip: onsets > syl ? '音比字多：可以把某些音改成「延長」，或一個字唱兩個音（轉音）。' : '字比音多：加音，或刪減歌詞。中文歌通常一字一音。' })
+    if (syl) fb.push(Math.abs(syl - onsets) <= 3 ? { level: 'good', text: `${part === 'verse' ? '主歌' : '副歌'}前兩句共 ${syl} 字，旋律有 ${onsets} 個音，一字一音剛好。` } : { level: 'warn', text: `前兩句 ${syl} 字，但旋律有 ${onsets} 個音。`, tip: onsets > syl ? '音比字多：可以把某些音改成「延長」，或一個字唱兩個音（轉音）。' : '字比音多：可以多放幾個音，或把歌詞唸短一點，唱唱看哪個順口。' })
   }
   return fb
 }

@@ -35,12 +35,12 @@ export function analyzeSection(s: LyricSection, hook: string) {
   // 3. 具體 vs 抽象
   const abs = countHits(s.text, ABSTRACT_WORDS)
   const con = countHits(s.text, CONCRETE_HINTS)
-  if (s.kind === 'verse') fb.push(con >= abs ? { level: 'good', text: '唸唸這段，看看有沒有你想留下的畫面。' } : { level: 'warn', text: `主歌抽象詞較多（${abs}）。`, tip: '想讓畫面更清楚的話，可以加一個當時的細節。' })
+  if (s.kind === 'verse') fb.push(con >= abs ? { level: 'good', text: '唸唸這段，看看有沒有你想留下的畫面。' } : { level: 'warn', text: `主歌裡心情的字（${abs} 個）比畫面多。`, tip: '想讓畫面更清楚的話，可以加一個當時的細節。' })
   // 4. 副歌包含 hook
   if (s.kind === 'chorus') {
     const h = cleanLine(hook)
     const has = h && cleanLine(s.text).includes(h)
-    fb.push(has ? { level: 'good', text: '副歌包含你的記憶點。' } : { level: 'bad', text: '副歌裡找不到記憶點那一句。', tip: `想繼續往下一頁，可以先把「${hook || '你那句話'}」放進副歌。` })
+    fb.push(has ? { level: 'good', text: '副歌包含你的記憶點。' } : { level: 'bad', text: '副歌裡還沒看到記憶點那一句。', tip: `把「${hook || '你那句話'}」放進副歌，整首歌會更有核心。` })
   }
   // 5. 句長
   const long = lens.filter((n) => n > 14).length
