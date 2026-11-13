@@ -19,7 +19,7 @@ function fromFeedback(fb: Feedback[], learned: string, fallbackNext: string, ext
   const good = pick(fb, 'good')
   const fix = pick(fb, 'bad') ?? pick(fb, 'warn')
   return {
-    text: [good?.text, fix ? `再聽聽這裡：${fix.text}` : ''].filter(Boolean).join(' ') || '嗯，我聽到了。再往下試試看。',
+    text: [good?.text, fix ? `另外聽聽這裡：${fix.text}` : ''].filter(Boolean).join(' ') || '嗯，我聽到了。再往下試試看。',
     learned,
     next: fix?.tip ?? fallbackNext,
     suggestions: extra,
@@ -44,7 +44,7 @@ export function learnedFor(step: string, p: Project): string {
     case 'arrange': return '試著讓主歌少一件樂器，再聽副歌進來的感覺。'
     case 'record': return '錄音時留點音量空間，唱到大聲的地方也比較不容易破音。音準可以用「音分」當參考，再用耳朵聽聽。'
     case 'mix': return '混音時，先聽聽最想讓人注意的聲音，再慢慢調整其他聲音的位置。'
-    case 'review': return '你建立了自己的判斷標準——規則是起點，你的耳朵才是最後的裁判。'
+    case 'review': return '你慢慢有了自己的判斷——建議只是起點，最後還是你的耳朵說了算。'
     default: return ''
   }
 }
@@ -110,27 +110,27 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
     case 'lyrics.edit': {
       const sec = p.lyrics.find((s) => s.kind === detail) ?? p.lyrics[0]
       if (!sec) return { text: '' }
-      const r = fromFeedback(analyzeSection(sec, p.idea.hook).fb, sec.kind === 'chorus' ? '副歌的工作是「說結論」並重複 Hook。' : '主歌的工作是「演」：給聽眾一個看得見的畫面。', '大聲唸一遍，聽句尾的韻母是不是同一個。')
+      const r = fromFeedback(analyzeSection(sec, p.idea.hook).fb, sec.kind === 'chorus' ? '副歌可以是整首歌的「結論」，Hook 在這裡回來最有感覺。' : '主歌可以先「演」出來：給聽的人一個看得見的畫面。', '大聲唸一遍，聽句尾的韻母是不是同一個。')
       return { ...r, text: `（${KIND_ZH[sec.kind]}）${r.text}` }
     }
     case 'arrange.change':
     case 'arrange.preview':
-      return fromFeedback(arrangementFeedback(p), '能量曲線：樂器越多越「大」，但只有在對比之下，大才聽得出來。', '試聽主歌和副歌各一次，比較哪一段比較「滿」。')
+      return fromFeedback(arrangementFeedback(p), '樂器越多聽起來越「大」，但要有對比，大才聽得出來。', '試聽主歌和副歌各一次，比較哪一段比較「滿」。')
     case 'record.level': {
       const pk = p.recording.levelPeakDb
       return pk == null ? { text: '' } : pk > -3
-        ? { text: `峰值 ${pk} dB，碰到紅區了——那就是破音。`, learned: '數位錄音超過 0 dB 會被「削波」，這是後製救不回來的。', next: '把增益調小或退後半個拳頭，再測一次。' }
-        : { text: `峰值 ${pk} dB，${pk >= -18 ? '在健康區間，最激動的句子也不會破。' : '偏小聲，雜音會被一起放大。'}`, learned: 'headroom：在最大聲和 0 dB 之間留的安全空間。', next: pk >= -18 ? '接著暖嗓，跟著你旋律裡的最高音唱唱看。' : '把增益調大一點再測。' }
+        ? { text: `峰值 ${pk} dB，這一下快碰到紅區了，再大聲一點就會破音。`, learned: '數位錄音一過 0 dB 就會「削波」，事後很難補回來，所以我們先把音量留點空間。', next: '把增益調小一點，或退後半個拳頭，我們再測一次。' }
+        : { text: `峰值 ${pk} dB，${pk >= -18 ? '音量剛好，最激動的那句應該也撐得住。' : '聲音有點小，雜音之後也會被一起放大。'}`, learned: '這段留白叫 headroom：最大聲的地方和 0 dB 之間留一點空間。', next: pk >= -18 ? '接著暖嗓，跟著你旋律裡的最高音唱唱看。' : '把增益調大一點再測。' }
     }
     case 'record.pitch':
       return { text: `你剛在 ±25 音分內撐住了 ${detail}。`, learned: '一個半音 = 100 音分；±25 內大多數人聽不出偏差。', next: '換你旋律最高的那個音試試——錄音前要確定它唱得穩。' }
     case 'mix.play':
     case 'mix.change':
-      return fromFeedback(mixFeedback(p, null), '混音先求「聽得清楚」，再求好聽：主唱優先，低頻放中間。', '按 A/B 比較，聽聽你的混音和原始狀態差在哪。')
+      return fromFeedback(mixFeedback(p, null), '混音可以先求「聽得清楚」：先聽最想讓人注意的聲音，低頻通常放中間會比較穩。', '按 A/B 比較，聽聽你的混音和原始狀態差在哪。')
     case 'mix.ab':
-      return { text: '剛剛那個「突然變糊」的瞬間，就是沒有分工的聲音。', learned: 'A/B 比較是混音師校準耳朵的方法，因為耳朵很快就會習慣。' }
+      return { text: '來回聽兩個版本，有沒有哪一邊比較清楚、比較舒服？', learned: 'A/B 來回比較是混音師常用的小技巧，因為耳朵很快就會習慣。' }
     case 'review.play':
-      return { text: `你剛從頭聽完了《${p.idea.title || '你的歌'}》。它是從一段 ${p.hum?.notes.length ?? 0} 個音的哼唱長出來的。`, next: '先別看規則，問自己：哪一句你最想再聽一次？那就是這首歌的心臟。' }
+      return { text: `你剛從頭聽完了《${p.idea.title || '你的歌'}》。它是從一段 ${p.hum?.notes.length ?? 0} 個音的哼唱長出來的。`, next: '先不看建議，問問自己：哪一句你最想再聽一次？那可能就是這首歌的心臟。' }
     case 'inspiration.saved':
     case 'inspiration.used':
     case 'inspiration.start': {
@@ -138,7 +138,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
       const heavy = /罪|痛|淚|夜|失|傷|孤|冷|黑|碎|離|負|沉|灰/.test(t)
       const bright = /光|笑|陽|晴|飛|甜|暖|春|跳|愛/.test(t)
       const feel = heavy ? '有重量，像壓著東西往前走——這種張力很適合小調、中慢速（約 70–85 BPM），讓每一步都踩得到' : bright ? '很明亮，適合大調、中快速，讓它往上飄' : '情緒還很開放，等你在構想裡選一個方向'
-      if (kind === 'inspiration.saved') return { text: `記下了${t ? `「${t}」` : ''}。不急著用它，先回到你剛剛在做的事。`, learned: '靈感先存、不打斷流程：創作者常用「靈感本」累積素材，再挑選。', next: t ? `這幾個字${feel}。` : undefined }
+      if (kind === 'inspiration.saved') return { text: `記下了${t ? `「${t}」` : ''}。不急著用它，先回到你剛剛在做的事。`, learned: '先記下來、不打斷手上的事，之後再回來挑，很多創作者都這樣累積素材。', next: t ? `這幾個字${feel}。` : undefined }
       if (kind === 'inspiration.start') return {
         text: `用「${t}」開一首歌。${t ? `這幾個字${feel}。` : ''}我已經把它放進歌名／Vibe 板。`,
         learned: '從一個核心意象出發，後面每個選擇都能問自己：「這像不像它？」',
