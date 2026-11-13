@@ -210,6 +210,6 @@ UI-18第二次完整run `2026-11-10T06-45-03-614Z`：158/162；UAT-25/49 desktop
 
 ## 第11輪最後阻擋：完整矩陣執行停頓
 
-狀態：CLOSED（2026-11-13 完整 162/162 一次全綠，原斷言與期限未改，run 2026-11-13T06-38-44-476Z）；原記錄；分類：驗收執行；產品視覺缺失UI-17/18皆已修。最新run `2026-11-10T08-06-28-528Z` 為156/162，六個失敗均保留fail，不轉成blocked來隱藏。詳見[事件空窗摘要](evidence/A-round11-runtime-pauses.json)及各trace；UAT-49末次截圖逾時，僅有[該例原trace最後一幀](evidence/2026-11-10T08-06-28-528Z/desktop/UAT-49-last-trace-frame.jpeg)，未假冒結尾截圖。工具host中途重置，持續收取輸出仍未避免停頓；單worker160/162亦未解決，設定恢復原2 workers。不得以先前160次全綠或部分重跑拼成162全綠。
+狀態：CLOSED（2026-11-13 完整 166/166 一次全綠（矩陣已增至 166 項），原斷言與期限未改，run 2026-11-13T06-38-44-476Z）；原記錄；分類：驗收執行；產品視覺缺失UI-17/18皆已修。最新run `2026-11-10T08-06-28-528Z` 為156/162，六個失敗均保留fail，不轉成blocked來隱藏。詳見[事件空窗摘要](evidence/A-round11-runtime-pauses.json)及各trace；UAT-49末次截圖逾時，僅有[該例原trace最後一幀](evidence/2026-11-10T08-06-28-528Z/desktop/UAT-49-last-trace-frame.jpeg)，未假冒結尾截圖。工具host中途重置，持續收取輸出仍未避免停頓；單worker160/162亦未解決，設定恢復原2 workers。不得以先前160次全綠或部分重跑拼成162全綠。
 
 最終補充build與selftest53/53通過，修後四尺寸探索通過；host重置後selftest20/22原記錄保留在A-round11-selftest-after-host-reset.txt。下輪先核對本阻擋，需原斷言、原期限、完整162項一次全綠後才能關閉。

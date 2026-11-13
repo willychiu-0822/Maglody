@@ -8,8 +8,8 @@ Chrome；desktop 1280x800/mobile 390x844；run=2026-11-13T07-33-32-592Z；完整
 
 ## 執行歷史與判讀（2026-11-13，誠實記錄）
 
-- run1 `2026-11-13T05-48-53-056Z`／`06-38-44` 系列：完整矩陣 166/166 一次全綠（原斷言、原期限未改）。
-- run2–4：各有數項 `locator.click` 或 predicate 逾時（例如 UAT-03/04 mobile，log 為 element is not stable），判為主機資源停頓；定向重跑（targeted-33-74、rerun-failed-*）皆通過。下方表格是最後一次（run4，161/166）的原樣結果，未改成 pass。
+- run1 `2026-11-13T06-38-44-476Z`：完整矩陣 166/166 一次全綠（原斷言、原期限未改；依 UAT-RUNS.json）。failures.md 內的「162/162」是矩陣尚為 162 項時的舊數字。
+- run2 `06-43-53`（158/166）、run3 `07-18-24`（164/166）、run4 `07-33-32`（161/166）：各有數項 `locator.click` 或 predicate 逾時（例如 UAT-03/04 mobile，log 為 element is not stable），判為主機資源停頓；定向重跑（targeted-33-74、rerun-failed-*）皆通過。下方表格是最後一次（run4，161/166）的原樣結果，未改成 pass。
 - deploy 的 MIME 檢查（e2e/deploy-assets.spec.ts）改用 `playwright.deploy.config.ts`，4/4 通過；一般設定以 testIgnore 排除。
 - 之後如需再跑：workers=1、只跑一次，不再追穩定度。
 - 每次 run 的逐例截圖資料夾（體積約 6.8GB）未提交，只提交固定檔名的代表截圖，故下表連結指向的 run 資料夾僅在本機。
