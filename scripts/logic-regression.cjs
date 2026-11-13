@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');const {buildSync}=require('esbuild')
 const {defaultProject,recordingStep,mixStep,lyricsStep,buildMidi,arrangedAudio,askMaster}=(()=>{
-  const text=buildSync({stdin:{contents:`export {defaultProject} from './src/lib/store';export {recordingStep} from './src/steps/Recording';export {mixStep} from './src/steps/Mix';export {lyricsStep} from './src/steps/Lyrics';export {buildMidi} from './src/lib/midi';export {arrangedAudio} from './src/steps/Arrangement';export {askMaster} from './src/agent/client'`,resolveDir:process.cwd()},bundle:true,platform:'node',format:'cjs',write:false,define:{'import.meta.env.VITE_AGENT_URL':'""'}}).outputFiles[0].text
+  const text=buildSync({stdin:{contents:`export {defaultProject} from './src/lib/store';export {recordingStep} from './src/steps/Recording';export {mixStep} from './src/steps/Mix';export {lyricsStep} from './src/steps/Lyrics';export {buildMidi} from './src/lib/midi';export {arrangedAudio} from './src/steps/Arrangement';export {askMaster} from './src/agent/client'`,resolveDir:process.cwd()},bundle:true,platform:'node',format:'cjs',write:false,loader:{'.css':'empty'},define:{'import.meta.env.VITE_AGENT_URL':'""'}}).outputFiles[0].text
   const m={exports:{}};new Function('module','exports','require',text)(m,m.exports,require);return m.exports
 })()
 let failed=0
