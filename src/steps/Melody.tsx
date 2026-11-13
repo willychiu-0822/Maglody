@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback, type Level } from '../components/ui'
+import { MidiKeyboardHint } from '../components/MidiKeyboardHint'
 import { playLoop, playNote, type Player } from '../lib/audio'
+import { useMidiKeyboard } from '../lib/midiInput'
 import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, scaleNote, snapToScale, SCALES, type Chord, type Mode } from '../lib/theory'
 import { cleanLine } from '../lib/rhyme'
 import type { Project } from '../lib/store'
@@ -141,6 +143,25 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
     setCells(n)
   }
 
+  // MIDI 鍵盤：彈一個音＝接在最後一個音後面的空格放音（和點格子寫進同一份資料）。
+  // 不在目前格子列上的音、或格子已經排到最後一格，就只發聲不寫。
+  const cellsRef = useRef(cells)
+  cellsRef.current = cells
+  const [midiSaid, setMidiSaid] = useState('')
+  const midi = useMidiKeyboard((m) => {
+    playNote(m, 0.3, { type: 'square', gain: 0.15 })
+    if (!rows.includes(m)) { setMidiSaid('這個音不在現在的格子裡，我先聽著，沒寫進去。'); return }
+    const n = [...cellsRef.current]
+    let at = STEPS
+    while (at > 0 && n[at - 1] == null) at--
+    if (at >= STEPS) { setMidiSaid('格子排到最後了，這個音我先聽著。想改哪一格，直接點它。'); return }
+    n[at] = m
+    cellsRef.current = n
+    setCells(n)
+    setPage(Math.floor(at / 8))
+    setMidiSaid('')
+  })
+
   const play = () => {
     player?.stop()
     const bars = prog.map((d) => (d != null ? chordVoicing(chords[d]) : []))
@@ -181,6 +202,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
   return (
     <>
       <Coach short={empty && p.hum ? '先把你的哼唱倒進格子裡，再一格一格修。' : missingChords ? '先點格子寫旋律；和弦之後再補也可以。' : notes < 4 ? '點格子放音。綠色的最穩。' : '播放，哪裡聽起來怪就改哪裡。'} />
+      <MidiKeyboardHint status={midi.status} deviceName={midi.deviceName} lastNote={midi.lastNote} onConnect={midi.connect} note={midiSaid} />
       <div className="seg seg-quiet">
         <button className={part === 'verse' ? 'on' : ''} onClick={() => { stop(); setPart('verse') }}>主歌</button>
         <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setPart('chorus') }}>副歌</button>

@@ -1,9 +1,12 @@
-// 匯出標準 MIDI 檔（SMF Type 1），讓作品可以帶進 REAPER 等 DAW 繼續製作。
+// 匯出標準 MIDI 檔（SMF Type 1），讓作品可以帶進 REAPER、Ableton Live 等 DAW 繼續製作。
 import type { Project } from './store'
 import { chordVoicing, diatonicChords } from './theory'
 
 const PPQ = 480
 const EIGHTH = PPQ / 2
+/** General MIDI 鼓組（第 10 軌道）：大鼓、小鼓、閉合 hi-hat */
+const KICK = 36, SNARE = 38, HAT = 42
+const DRUM_LEN = PPQ / 4
 
 function vlq(n: number): number[] {
   const out = [n & 0x7f]
@@ -27,8 +30,9 @@ function track(name: string, evs: Ev[]): number[] {
 /** 依編曲結構展開（沒有編曲時用 主歌→副歌） */
 export function buildMidi(p: Project): Uint8Array {
   const chords = diatonicChords(p.harmony.root, p.harmony.mode)
-  const plan = p.arrangement.length ? p.arrangement.map((s) => ({ kind: s.kind, bars: s.bars, mel: s.layers.melody, harm: s.layers.keys || s.layers.pad, bass: s.layers.bass })) : [{ kind: 'verse', bars: 4, mel: true, harm: true, bass: true }, { kind: 'chorus', bars: 4, mel: true, harm: true, bass: true }]
-  const melody: Ev[] = [], harm: Ev[] = [], bass: Ev[] = []
+  const plan = p.arrangement.length ? p.arrangement.map((s) => ({ kind: s.kind, bars: s.bars, mel: s.layers.melody, harm: s.layers.keys || s.layers.pad, bass: s.layers.bass, drums: !!s.layers.drums })) : [{ kind: 'verse', bars: 4, mel: true, harm: true, bass: true, drums: true }, { kind: 'chorus', bars: 4, mel: true, harm: true, bass: true, drums: true }]
+  const melody: Ev[] = [], harm: Ev[] = [], bass: Ev[] = [], drums: Ev[] = []
+  const hit = (t: number, note: number, vel: number) => { drums.push({ t, data: [0x99, note, vel] }, { t: t + DRUM_LEN, data: [0x89, note, 0] }) }
   let bar0 = 0
   plan.forEach((s) => {
     const useChorus = ['chorus', 'intro', 'inter', 'outro'].includes(s.kind)
@@ -53,13 +57,60 @@ export function buildMidi(p: Project): Uint8Array {
           melody.push({ t: st, data: [0x90, m, 100] }, { t: st + len * EIGHTH - 10, data: [0x80, m, 0] })
         }
       }
+      // 鼓：跟 audio.ts 播放的節奏同一組（八分音符第 0、5 格大鼓，第 2、6 格小鼓，每格 hi-hat），匯出的和耳朵聽到的一致。
+      if (s.drums) {
+        for (let i = 0; i < 8; i++) {
+          const st = t + i * EIGHTH
+          if (i === 0 || i === 5) hit(st, KICK, 100)
+          if (i === 2 || i === 6) hit(st, SNARE, 96)
+          hit(st, HAT, i % 2 ? 54 : 70)
+        }
+      }
     }
     bar0 += s.bars
   })
   const tempo = Math.round(60_000_000 / p.idea.bpm)
   const meta = track('Tempo', [{ t: 0, data: [0xff, 0x51, 3, (tempo >> 16) & 255, (tempo >> 8) & 255, tempo & 255] }, { t: 0, data: [0xff, 0x58, 4, 4, 2, 24, 8] }])
-  const header = [...str('MThd'), ...u32(6), 0, 1, 0, 4, PPQ >> 8, PPQ & 255]
-  return new Uint8Array([...header, ...meta, ...track('主旋律 Melody', melody), ...track('和弦 Chords', harm), ...track('貝斯 Bass', bass)])
+  const header = [...str('MThd'), ...u32(6), 0, 1, 0, 5, PPQ >> 8, PPQ & 255]
+  return new Uint8Array([...header, ...meta, ...track('主旋律 Melody', melody), ...track('和弦 Chords', harm), ...track('貝斯 Bass', bass), ...track('鼓 Drums', drums)])
+}
+
+/** 讀出 .mid 裡每個 MTrk 的軌道名稱（FF 03）；沒有名稱的軌回傳空字串。 */
+export function midiTrackNames(bytes: Uint8Array): string[] {
+  const names: string[] = []
+  const u32at = (i: number) => bytes[i] * 16777216 + bytes[i + 1] * 65536 + bytes[i + 2] * 256 + bytes[i + 3]
+  let pos = 0
+  while (pos + 8 <= bytes.length) {
+    const id = String.fromCharCode(bytes[pos], bytes[pos + 1], bytes[pos + 2], bytes[pos + 3])
+    const start = pos + 8
+    const end = Math.min(start + u32at(pos + 4), bytes.length)
+    pos = end
+    if (id !== 'MTrk') continue
+    let i = start, running = 0, name = ''
+    const readVlq = () => { let n = 0, b = 0; do { b = bytes[i++]; n = n * 128 + (b & 0x7f) } while (b & 0x80 && i < end); return n }
+    while (i < end) {
+      readVlq()
+      let status = bytes[i]
+      if (status & 0x80) i++
+      else status = running
+      if (status === 0xff) {
+        const type = bytes[i++]
+        const len = readVlq()
+        if (type === 0x03 && !name) name = new TextDecoder().decode(bytes.subarray(i, Math.min(i + len, end)))
+        i += len
+        if (type === 0x2f) break
+      } else if (status === 0xf0 || status === 0xf7) {
+        const len = readVlq()
+        i += len
+      } else {
+        running = status
+        const kind = status & 0xf0
+        i += kind === 0xc0 || kind === 0xd0 ? 1 : 2
+      }
+    }
+    names.push(name)
+  }
+  return names
 }
 
 export function downloadMidi(p: Project) {

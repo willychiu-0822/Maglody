@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Card, Coach, DeskActions, FeedbackList, Light, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { SongSheet } from '../components/SongSheet'
+import { AbletonGuide } from '../components/AbletonGuide'
 import { playSequence, type Player } from '../lib/audio'
 import type { Project } from '../lib/store'
 import { downloadMidi } from '../lib/midi'
@@ -150,6 +151,8 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
           <button className="btn btn-ghost" onClick={() => download('music-lab-project.json', JSON.stringify(p, null, 2), 'application/json')}>備份這首歌（.json）</button>
         </div>
       </Card>
+
+      <AbletonGuide p={p} />
 
       <Why title="為什麼留一點自己的想法？" apply="下次回來聽，也能想起當時喜歡哪裡。">
         <p>小提示可以陪你找找不同的地方；喜不喜歡，還是交給你的耳朵。先記下一處你想再聽的地方就好。</p>

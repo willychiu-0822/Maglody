@@ -95,7 +95,9 @@ test('UAT-63 重新開始新歌，清空舊對話並隔離晚到回覆', async (
     await page.getByRole('dialog', { name: '翻開新的一頁', exact: true }).getByRole('button', { name: '開始新的歌', exact: true }).click()
     await expect(page.locator('.presence-state')).toHaveText('作曲家在琴邊坐下。')
     await page.locator('.presence').click()
-    await expect.soft(page.locator('.msg')).toHaveCount(0)
+    // 空狀態現在是夥伴自己的開場白（.msg.chat-empty）：舊對話要清空，開場白要在。
+    await expect.soft(page.locator('.msg:not(.chat-empty)')).toHaveCount(0)
+    await expect.soft(page.locator('.msg.chat-empty')).toHaveCount(1)
     await expect.soft(page.locator('.master-input input')).toHaveValue('')
     await expect.soft(page.locator('.typing')).toHaveCount(0)
     await shot(page, info, 'new-song-before-old-reply')
