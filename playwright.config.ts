@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test'
 const stamp = new Date().toISOString().replace(/[:.]/g, '-')
 process.env.UAT_RUN_ID ||= stamp
 export default defineConfig({
-  testDir: './e2e', outputDir: `test-results/${process.env.UAT_RUN_ID}`, timeout: 45_000, expect: { timeout: 7000 },
+  testDir: './e2e', testIgnore: '**/deploy-assets.spec.ts', /* MIME check runs via playwright.deploy.config.ts */ outputDir: `test-results/${process.env.UAT_RUN_ID}`, timeout: 45_000, expect: { timeout: 7000 },
   fullyParallel: false, workers: 2, retries: 0,
   reporter: [['list'], ['./e2e/reporter.ts']],
   use: {

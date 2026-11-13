@@ -26,9 +26,10 @@ export default class UatReporter implements Reporter {
     const pass = rows.filter(r => r.status === 'pass').length
     const expectedCases = new Set(fs.readdirSync('e2e').filter(file => file.endsWith('.spec.ts')).flatMap(file =>
       [...fs.readFileSync(`e2e/${file}`, 'utf8').matchAll(/test\(['"](UAT-\d+)/g)].map(match => match[1])))
-    const fullMatrix = rows.length === expectedCases.size * 2 && [...expectedCases].every(id =>
+    const uatRows = rows.filter(row => /^UAT-\d+$/.test(row.case))
+    const fullMatrix = uatRows.length === expectedCases.size * 2 && [...expectedCases].every(id =>
       ['desktop','mobile'].every(viewport => rows.some(row => row.case === id && row.viewport === viewport)))
-    const allEvidence = rows.every(row => row.evidence && fs.existsSync(row.evidence))
+    const allEvidence = uatRows.every(row => row.evidence && fs.existsSync(row.evidence))
     const visualOpen = fs.existsSync('docs/uat/failures.md') && fs.readFileSync('docs/uat/failures.md','utf8').includes('狀態：OPEN')
     const passed = (ids: string[]) => ids.every(id=>['desktop','mobile'].every(viewport=>rows.some(r=>r.case===id&&r.viewport===viewport&&r.status==='pass')))
     const checks = {R1:['UAT-81','UAT-79','UAT-80','UAT-78','UAT-76','UAT-77','UAT-73','UAT-74','UAT-71','UAT-72','UAT-28','UAT-57','UAT-65','UAT-66','UAT-69','UAT-70'],R2:['UAT-81','UAT-79','UAT-80','UAT-78','UAT-76','UAT-77','UAT-75','UAT-73','UAT-74','UAT-71','UAT-72','UAT-24','UAT-56','UAT-65','UAT-66','UAT-67','UAT-68','UAT-69','UAT-70'],R3:['UAT-71','UAT-25','UAT-30','UAT-53','UAT-59','UAT-61','UAT-62','UAT-63','UAT-65','UAT-66','UAT-67','UAT-68','UAT-69','UAT-70'],R4:['UAT-25','UAT-29','UAT-57','UAT-69'],R5:['UAT-81','UAT-79','UAT-80','UAT-76','UAT-77','UAT-75','UAT-73','UAT-74','UAT-72','UAT-13','UAT-14','UAT-15','UAT-16','UAT-49','UAT-60','UAT-69','UAT-70'],R6:['UAT-33','UAT-58']}
