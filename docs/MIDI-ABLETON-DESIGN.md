@@ -170,8 +170,8 @@ SMF Type 1、PPQ 480，`buildMidi(project)`／`downloadMidi(project)`。
 
 | 塊 | 內容 | 狀態 |
 | --- | --- | --- |
-| 第一塊 | Web MIDI 輸入接旋律頁＋角色提示（`midiInput.ts`、`MidiKeyboardHint.tsx`） | 實作中（2026-11-13 晚） |
-| 第二塊 | 匯出加鼓軌＋總檢討頁 Ableton 引導卡 | 實作中（2026-11-13 晚） |
+| 第一塊 | Web MIDI 輸入接旋律頁＋角色提示（`midiInput.ts`、`MidiKeyboardHint.tsx`） | 草稿完成；build 與單元測試通過（2026-11-14），未實機、無瀏覽器 e2e／截圖 |
+| 第二塊 | 匯出加鼓軌＋總檢討頁 Ableton 引導卡 | 草稿完成；`buildMidi` 單元測試通過（2026-11-14），未拖進真的 Ableton、無截圖 |
 | 第三塊 | 和聲頁和弦辨識、哼唱頁彈回動機 | 未做 |
 | 第四塊 | 墊子／旋鈕接編曲頁與混音頁＋MIDI learn 設定 | 未做 |
 | 第五塊 | Web MIDI 輸出到 IAC／loopMIDI | 未做 |
