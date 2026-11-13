@@ -91,7 +91,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
         {TRACKS.map((tr) => (
           <label key={tr.id} className="mix-row">
             <span>{tr.name.replace(/（.*）/, '')}</span>
-            <input type="range" min={0} max={1.2} step={0.01} value={tracks[tr.id].vol} onChange={(e) => setT(tr.id, { vol: +e.target.value })} />
+            <input type="range" min={0} max={1.2} step={0.01} value={tracks[tr.id].vol} style={{ '--fill': `${(tracks[tr.id].vol / 1.2) * 100}%` } as React.CSSProperties} onChange={(e) => setT(tr.id, { vol: +e.target.value })} />
           </label>
         ))}
       </div>
@@ -122,7 +122,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
               </div>
               <label className="field">
                 <span>音量 {Math.round(s.vol * 100)}%</span>
-                <input type="range" min={0} max={1.2} step={0.01} value={s.vol} onChange={(e) => setT(tr.id, { vol: +e.target.value })} />
+                <input type="range" min={0} max={1.2} step={0.01} value={s.vol} style={{ '--fill': `${(s.vol / 1.2) * 100}%` } as React.CSSProperties} onChange={(e) => setT(tr.id, { vol: +e.target.value })} />
               </label>
               <label className="field">
                 <span>左右 {s.pan === 0 ? '中' : s.pan < 0 ? `左 ${Math.round(-s.pan * 100)}%` : `右 ${Math.round(s.pan * 100)}%`}</span>

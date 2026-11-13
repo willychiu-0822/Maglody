@@ -86,7 +86,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
         <label className="field"><span>故事：誰、在哪、發生什麼</span><textarea rows={3} value={idea.story} onChange={(e) => set('story', e.target.value)} /></label>
         <label className="field">
           <span>速度：<strong>{idea.bpm}</strong> BPM</span>
-          <input type="range" min={55} max={170} value={idea.bpm} onChange={(e) => set('bpm', +e.target.value)} />
+          <input type="range" min={55} max={170} value={idea.bpm} style={{ '--fill': `${((idea.bpm - 55) / 115) * 100}%` } as React.CSSProperties} onChange={(e) => set('bpm', +e.target.value)} />
         </label>
         {mood && <button className="btn small" onClick={() => preview(p.harmony.mode === 'major' ? 'minor' : 'major', idea.bpm)}>▶ 對照：換成{mood.mode === 'major' ? '小' : '大'}調</button>}
         {p.hum && <p className="muted small">你的哼唱在 {keyName(p.hum.keyRoot, p.hum.keyMode)}。</p>}
