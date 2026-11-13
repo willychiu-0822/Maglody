@@ -16,6 +16,11 @@ Chrome；desktop 1280x800/mobile 390x844；run=matrix-1113-evening；完整矩�
   - 案例數從 166 變 164：deploy 圖片載入與 MIME 檢查（`e2e/deploy-assets.spec.ts`）整檔改由 `playwright.deploy.config.ts` 執行（下午 4/4 通過），主矩陣以 testIgnore 排除。
 - 每次 run 的逐例截圖資料夾未提交（單次約 180MB 以上），只提交固定檔名的代表截圖，故下表連結指向的 run 資料夾僅在本機。
 - 之後如需再跑：workers=1、只跑一次，不再追穩定度。
+- 收尾定向重跑 `rerun-wrapup-1114`（2026-11-14，workers=1、只跑一次，build 版、含 MIDI 草稿的程式）：
+  - UAT-63：測試期待已在 454420b 改為「舊訊息清空（`.msg:not(.chat-empty)` 為 0）＋夥伴開場白在（`.msg.chat-empty` 為 1）」，其餘斷言（輸入清空、無等待、舊答不入新歌）未動。desktop、mobile 皆 pass。這是測試期待跟上產品文案，不是產品行為被放寬。
+  - UAT-04、UAT-34：desktop、mobile 皆 pass（各 2.4–3.8 秒），晚間的逾時沒有重現，與先前「主機停頓」判讀一致；原斷言與期限都沒改。
+  - 這 6 次只是部分重跑，下方表格仍是晚間矩陣的原樣結果（160/164），沒有被改寫。截圖：[04 desktop](evidence/rerun-wrapup-1114/desktop/UAT-04.png)、[34 desktop](evidence/rerun-wrapup-1114/desktop/UAT-34.png)、[63 desktop](evidence/rerun-wrapup-1114/desktop/UAT-63.png)、[63 mobile](evidence/rerun-wrapup-1114/mobile/UAT-63.png)。
+  - **ready_for_user_test 維持 false**：晚間完整矩陣在 MIDI 草稿（MiniLab 37 輸入、Ableton 匯出、Melody／Review 畫面變動）合入之前跑的，合入後沒有完整重跑；只有定向 6 次與 33 項單元測試、build 通過。要設 true，需在最終程式上完整跑一次 164 項全過。
 
 | 案例 | Viewport | 結果 | 失敗原因 | 截圖 |
 |---|---|---|---|---|

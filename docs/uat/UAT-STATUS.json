@@ -284,5 +284,16 @@
       ]
     }
   },
-  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=matrix-1113-evening；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證"
+  "notes": "Chrome；desktop 1280x800/mobile 390x844；run=matrix-1113-evening；完整矩陣；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證；2026-11-14 收尾定向重跑 rerun-wrapup-1114：UAT-63/04/34 desktop+mobile 6/6 pass（部分重跑，上列計數仍為晚間矩陣 160/164）；MIDI 草稿合入後未完整重跑矩陣，故 ready_for_user_test 維持 false",
+  "latest_targeted_rerun": {
+    "run": "rerun-wrapup-1114",
+    "cases": [
+      "UAT-63",
+      "UAT-04",
+      "UAT-34"
+    ],
+    "executions": 6,
+    "pass": 6,
+    "fail": 0
+  }
 }
