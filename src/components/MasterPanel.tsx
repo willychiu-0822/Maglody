@@ -4,9 +4,9 @@ import type { AgentAction, AgentMessage } from '../agent/types'
 import { ROLES, ROLE_ORDER, type RoleId } from '../agent/roles'
 
 const QUICK: Record<RoleId, string[]> = {
-  producer: ['這首歌像我要的感覺嗎？', '下一步'],
+  producer: ['這首歌像我要的感覺嗎？', '接下來做什麼？'],
   composer: ['為什麼這和弦？', '換一個更哀傷的走向'],
-  lyricist: ['押韻怎麼找？', '幫我寫一句'],
+  lyricist: ['押韻怎麼找？', '卡住了，怎麼開頭？'],
   arranger: ['副歌怎麼更有爆發力？'],
   engineer: ['太高唱不上去', '怎麼帶進 REAPER？'],
 }

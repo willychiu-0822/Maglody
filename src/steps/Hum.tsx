@@ -127,13 +127,13 @@ function HumStep({ p, update, notify, next }: StepProps) {
   if (hum) {
     const n = hum.notes.length
     const total = hum.notes.reduce((s, x) => s + x.dur, 0)
-    fb.push(n >= 8 ? { level: 'good', text: `我聽到 ${n} 個音。來聽聽看吧。` } : n >= 3 ? { level: 'warn', text: `我聽到 ${n} 個音。`, tip: '想多留一點的話，可以用「嗯～」或「啦～」哼長一點，試試超過 8 秒。' } : { level: 'bad', text: '這次沒聽清楚幾個音。', tip: '可以靠近麥克風一個拳頭的距離，找個安靜的地方，再用清楚的聲音試試。' })
+    fb.push(n >= 8 ? { level: 'good', text: `聽到 ${n} 個音，夠我們玩了。來聽聽看。` } : n >= 3 ? { level: 'warn', text: `聽到 ${n} 個音，有點少。`, tip: '想多留一點，可以用「嗯～」或「啦～」拖長一點，試試哼超過 8 秒。' } : { level: 'bad', text: '這次沒聽清楚幾個音。', tip: '離麥克風大約一個拳頭，找個安靜的地方，再哼一次看看。' })
     const inK = hum.notes.filter((x) => inScale(x.midi, hum.keyRoot, hum.keyMode)).reduce((s, x) => s + x.dur, 0)
     const ratio = total ? inK / total : 0
-    fb.push(ratio > 0.85 ? { level: 'good', text: `這段有 ${Math.round(ratio * 100)}% 落在 ${keyName(hum.keyRoot, hum.keyMode)} 裡。` } : ratio > 0.65 ? { level: 'warn', text: `這段有 ${Math.round(ratio * 100)}% 落在選的調裡。`, tip: '紅色的音也許正是你想要的色彩。播放「整理後的音」，聽聽看吧。' } : { level: 'bad', text: '這段的調，我還不太確定。', tip: '可以先哼一段熟悉的旋律暖暖耳朵，再試自己的。' })
+    fb.push(ratio > 0.85 ? { level: 'good', text: `這段有 ${Math.round(ratio * 100)}% 落在 ${keyName(hum.keyRoot, hum.keyMode)} 裡，滿貼的。` } : ratio > 0.65 ? { level: 'warn', text: `這段有 ${Math.round(ratio * 100)}% 落在目前選的調裡。`, tip: '紅色的音說不定正是你要的味道。按「聽聽整理後的音」聽聽。' } : { level: 'bad', text: '這段的調，我還不太確定。', tip: '先哼一小段熟悉的歌暖暖耳朵，再哼你自己的。' })
     const range = hum.rangeHigh - hum.rangeLow
-    fb.push(range <= 12 && range >= 4 ? { level: 'good', text: `這段從 ${noteNameOct(hum.rangeLow)} 到 ${noteNameOct(hum.rangeHigh)}，跨了 ${range} 個半音。` } : range > 12 ? { level: 'warn', text: `這段跨了 ${range} 個半音，超過一個八度。`, tip: '唱起來如果有點吃力，可以試試把某一句放低，聽聽喜不喜歡。' } : { level: 'warn', text: '這段的音靠得滿近。', tip: '想換個感覺的話，可以試著讓某一句往上走。' })
-    fb.push(hum.confidence > 0.08 ? { level: 'good', text: '這個調聽起來滿貼近這段旋律。' } : { level: 'warn', text: '有兩個調聽起來都很像。', tip: '可以在下方換個調聽聽，或到「和聲」用耳朵決定。' })
+    fb.push(range <= 12 && range >= 4 ? { level: 'good', text: `這段從 ${noteNameOct(hum.rangeLow)} 到 ${noteNameOct(hum.rangeHigh)}，跨了 ${range} 個半音。` } : range > 12 ? { level: 'warn', text: `這段跨了 ${range} 個半音，超過一個八度。`, tip: '唱起來如果有點吃力，可以試試把某一句放低，聽聽喜不喜歡。' } : { level: 'warn', text: '這段的音都靠得很近，起伏不大。', tip: '想換個感覺，可以讓某一句往上走走看。' })
+    fb.push(hum.confidence > 0.08 ? { level: 'good', text: '這個調跟這段旋律滿貼的。' } : { level: 'warn', text: '有兩個調我聽起來都像。', tip: '可以在下方換個調聽聽，或到「和聲」用耳朵決定。' })
   }
 
   const hist = ana?.hist
@@ -202,7 +202,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
             ))}
           </div>
         )}
-        <FeedbackList items={fb} empty="哼完之後，這裡會有幾句觀察。" />
+        <FeedbackList items={fb} empty="哼完之後，我會在這裡跟你說聽到了什麼。" />
         <Why ready={!!hum} title="我怎麼聽出你的「家」？" listen={{ label: '只聽主音', play: () => hum && playNote(60 + hum.keyRoot, 1.5) }}>
           <p>上面的長條圖記下每個音停留了多久。我用這些音猜猜看哪個調可能適合；不一定猜得準，換個調聽聽，挑你喜歡的就好。</p>
           {ana && ana.chordHints.length > 0 && (

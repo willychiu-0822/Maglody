@@ -198,7 +198,7 @@ function questionReply(p: Project, step: string, q: string): AgentReply {
     const ch = lastChar(p.idea.hook)
     const r = rhymeOf(ch)
     return r
-      ? { text: `你的 Hook 結尾「${ch}」屬於「${r.group}」轍（${r.sound}）。同韻的字有：${RHYME_GROUPS[r.idx].sample}。挑一個跟你的畫面有關的，放在另一句的句尾。`, learned: '十三轍：中文歌只要韻母相近就算押韻。' }
+      ? { text: `你的 Hook 結尾「${ch}」屬於「${r.group}」轍（${r.sound}）。同韻的字有：${RHYME_GROUPS[r.idx].sample}。挑一個跟你的畫面有關的，放在另一句的句尾。`, learned: '十三轍：中文歌的韻母相近，耳朵就聽得出押韻。' }
       : { text: `「${ch || '你的句尾字'}」不在我的韻表裡。大聲唸出來，聽它的韻母（a、ang、ing…），再到韻腳小抄找同組的字。` }
   }
   if (/(旋律|怎麼寫曲|音符)/.test(q)) {
