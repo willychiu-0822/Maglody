@@ -31,16 +31,16 @@ export function progressionFeedback(degs: (number | null)[], mode: Mode, label: 
   const fb: Feedback[] = []
   if (d.length < degs.length) return [{ level: 'warn', text: `${label}還有 ${degs.length - d.length} 格空著。` }]
   const tonicLike = mode === 'major' ? [0, 5] : [0, 2]
-  fb.push(tonicLike.includes(d[0]) ? { level: 'good', text: `${label}從穩定的和弦開始，聽眾馬上知道「家」在哪。` } : { level: 'warn', text: `${label}從不穩定的和弦開始。`, tip: '這會帶來懸疑感，很適合導歌；如果是主歌，試試從 I 或 vi 開始。' })
+  fb.push(tonicLike.includes(d[0]) ? { level: 'good', text: `${label}從穩定的和弦開始，聽眾馬上知道「家」在哪。` } : { level: 'warn', text: `${label}一開頭就帶點懸著的感覺。`, tip: '這種開場很有戲；想先讓人安心的話，也可以試試從 I 或 vi 起頭。' })
   const last = d[d.length - 1]
   if (last === 4) fb.push({ level: 'good', text: `${label}停在 V：像一個問號，耳朵會想回到開頭，循環起來很順。` })
   else if (last === 0) fb.push({ level: 'good', text: `${label}停在 I：像句號，很適合段落或整首歌的結尾。` })
   else if (last === 3) fb.push({ level: 'good', text: `${label}停在 IV：溫柔、未完待續，回到 I 時很自然。` })
-  else fb.push({ level: 'warn', text: `${label}結尾的和弦較少見。`, tip: '結尾停在 V（問號）或 I（句號）最好接下一輪。' })
+  else fb.push({ level: 'warn', text: `${label}的結尾比較少見，聽起來有點特別。`, tip: '想讓它接回開頭，可以試試停在 V（問號）或 I（句號）。' })
   const uniq = new Set(d).size
-  fb.push(uniq >= 3 ? { level: 'good', text: `用了 ${uniq} 種和弦，有變化。` } : uniq === 2 ? { level: 'warn', text: '只有 2 種和弦，可能有點單調。', tip: '加一個 IV 或 vi 試試。' } : { level: 'bad', text: '只有一種和弦，聽不出走向。' })
-  if (!d.includes(4) && !d.includes(3)) fb.push({ level: 'warn', text: '沒有 IV 或 V。', tip: 'IV（離家）和 V（想回家）是推動歌曲前進的引擎。' })
-  if (d.includes(6)) fb.push({ level: 'warn', text: '這裡用了 vii°（減和弦），聽起來有點懸。', tip: '聽聽看，這是你想要的感覺嗎？' })
+  fb.push(uniq >= 3 ? { level: 'good', text: `用了 ${uniq} 種和弦，走起來有起伏。` } : uniq === 2 ? { level: 'warn', text: '現在只有 2 種和弦，聽起來很簡單。', tip: '想多一點變化的話，可以加一個 IV 或 vi 聽聽。' } : { level: 'bad', text: '現在只有一種和弦，像一直停在同一個地方。', tip: '想往前走一步的話，換一格試試別的和弦。' })
+  if (!d.includes(4) && !d.includes(3)) fb.push({ level: 'warn', text: '這一圈還沒用到 IV 或 V。', tip: 'IV（離家）和 V（想回家）會讓歌往前走，想要動感的話可以放一個聽聽。' })
+  if (d.includes(6)) fb.push({ level: 'warn', text: '這裡用了 vii°（減和弦），聽起來有點懸著。', tip: '聽聽看，這是你想要的感覺嗎？' })
   return fb
 }
 
@@ -92,9 +92,9 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
   const fb = [...progressionFeedback(h.verse, h.mode, '主歌'), ...progressionFeedback(h.chorus, h.mode, '副歌')]
   const vd = h.verse.join(','), cd = h.chorus.join(',')
   if (!h.verse.includes(null) && !h.chorus.includes(null))
-    fb.push(vd !== cd ? { level: 'good', text: '主歌和副歌的和弦不同，副歌出現時會有「換場景」的感覺。' } : { level: 'warn', text: '主歌和副歌和弦一模一樣。', tip: '這樣也很好。如果想讓副歌換個感覺，可以試試不同的旋律或樂器。' })
+    fb.push(vd !== cd ? { level: 'good', text: '主歌和副歌的和弦不一樣，副歌一來，就像換了個場景。' } : { level: 'warn', text: '主歌和副歌用的是同一組和弦。', tip: '這樣也很好。如果想讓副歌換個感覺，可以試試不同的旋律或樂器。' })
   if (p.hum && (p.hum.keyRoot !== h.root || p.hum.keyMode !== h.mode))
-    fb.push({ level: 'warn', text: `你換了調（哼唱是 ${keyName(p.hum.keyRoot, p.hum.keyMode)}）。`, tip: '換調沒問題，但之後寫旋律要用新調來寫，記得唱唱看音域是否舒服。' })
+    fb.push({ level: 'warn', text: `你換了調（剛剛哼的是 ${keyName(p.hum.keyRoot, p.hum.keyMode)}）。`, tip: '換調沒問題，之後寫旋律就跟著新的調走，也順便唱唱看音域舒不舒服。' })
 
   const Slot = ({ part, i }: { part: 'verse' | 'chorus'; i: number }) => {
     const d = h[part][i]
@@ -183,7 +183,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
               </div>
               {quizRes && (
                 <p className={quizRes === 'right' ? 'ok-text' : 'err-text'}>
-                  {quizRes === 'right' ? '對。' : '不是喔。'}
+                  {quizRes === 'right' ? '耳朵不錯！' : '差一點，再聽一次就有感覺了。'}
                   {quiz.kind === 'quality' ? (quiz.answer === 'a' ? '中間那個音高一點，聽起來開闊。' : '中間那個音低半音，聽起來有陰影。') : (quiz.answer === 'a' ? '回到家了，像句號。' : '停在想回家的地方，耳朵還在等。')}
                   <button className="link-btn" onClick={newQuiz}>下一題</button>
                 </p>
