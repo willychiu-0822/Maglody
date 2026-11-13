@@ -25,3 +25,6 @@
 - UAT-STATUS.json 仍 ready=false；完整雙尺寸 UAT 矩陣未重跑。
 - Arrangement 長度「偏短／偏長」句、Review／Ideation 的動態狀態尚未逐狀態再核。
 - Web Audio、真實麥克風、真實 LLM 未驗證。額度用量無法在非互動環境量測。
+
+## 補充
+Arrangement（含長度「偏短」）、Ideation、Review 的回饋句再讀過一次，已是夥伴口吻且都附一個可試的小動作，本輪未改。
