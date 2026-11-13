@@ -40,7 +40,7 @@ export function analyzeSection(s: LyricSection, hook: string) {
   if (s.kind === 'chorus') {
     const h = cleanLine(hook)
     const has = h && cleanLine(s.text).includes(h)
-    fb.push(has ? { level: 'good', text: '副歌包含你的記憶點。' } : { level: 'bad', text: '副歌裡還沒看到記憶點那一句。', tip: `把「${hook || '你那句話'}」放進副歌，整首歌會更有核心。` })
+    fb.push(has ? { level: 'good', text: '副歌包含你的記憶點。' } : { level: 'bad', text: '副歌裡還沒看到記憶點那一句。', tip: `把「${hook || '你那句話'}」放進副歌，這一頁的小清單就能打勾，往下一步也更順。` })
   }
   // 5. 句長
   const long = lens.filter((n) => n > 14).length

@@ -14,4 +14,4 @@
 | 耳朵小遊戲 | 對。／不是喔。 | 耳朵不錯！／差一點，再聽一次就有感覺了。 |
 
 驗證：`npm run build` 通過；`SELFTEST_URL=http://127.0.0.1:4109/ npm run selftest` 53/53 通過。舊文字在 e2e／scripts 中無斷言。
-未做：這批沒有新截圖，尚未逐狀態目視核對；`src/agent/mock.ts` 的和聲回覆（引用 `progressionFeedback`）已自動吃到新句，但 mock 內自己的句子（如「換場景」那句）還沒改。其他頁面見 maglody-progress.md。
+未做：這批新截圖見 docs/uat/evidence/copy-1113/（和聲、旋律、編曲，桌面與手機），尚未逐狀態目視核對；`src/agent/mock.ts` 的和聲回覆（引用 `progressionFeedback`）已自動吃到新句，但 mock 內自己的句子（如「換場景」那句）還沒改。其他頁面見 maglody-progress.md。

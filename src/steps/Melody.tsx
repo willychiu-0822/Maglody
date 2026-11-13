@@ -53,7 +53,7 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   const chordAt = (i: number) => { const d = prog[Math.floor(i / 8)]; return d != null ? chords[d] : null }
   const fit = strong.filter((n) => chordAt(n.i)?.pcs.includes(pc(n.m))).length
   const r = strong.length ? fit / strong.length : 1
-  fb.push(r >= 0.7 ? { level: 'good', text: `強拍上 ${Math.round(r * 100)}% 是和弦音，旋律和伴奏很「黏」。` } : r >= 0.45 ? { level: 'warn', text: `強拍上只有 ${Math.round(r * 100)}% 是和弦音。`, tip: '紅色格子在強拍上和和弦有點不合拍。可以挪到上下相鄰的綠色格，或放到弱拍當「經過音」，聽聽差別。' } : { level: 'bad', text: '強拍上的音大多不在和弦裡，聽起來會有點飄。', tip: '想踏實一點，可以讓每小節第 1 格先放和弦音（綠色），再用其他音接起來。' })
+  fb.push(r >= 0.7 ? { level: 'good', text: `強拍上 ${Math.round(r * 100)}% 是和弦音，旋律和伴奏很「黏」。` } : r >= 0.45 ? { level: 'warn', text: `強拍上只有 ${Math.round(r * 100)}% 是和弦音。`, tip: '紅色格子在強拍上和和弦不太合。可以挪到上下相鄰的綠色格，或放到弱拍當「經過音」，聽聽差別。' } : { level: 'bad', text: '強拍上的音大多不在和弦裡，聽起來會有點飄。', tip: '想踏實一點，可以讓每小節第 1 格先放和弦音（綠色），再用其他音接起來。' })
   // 音域
   const ms = notes.map((n) => n.m)
   const range = Math.max(...ms) - Math.min(...ms)
@@ -77,7 +77,7 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   const other = p.melody[part === 'verse' ? 'chorus' : 'verse'].filter((m): m is number => m != null && m >= 0)
   if (other.length >= 4) {
     const vMax = Math.max(...(part === 'verse' ? ms : other)), cMax = Math.max(...(part === 'chorus' ? ms : other))
-    fb.push(cMax > vMax ? { level: 'good', text: '副歌的最高音比主歌高，情緒有往上推。' } : { level: 'warn', text: '副歌的高度和主歌差不多。', tip: '想讓副歌更有爆發力的話，可以試試把整段往上移 3–5 度，聽聽感覺。' })
+    fb.push(cMax > vMax ? { level: 'good', text: '副歌的最高音比主歌高，情緒有往上推。' } : { level: 'warn', text: '副歌的最高音沒有比主歌高。', tip: '想讓副歌更有爆發力的話，可以試試把整段往上移 3–5 度，聽聽感覺。' })
   }
   // 動機：第 1 小節的節奏型是否在後面重複出現（重複＋變化）
   const rhythm = (b: number) => cells.slice(b * 8, b * 8 + 8).map((c) => (c != null && c >= 0 ? 'x' : c === HOLD ? '-' : '.')).join('')
@@ -92,7 +92,7 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
     const ls = lyricLines(sec.text)
     const syl = ls.slice(0, 2).reduce((a, l) => a + cleanLine(l).length, 0)
     const onsets = notes.length
-    if (syl) fb.push(Math.abs(syl - onsets) <= 3 ? { level: 'good', text: `${part === 'verse' ? '主歌' : '副歌'}前兩句共 ${syl} 字，旋律有 ${onsets} 個音，一字一音剛好。` } : { level: 'warn', text: `前兩句 ${syl} 字，但旋律有 ${onsets} 個音。`, tip: onsets > syl ? '音比字多：可以把某些音改成「延長」，或一個字唱兩個音（轉音）。' : '字比音多：可以多放幾個音，或把歌詞唸短一點，唱唱看哪個順口。' })
+    if (syl) fb.push(Math.abs(syl - onsets) <= 3 ? { level: 'good', text: `${part === 'verse' ? '主歌' : '副歌'}前兩句共 ${syl} 字，旋律有 ${onsets} 個音，一字一音剛好。` } : { level: 'warn', text: `前兩句 ${syl} 字，但旋律有 ${onsets} 個音。`, tip: onsets > syl ? '音比字多：可以把某些音改成「延長」，或一個字唱兩個音（轉音）。' : '字比音多：可以多放幾個音，或把歌詞刪掉幾個字，唱唱看哪個順口。' })
   }
   return fb
 }

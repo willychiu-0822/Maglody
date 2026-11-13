@@ -57,7 +57,7 @@ export function arrangementFeedback(p: Project): Feedback[] {
   else fb.push({ level: 'warn', text: '沒有前奏，一開口就是歌。', tip: '這樣很有衝擊力；如果錄音時想先抓速度和音準，放 1–2 小節前奏也不錯。' })
   if (ch.length && vs.length) {
     const ce = Math.min(...ch.map(energy)), ve = Math.max(...vs.map(energy))
-    fb.push(ce > ve ? { level: 'good', text: '每段副歌的能量都比主歌高，有起伏。' } : { level: 'bad', text: '副歌聽起來和主歌差不多滿。', tip: '想拉開差距的話，可以讓主歌先少放一兩個樂器（例如先不要鼓），副歌再一起進來。' })
+    fb.push(ce > ve ? { level: 'good', text: '每段副歌的能量都比主歌高，有起伏。' } : { level: 'bad', text: '副歌的樂器沒有比主歌多，聽起來不太有對比。', tip: '想拉開差距的話，可以讓主歌先少放一兩個樂器（例如先不要鼓），副歌再一起進來。' })
   }
   const lastChorus = a.map((s) => s.kind).lastIndexOf('chorus')
   const dip = a.some((s, i) => i > 0 && i < lastChorus && energy(s) < energy(a[i - 1]) - 2)

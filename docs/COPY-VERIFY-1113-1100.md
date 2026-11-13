@@ -18,7 +18,14 @@
 `npm run build` 通過；`selftest` 53/53 通過（兩次；第一次冷啟動曾在靈感流程逾時一次，重跑通過）。
 
 ## 未完成（不可當成 ready）
-- 沒有新截圖；各頁文案尚未逐狀態目視。
+- 新截圖見 docs/uat/evidence/copy-1113/（和聲、旋律、編曲，桌面與手機）；各頁文案尚未逐狀態目視。
 - `docs/uat/UAT-STATUS.json` 未更新，`ready_for_user_test` 仍為 false；完整雙尺寸 UAT 矩陣未重跑，只重跑了 UAT-79/80/81 與 selftest。
 - Mix、Hum 的回饋句、Arrangement 長度「偏短／偏長」、KnowledgeSpark、MasterPanel 等元件文案尚未全面再核。
 - Web Audio 實際播放、真實麥克風、真實 LLM 仍未驗證。
+
+## 補充（審查後修正，2026-11-13）
+- 修正：「不合拍」→「不太合」、「唸短」→「刪掉幾個字」、副歌高度／滿度句改成不失真（「沒有比主歌高／多」）、「另外聽聽這裡」只在有肯定句時出現、固定讚美「耳朵不錯！」→「聽出來了。」。
+- 歌詞步驟的小清單包含「把那句話放進副歌」，所以該提示補回「這一頁的小清單就能打勾」。
+- 驗證：`selftest:unit` 17/17、`test:logic` 通過、selftest 53/53、notebook-decisions（UAT_RUN_ID=copy-1113）6/6；截圖 docs/uat/evidence/copy-1113/{harmony,melody,arrange}-{desktop,mobile}.png 與 {desktop,mobile}/UAT-79/80/81.png 已目視，手機換行正常、長文無橫向溢出。
+- 舊檔 0100/0125/0150 已改名為 1113-1050/1055/1100（台北時間約略）。
+- UAT 完整矩陣未重跑，UAT-STATUS.json 維持 ready=false。提交作者顯示為 Claude <noreply@anthropic.com>，因本機未設定 git 身分；如需沿用原作者請告知。

@@ -18,4 +18,4 @@
 | 歌詞 | 副歌裡找不到記憶點那一句／想繼續往下一頁 | 副歌裡還沒看到記憶點那一句／整首歌會更有核心 |
 
 驗證：`npm run build` 通過；`SELFTEST_URL=http://127.0.0.1:4109/ npm run selftest` 53/53（第一次冷啟動時靈感流程逾時一次，重跑通過）。e2e／scripts 無舊句斷言。
-未做：沒有新截圖，尚未逐頁目視。Mix、Hum、Review、角色動態回覆（`src/agent/*`）、錯誤與慶祝狀態另批處理。
+未做：新截圖見 docs/uat/evidence/copy-1113/（和聲、旋律、編曲，桌面與手機），尚未逐頁目視。Mix、Hum、Review、角色動態回覆（`src/agent/*`）、錯誤與慶祝狀態另批處理。

@@ -183,7 +183,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
               </div>
               {quizRes && (
                 <p className={quizRes === 'right' ? 'ok-text' : 'err-text'}>
-                  {quizRes === 'right' ? '耳朵不錯！' : '差一點，再聽一次就有感覺了。'}
+                  {quizRes === 'right' ? '聽出來了。' : '差一點，再聽一次就有感覺了。'}
                   {quiz.kind === 'quality' ? (quiz.answer === 'a' ? '中間那個音高一點，聽起來開闊。' : '中間那個音低半音，聽起來有陰影。') : (quiz.answer === 'a' ? '回到家了，像句號。' : '停在想回家的地方，耳朵還在等。')}
                   <button className="link-btn" onClick={newQuiz}>下一題</button>
                 </p>

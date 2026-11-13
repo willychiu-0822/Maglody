@@ -19,7 +19,7 @@ function fromFeedback(fb: Feedback[], learned: string, fallbackNext: string, ext
   const good = pick(fb, 'good')
   const fix = pick(fb, 'bad') ?? pick(fb, 'warn')
   return {
-    text: [good?.text, fix ? `另外聽聽這裡：${fix.text}` : ''].filter(Boolean).join(' ') || '嗯，我聽到了。再往下試試看。',
+    text: [good?.text, fix ? `${good ? '另外' : ''}聽聽這裡：${fix.text}` : ''].filter(Boolean).join(' ') || '嗯，我聽到了。再往下試試看。',
     learned,
     next: fix?.tip ?? fallbackNext,
     suggestions: extra,
