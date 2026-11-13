@@ -148,7 +148,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
         {mic.running && <div className={`big-note ${mic.midi != null ? 'on' : ''}`}>{mic.midi != null ? noteNameOct(mic.midi) : '…'}</div>}
         {(shownFrames.length > 0 || shownNotes.length > 0) ? (
           <PitchCanvas frames={shownFrames} notes={shownNotes} duration={shownDur} keyRoot={hum?.keyRoot} keyMode={hum?.keyMode} playhead={playhead} height={180} />
-        ) : !mic.running && <div className="stage-empty" aria-hidden>～</div>}
+        ) : !mic.running && <div className="stage-empty"><span aria-hidden>～</span><small>作曲家把琴蓋掀開了，等你起個頭。</small></div>}
         {busy && <p className="muted small center">{analysisSource === 'demo' ? '在聽示範旋律……' : analysisSource === 'file' ? '在聽這段音檔……' : '在聽你剛剛哼的……'}</p>}
         {mic.error && !hasResult && !busy && <p className="error small">{mic.error}</p>}
       </div>

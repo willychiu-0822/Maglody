@@ -1,7 +1,8 @@
 import type { Project } from '../lib/store'
+import type { Role } from '../agent/roles'
 
 /** One observation from the actual song, after doing; explanation stays optional. */
-export function KnowledgeSpark({ step, p }: { step: string; p: Project }) {
+export function KnowledgeSpark({ step, p, role }: { step: string; p: Project; role?: Pick<Role, 'id' | 'name'> }) {
   const noteCount = (notes: (number | null)[]) => notes.filter(n => n != null && n >= 0).length
   const sparks: Record<string, { ready: boolean; line: string; detail: string }> = {
     hum: { ready: (p.hum?.notes.length ?? 0) >= 3, line: `這段有 ${p.hum?.notes.length ?? 0} 個音。哪一句想留下來？`, detail: '挑一句喜歡的，哼兩遍看看。第二遍可以換個結尾，不用急著哼完整首。' },
@@ -16,5 +17,5 @@ export function KnowledgeSpark({ step, p }: { step: string; p: Project }) {
   }
   const spark = sparks[step]
   if (!spark?.ready) return null
-  return <details className="knowledge-spark"><summary><span className="spark-kicker">小火花</span><span className="spark-line">{spark.line}</span><span className="spark-invite">想知道？<span className="spark-toggle" aria-hidden="true" /></span></summary><div className="spark-body"><p>{spark.detail}</p><details><summary>多看看</summary><p>打開下方工具箱的「想知道？」可以看原理，並用這首歌的聲音再試一次。</p></details></div></details>
+  return <details className="knowledge-spark"><summary><span className="spark-kicker">{role && <img src={`/studio/roles/${role.id}.webp`} width="28" height="28" alt="" />}<span>{role ? `${role.name}順口提了一句` : '順口提一句'}</span></span><span className="spark-line">{spark.line}</span><span className="spark-invite">{role ? `想聽${role.name}多說一點？` : '想多聽一點？'}<span className="spark-toggle" aria-hidden="true" /></span></summary><div className="spark-body"><p>{spark.detail}</p><details><summary>多看看</summary><p>打開下方工具箱的「想知道？」可以看原理，並用這首歌的聲音再試一次。</p></details></div></details>
 }

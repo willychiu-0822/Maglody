@@ -140,7 +140,7 @@ test('UAT-19 本子空白仍能新增', async ({ page }) => {
   })
   await setup(page)
   await library(page)
-  await expect(page.locator('.inspo-list')).toContainText('本子還是空的')
+  await expect(page.locator('.inspo-list')).toContainText('本子還空著')
   await page.getByRole('button',{name:'← 記新的',exact:true}).click()
   await page.locator('.inspo-capture textarea').fill('第一頁')
   await page.getByRole('button',{name:'夾進本子',exact:true}).click()

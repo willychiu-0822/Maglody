@@ -51,7 +51,7 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
         </div>
 
         <div className="master-list" ref={listRef}>
-          {messages.length === 0 && <p className="muted small">想聊什麼都可以：靈感、卡住的地方、哪一版比較好。</p>}
+          {messages.length === 0 && <div className="msg msg-master chat-empty"><div className="msg-avatar" aria-hidden="true"><img src={`/studio/roles/${role.id}.webp`} width="40" height="48" alt="" /></div><div className="msg-body"><strong className="msg-speaker">{role.name}</strong>{role.name}把椅子拉過來了。靈感、卡住的地方、哪一版比較好，都可以慢慢說。下面有幾個開場句，點一下就行。</div></div>}
           {messages.map((m) => {
             const r = m.role_id ? ROLES[m.role_id as RoleId] : null
             return (

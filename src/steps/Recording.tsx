@@ -86,7 +86,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
             <Meter value={(mic.levelDb + 60) / 60} level={lvl} />
             <div className="meter-scale small muted"><span>小聲</span><span>剛好</span><span>太滿</span></div>
           </div>
-        ) : <div className="stage-empty" aria-hidden>◎</div>}
+        ) : <div className="stage-empty"><span aria-hidden>◎</span><small>錄音師把麥克風架好了，等你開口。</small></div>}
         {mic.error && <p className="error small">{mic.error}</p>}
       </div>
 

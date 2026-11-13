@@ -164,7 +164,12 @@ input[type=text], input:not([type]), textarea, select { width: 100%; border: 1px
 select { width: auto; padding: 6px 10px; }
 input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 input[type=range] { width: 100%; accent-color: var(--accent); }
-input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--good); flex: none; margin-top: 3px; }
+input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 24px; height: 24px; flex: none; margin: 3px 0 0; border: 1.5px solid var(--ink); border-radius: 3px 6px 4px 7px; background: var(--paper); display: inline-grid; place-content: center; cursor: pointer; }
+input[type=checkbox]::after { content: '✓'; font-size: 1rem; line-height: 1; color: var(--good); transform: scale(0) rotate(-12deg); transition: transform .12s; }
+input[type=checkbox]:checked { background: color-mix(in srgb, var(--wash-sage) 80%, var(--paper)); }
+input[type=checkbox]:checked::after { transform: scale(1) rotate(-6deg); }
+input[type=checkbox]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.checklist label, .inspo-card .pick { min-height: 44px; align-items: flex-start; }
 textarea { resize: vertical; }
 
 /* ---------- feedback ---------- */
@@ -948,7 +953,11 @@ body::before { opacity: .12; }
 .knowledge-spark::before { content: ''; position: absolute; right: 16px; top: -5px; width: 32px; height: 9px; transform: rotate(4deg); background: color-mix(in srgb, var(--wash-ochre) 70%, transparent); border: 1px solid var(--line); }
 .knowledge-spark > summary { min-height: 44px; }
 .knowledge-spark > summary::-webkit-details-marker { display: none; }
-.spark-kicker { display: block; font-family: var(--font-title); font-size: .9rem; color: #5c7050; margin-bottom: 5px; letter-spacing: .15em; }
+.spark-kicker { display: flex; align-items: center; gap: 8px; font-family: var(--font-title); font-size: .86rem; color: #5c7050; margin-bottom: 6px; letter-spacing: .08em; }
+.spark-kicker img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; object-position: top; border: 1px solid var(--line); background: var(--paper); }
+.spark-line::before { content: '「'; color: #9baf8a; }
+.spark-line::after { content: '」'; color: #9baf8a; }
+.spark-line { font-family: var(--font-title); font-size: 1rem; transform: rotate(-.3deg); }
 .spark-line { display: block; line-height: 1.7; }
 .spark-invite { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: .78rem; color: var(--muted); }
 .spark-toggle { font-size: 1.1rem; color: var(--accent); }
@@ -1192,3 +1201,15 @@ body::before { opacity: .12; }
 .decision-song-title { max-height: 96px; overflow-y: auto; overscroll-behavior: contain; white-space: pre-wrap; overflow-wrap: anywhere; border: 1px dashed var(--grid-strong); border-radius: 3px 8px 4px 6px; padding: 6px 10px; font-family: var(--font-title); }
 .decision-notebook .notebook-tools { position: sticky; top: 0; z-index: 2; flex-shrink: 0; padding: 6px 0; background: var(--paper); border-bottom: 1px dashed var(--grid-strong); }
 .decision-notebook .notebook-tools::before { content: ''; position: absolute; inset: -28px -1px 100%; background: var(--paper); pointer-events: none; }
+
+/* 1113 UI audit: ideas read as handwritten sticky notes on the notebook sheet */
+.notebook-sheet .inspo-card { position: relative; background-image: repeating-linear-gradient(transparent 0 29px, color-mix(in srgb, var(--grid-strong) 55%, transparent) 29px 30px), radial-gradient(ellipse at 0 0, var(--wash-ochre), transparent 80%); background-color: var(--paper); transform: rotate(-.4deg); }
+.notebook-sheet .inspo-card:nth-of-type(even) { transform: rotate(.5deg); }
+.notebook-sheet .inspo-card::before { content: ''; position: absolute; left: 18px; top: -6px; width: 36px; height: 10px; transform: rotate(-3deg); background: color-mix(in srgb, var(--wash-ochre) 75%, transparent); border: 1px solid var(--line); }
+.notebook-sheet .inspo-card .inspo-text { font-weight: 400; font-size: 1.12rem; line-height: 30px; letter-spacing: .04em; }
+.notebook-sheet .inspo-card-head > .small { font-size: .74rem; letter-spacing: .06em; }
+.notebook-sheet .inspo-card.picked { transform: none; }
+@media (prefers-reduced-motion: no-preference) { .notebook-sheet .inspo-card { transition: transform .2s; } .notebook-sheet .inspo-card:hover { transform: rotate(0) translateY(-1px); } }
+.stage-empty { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.stage-empty small { font-family: var(--font-body); font-size: .85rem; color: var(--muted); letter-spacing: .04em; }
+.chat-empty .msg-body { background: color-mix(in srgb, var(--wash-ochre) 40%, var(--paper)); }

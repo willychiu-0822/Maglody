@@ -1,0 +1,450 @@
+[
+ {
+  "state": "empty",
+  "d": "哼唱解析",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "構想",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "和聲",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "旋律",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": [
+   "DIV.roll",
+   "DIV.roll-chord",
+   "DIV.roll-chord",
+   "DIV.roll-chord",
+   "BUTTON.cell"
+  ]
+ },
+ {
+  "state": "empty",
+  "d": "歌詞",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "編曲",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "錄音準備",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "混音觀念",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "總檢討",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "哼唱解析",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "構想",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "和聲",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "旋律",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": [
+   "DIV.roll",
+   "DIV.roll-chord",
+   "DIV.roll-chord",
+   "DIV.roll-chord",
+   "BUTTON.cell"
+  ]
+ },
+ {
+  "state": "filled",
+  "d": "歌詞",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "編曲",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "錄音準備",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "混音觀念",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "總檢討",
+  "vn": "desktop",
+  "primaries": 1,
+  "docW": 1280,
+  "vw": 1280,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "哼唱解析",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "構想",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "和聲",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "旋律",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": [
+   "DIV.roll-chord",
+   "BUTTON.cell",
+   "BUTTON.cell",
+   "BUTTON.cell",
+   "BUTTON.cell"
+  ]
+ },
+ {
+  "state": "empty",
+  "d": "歌詞",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "編曲",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "錄音準備",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "混音觀念",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "empty",
+  "d": "總檢討",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "哼唱解析",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "構想",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "和聲",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "旋律",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": [
+   "DIV.roll-chord",
+   "BUTTON.cell",
+   "BUTTON.cell",
+   "BUTTON.cell",
+   "BUTTON.cell"
+  ]
+ },
+ {
+  "state": "filled",
+  "d": "歌詞",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "編曲",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "錄音準備",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "混音觀念",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [],
+  "over": []
+ },
+ {
+  "state": "filled",
+  "d": "總檢討",
+  "vn": "mobile",
+  "primaries": 1,
+  "docW": 390,
+  "vw": 390,
+  "small": [
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24",
+   "INPUT.[] 24x24"
+  ],
+  "over": []
+ }
+]

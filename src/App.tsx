@@ -164,7 +164,7 @@ export default function App() {
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
             <Comp goTo={goKey} p={p} update={update} notify={notify} next={next} />
-            <KnowledgeSpark step={step.key} p={p} />
+            <KnowledgeSpark step={step.key} p={p} role={role} />
           </GentleContext.Provider>
         </WhisperContext.Provider>
         </section>

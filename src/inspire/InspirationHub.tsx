@@ -331,7 +331,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                     {collageChoices.some(o => o.how !== 'collage.new') && <details className="collage-more"><summary>其他拼法</summary>{collageChoices.filter(o => o.how !== 'collage.new').map(o => <button key={o.how} className="link-btn" onClick={() => performCollage(o)}>{o.label}</button>)}</details>}
                   </div>
                 )}
-                {api.list.length === 0 && <p className="muted">本子還是空的。隨時按右上角「記一下」，或上方「記新的」，留幾個字就好。</p>}
+                {api.list.length === 0 && <p className="muted">本子還空著，沒關係。哼一句、寫幾個字、拍張照，隨手夾進來就行。</p>}
                 {api.list.map((x) => {
                   const { here, start } = pullOptions(x, step, p)
                   const isOpen = expanded === x.id
@@ -340,7 +340,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                       {collage && <label className="pick"><input type="checkbox" checked={picked.includes(x.id)} onChange={() => togglePick(x.id)} /> 拿來拼</label>}
                       <button className="inspo-card-head" onClick={() => setExpanded(isOpen ? null : x.id)}>
                         <strong className="inspo-text">{x.text || x.voice?.transcript || '（無文字）'}</strong>
-                        <span className="small muted">{new Date(x.createdAt).toLocaleDateString('zh-TW')} · {x.tags.map((t) => TAG_ZH[t]).join('、') || '未分類'}{x.used.length ? ` · 已用 ${x.used.length} 次` : ''}</span>
+                        <span className="small muted">{new Date(x.createdAt).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })} 記下 · {x.tags.map((t) => TAG_ZH[t]).join('、') || '還沒歸類'}{x.used.length ? ` · 已用 ${x.used.length} 次` : ''}</span>
                         {x.note && <span className="small">{x.note}</span>}
                       </button>
                       {!isOpen && (x.voice || x.hum || x.images.length > 0) && (
