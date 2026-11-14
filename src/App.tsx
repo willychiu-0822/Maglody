@@ -235,7 +235,7 @@ export default function App() {
         onReset={() => { stopAll(); master.clear(); reset(); setCur(0); setMenu(false) }}
         onCapture={() => setInspoOpen('capture')} onClose={() => setProjectDecision(null)} />}
 
-      <MasterPanel key={master.session} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
+      <MasterPanel key={master.session} p={p} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
         messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />
     </div>
   )

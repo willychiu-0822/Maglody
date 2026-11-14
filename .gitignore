@@ -6,3 +6,7 @@ test-results/
 playwright-report/
 
 .uat-git/
+
+# 驗收截圖與 trace 只放在本機（M-05）。要留存的代表圖，壓成 WebP 後放進報告引用的資料夾。
+docs/uat/evidence/*
+!docs/uat/evidence/README.md

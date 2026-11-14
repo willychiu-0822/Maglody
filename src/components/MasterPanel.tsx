@@ -2,16 +2,11 @@ import { Modal } from './Modal'
 import { useEffect, useRef, useState } from 'react'
 import type { AgentAction, AgentMessage } from '../agent/types'
 import { ROLES, ROLE_ORDER, type RoleId } from '../agent/roles'
-
-const QUICK: Record<RoleId, string[]> = {
-  producer: ['這首歌像我要的感覺嗎？', '接下來做什麼？'],
-  composer: ['為什麼這和弦？', '換一個更哀傷的走向'],
-  lyricist: ['押韻怎麼找？', '卡住了，怎麼開頭？'],
-  arranger: ['副歌怎麼更有爆發力？'],
-  engineer: ['太高唱不上去', '怎麼帶進 REAPER？'],
-}
+import { quickPrompts } from '../agent/quick'
+import type { Project } from '../lib/store'
 
 interface Props {
+  p: Project
   open: boolean
   roleId: RoleId
   setRoleId: (r: RoleId) => void
@@ -25,7 +20,7 @@ interface Props {
 }
 
 /** 跟工作室夥伴聊天：點誰就跟誰聊，不限目前的工作檯 */
-export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messages, busy, onAsk, onAction }: Props) {
+export function MasterPanel({ p, open, roleId, setRoleId, onClose, onCapture, messages, busy, onAsk, onAction }: Props) {
   const [q, setQ] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
   useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight }) }, [messages, open])
@@ -86,7 +81,7 @@ export function MasterPanel({ open, roleId, setRoleId, onClose, onCapture, messa
         </div>
 
         <div className="master-quick">
-          {QUICK[roleId].map((t) => <button key={t} className="chip" onClick={() => send(t)}>{t}</button>)}
+          {quickPrompts(roleId, p).map((t) => <button key={t} className="chip" onClick={() => send(t)}>{t}</button>)}
         </div>
         <form className="master-input" onSubmit={(e) => { e.preventDefault(); send(q) }}>
           <input aria-label="跟夥伴說的話" value={q} onChange={(e) => setQ(e.target.value)} placeholder={`跟${role.name}說……`} />
