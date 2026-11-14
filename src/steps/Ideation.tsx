@@ -46,10 +46,10 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
   if (idea.image) fb.push(cleanLine(idea.image).length >= 6 ? { level: 'good', text: '有一個核心畫面，等一下寫歌詞時可以一直回來看它。' } : { level: 'warn', text: '核心畫面還有點模糊。', tip: '想更清楚的話，可以加上顏色、天氣、時間或一樣東西。' })
   if (idea.hook) {
     const n = cleanLine(idea.hook).length
-    fb.push(n >= 4 && n <= 12 ? { level: 'good', text: `記憶點 ${n} 個字，長度剛好，好記又好唱。` } : n < 4 ? { level: 'warn', text: '記憶點有點短。', tip: '4–12 個字通常順口：一口氣唱得完，又能說出一件事。' } : { level: 'warn', text: `記憶點 ${n} 個字，有點長。`, tip: '副歌最想讓人記住的那句，最好一口氣唱得完，可以試著拿掉幾個形容詞。' })
+    fb.push(n >= 4 && n <= 12 ? { level: 'good', text: `一句話 ${n} 個字，長度剛好，好記又好唱。` } : n < 4 ? { level: 'warn', text: '一句話有點短。', tip: '4–12 個字通常順口：一口氣唱得完，又能說出一件事。' } : { level: 'warn', text: `一句話 ${n} 個字，有點長。`, tip: '副歌最想讓人記住的那句，最好一口氣唱得完，可以試著拿掉幾個形容詞。' })
   }
   if (idea.title && idea.hook && (idea.hook.includes(idea.title) || idea.title.includes(cleanLine(idea.hook).slice(0, 2))))
-    fb.push({ level: 'good', text: '歌名出現在記憶點裡，聽眾聽完就知道歌名。' })
+    fb.push({ level: 'good', text: '歌名出現在一句話裡，聽眾聽完就知道歌名。' })
 
   const pickMood = (m: (typeof MOODS)[number]) => {
     const bpm = Math.round((m.bpm[0] + m.bpm[1]) / 2)
@@ -81,7 +81,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
 
       <Toolbox label="多寫一點（選填）">
         <label className="field"><span>歌名（不填就用上面那句）</span><input value={idea.title} onChange={(e) => set('title', e.target.value)} /></label>
-        <label className="field"><span>Vibe：聽起來像什麼？（場景、聲音、參考的歌）</span><input value={idea.vibe} placeholder="深夜騎車、街燈、帶點雨聲" onChange={(e) => set('vibe', e.target.value)} /></label>
+        <label className="field"><span>感覺：聽起來像什麼？（場景、聲音、參考的歌）</span><input value={idea.vibe} placeholder="深夜騎車、街燈、帶點雨聲" onChange={(e) => set('vibe', e.target.value)} /></label>
         <label className="field"><span>閉上眼睛看到的畫面</span><input value={idea.image} onChange={(e) => set('image', e.target.value)} /></label>
         <label className="field"><span>故事：誰、在哪、發生什麼</span><textarea rows={3} value={idea.story} onChange={(e) => set('story', e.target.value)} /></label>
         <label className="field">
@@ -94,7 +94,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
         <Why ready={!!idea.mood} title="為什麼情緒會改變和弦和速度？">
           <p>{mood?.why} 速度越接近休息時的心跳（60–80），聽起來越放鬆；越接近跑步，越激動。</p>
         </Why>
-        <Why ready={!!idea.hook} title="什麼是 Hook？">
+        <Why ready={!!idea.hook} title="為什麼要有一句話？">
           <p>那句讓人聽過還想再哼的話。可以試著放進副歌，看看你喜不喜歡。</p>
         </Why>
       </Toolbox>

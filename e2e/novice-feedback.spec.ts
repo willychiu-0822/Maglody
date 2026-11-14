@@ -46,7 +46,7 @@ test('UAT-54 P1 歌曲素材齊全可跨主副歌播放、缺項直達',async({p
   await shot(page,info,'chorus')
   await primary(page).click()
   await expect(primary(page)).toContainText('從頭聽')
-  await page.evaluate(()=>{const key='music-lab-project-v2',p=JSON.parse(localStorage.getItem(key)!);p.harmony.chorus=[null,null,null,null];localStorage.setItem(key,JSON.stringify(p))})
+  await page.evaluate(()=>{const key='maglody-project-v2',p=JSON.parse(localStorage.getItem(key)!);p.harmony.chorus=[null,null,null,null];localStorage.setItem(key,JSON.stringify(p))})
   await page.reload()
   await go(page,'總檢討')
   await expect(page.locator('.demo-missing')).toContainText('副歌和弦')
@@ -182,6 +182,8 @@ test('UAT-60 新手先救文字再回草稿救錄音，兩份成果都保留',as
   await page.getByRole('button',{name:'記一下靈感'}).click()
   await page.locator('.inspo-capture textarea').fill('窗外雨聲不要忘記')
   await page.locator('.inspo-big').filter({hasText:'說'}).click()
+  // M-21：第一次按「說」之前先說明聽寫是請瀏覽器幫忙
+  await page.getByRole('button',{name:'好，開始說',exact:true}).click()
   await expect(page.locator('.inspo-big.rec')).toBeVisible()
   await page.waitForTimeout(700)
   await page.locator('.inspo-big.rec').click()

@@ -2,33 +2,27 @@
 
 Repo：<https://github.com/willychiu-0822/Maglody>
 
-一間放在手機裡的**創作工作室**：把靈感、哼唱、詞句東拼西湊成你自己的歌，旁邊有一位大師陪著你，邊做邊懂。
+一間放在手機裡的**創作工作室**：把靈感、哼唱、詞句東拼西湊成你自己的歌，旁邊有一位夥伴陪著你，邊做邊懂。
 
 **發想**（哼唱、構想／Vibe）→ **成形**（和聲、旋律、歌詞、編曲）→ **打磨**（錄音準備、混音、總檢討）
 
 - 不是關卡：任何一檯都能隨時進出、跳著做；可以從哼唱、一句詞、和弦迴圈或舊靈感開始。
 - 拼貼：從靈感本子勾幾則碎片，拼成一段歌詞、接成一條旋律，或合成新靈感。
 - 先做、先聽，再輕輕點一句「為什麼」；想深入才展開，不灌輸。
-- 底部 ▶ 隨時聽目前為止的 Demo；改稿前存成 Demo v1、v2，可以回到舊版。
-- 大師只當教練，不會替你寫好整首歌。
+- 選單裡隨時能聽目前為止的 Demo；改稿前存成 Demo v1、v2，可以回到舊版。走完九檯，能把整首歌存成聲音檔帶走。
+- 夥伴只當教練，不會替你寫好整首歌。
 - 靈感隨時可以記：文字、語音（自動聽寫）、哼唱、照片可以放在同一則裡，之後一鍵拉回創作。
 
-## 目前驗證範圍
-
-本輪已換上核可的 v2 水彩人物與工作室底圖、補齊每檯推薦主動作、歌曲脈絡教練與有聲示範，並整合 A/B 的錄音保存、離線、資料復原與完整旅程驗收。
-
-- 本機 Chrome 的手機 390×844／桌面 1280×800 驗收：[UAT 計畫](docs/uat/UAT-PLAN.md)、[最新結果與截圖](docs/uat/UAT-RESULTS.md)、[機器狀態](docs/uat/UAT-STATUS.json)。
-- `npm run build`、`npm run selftest`、`npm run test:logic` 是補充檢查；範圍與修正記錄見 [Session A 清單](docs/codex-fixlist-a.md)。
-- 尚未驗證：實體手機、iOS Safari 的麥克風/靜音鍵/聽寫/PWA 安裝，以及真實 OpenAI/Gemini/Vertex 金鑰。預設使用離線 mock，測試不需要金鑰。
-- 已接手 session B，正式矩陣為 UAT-01～81 × 手機／桌面共162次。第11輪把本子採用／移除改成水彩確認紙頁，並補長文字分區與固定捕捉入口；[逐頁截圖與前後比較](docs/uat/UI-CHANGES.md)。最新build、selftest53/53及四尺寸探索通過，但最後完整162項為156 pass／6 fail，工具與瀏覽器重複停頓尚未解決，**目前未放行使用者測試**。原worktree metadata唯讀，提交使用 `scripts/git-local.sh`；無push、部署或tunnel操作。
-
-本機完整驗收（自動 build，在 4102 啟動 preview，跑完關閉）：
+## 怎麼跑、怎麼測、現況
 
 ```sh
-npm run test:e2e
+npm ci
+npm run dev            # 本機開發
+npm test               # 型別檢查、lint、單元、邏輯、音訊、build、部署煙霧測試（CI 跑的就是這個）
+npm run test:e2e       # 手機 390×844／桌面 1280×800 的完整驗收矩陣（約 6 分鐘，預設只寫 test-results/）
 ```
 
-舊手機 selftest 需另開 `npm run preview -- --host 127.0.0.1 --port 4101 --strictPort`；跑 `npm run selftest` 後，請關閉該 preview。
+現況：自動測試大致全過（有兩個已知的不穩定處：webaudio 檢查在沒有音訊裝置的環境會隨機失敗；完整 e2e 在機器忙的時候偶爾有 1～2 個「element is not stable」逾時，單獨重跑會過），`ready_for_user_test` 仍是 false。沒驗過的：實體手機與 iOS Safari、真實麥克風、真實 OpenAI／Gemini／Vertex 金鑰。驗收計畫與歷次紀錄見 [docs/uat/](docs/uat/UAT-PLAN.md)；舊的逐輪流水帳在 [docs/HANDOFF-20261113.md](docs/HANDOFF-20261113.md)。舊手機 selftest 需另開 `npm run preview -- --host 127.0.0.1 --port 4101 --strictPort`，跑完請關掉。
 
 ## 📱 手機可直接使用
 
@@ -51,9 +45,9 @@ npm run dev:mobile -- --port 4101 --strictPort # 自簽 https；手機開 https:
 npm run build        # 產生 dist/，部署到任何靜態主機（需 https）即可在手機使用
 ```
 
-## 大師 Agent（可切換 LLM）
+## 夥伴 Agent（可切換 LLM）
 
-預設是**離線 mock 大師**：用規則產生旁白，不需要網路和金鑰，也是 LLM 失敗時的備援。
+預設是**離線 mock 夥伴**：用規則產生旁白，不需要網路和金鑰，也是 LLM 失敗時的備援。
 
 要接真正的 LLM，請啟動後端代理。API 金鑰只放在後端，瀏覽器拿不到：
 
@@ -77,31 +71,37 @@ VITE_AGENT_URL=http://localhost:8787/api/master npm run dev
 | `GCP_USE_METADATA` | 部署在 Cloud Run 時設為 `1`，改用服務帳戶自動取得權杖（不需要金鑰檔） | — |
 | `GEMINI_API_KEY` | Gemini Developer API 金鑰（`gemini` 必填，適合本機開發） | — |
 | `PORT` | 後端埠號 | `8787` |
-| `ALLOW_ORIGIN` | 允許呼叫後端的前端網址（CORS），多個請用逗號分隔 | `http://localhost:5173` |
+| `ALLOW_ORIGIN` | 允許呼叫後端的前端網址（CORS），多個請用逗號分隔。只擋瀏覽器，擋不了直接呼叫 | `http://localhost:5173` |
+| `RATE_PER_MINUTE` | 每個來源每分鐘最多幾次，超過回 429（前端會退回離線夥伴） | `20` |
+| `RATE_PER_DAY` | 整個服務每 24 小時最多幾次；`0` 代表不限制 | `3000` |
+| `TRUST_PROXY_HOPS` | 前面有幾層自己的代理（Render、Cloud Run 填 `1`），用來從 `X-Forwarded-For` 認出來源；放在代理後面卻沒設，所有人會被算成同一個來源 | `0` |
 | `VITE_AGENT_URL` | **前端**：後端網址；不設定就用離線 mock | — |
+
+後端只收「資料」（工作檯、夥伴代號、歌曲摘要、提問、最近幾則對話）；system prompt 和夥伴設定由後端自己帶，請求裡帶 `system` 或 `messages` 會被擋掉。限流存在程序記憶體裡，重啟或多開幾台就各算各的，所以供應商那邊的預算上限仍要設。
 
 健康檢查：`curl localhost:8787/api/health`。**一步一步的雲端設定（OpenAI、Gemini、Vertex、Netlify／Render／Cloud Run 部署）見 [docs/cloud-setup.md](docs/cloud-setup.md)，給非工程背景的人也能照做。**Prompt 模板見 [docs/agent-prompts.md](docs/agent-prompts.md)。
 
 ## 帶進 DAW：預設教學用 REAPER
 
-Web 版負責「學會做決定」，DAW 負責「把決定做到好聽」。編曲、錄音、混音章節都附有 REAPER 操作步驟，可以下載 **MIDI**（主旋律／和弦／貝斯三軌，含速度）直接拖進 REAPER。
+Web 版負責「學會做決定」，DAW 負責「把決定做到好聽」。編曲、錄音、混音章節都附有 REAPER 操作步驟，可以下載 **MIDI**（旋律／和弦／貝斯／鼓四軌，含速度）直接拖進 REAPER。
 
 REAPER 選擇原因：輕量、跨平台、可完整試用 60 天。試用期結束後，官方要求購買授權（個人與小型用途有折扣授權），但軟體不會被鎖住。下載：<https://www.reaper.fm/>
 
 ## 資料存在哪裡
 
-全部存在你自己的瀏覽器裡，不會上傳：
+歌、靈感和錄音都存在你自己的瀏覽器裡，不會放到我們的伺服器。兩個例外要說清楚：
 
 - 目前這首歌：`localStorage`
 - 靈感庫的文字：`localStorage`；語音、哼唱、照片：IndexedDB
-- 接上 LLM 時，只會把歌的文字摘要（不含錄音和照片）送給後端
+- 記靈感的「說」是請瀏覽器的語音辨識打成字；瀏覽器（例如 Chrome）一般是把聲音送到它自己的語音服務辨識（這一點沒有在目標瀏覽器上抓封包驗證）。App 第一次按「說」之前會先說明，也可以選「只錄音」
+- 接上 LLM 時，只會把歌的文字摘要（不含錄音和照片）送給後端與模型供應商。App 選單「更多」的「你的東西放在哪」有同樣的說明
 
 ## 文件
 
 - [docs/creator-workflow.md](docs/creator-workflow.md)：真實創作者的做歌流程與 Maglody 的對齊
 - [docs/pedagogy.md](docs/pedagogy.md)：研究結論與教學設計（工作室、火種式學習、可聽成果）
 - [docs/architecture.md](docs/architecture.md)：前後端架構、LLM provider 抽象層、資料模型
-- [docs/agent-prompts.md](docs/agent-prompts.md)：大師 Agent 的 prompt 模板
+- [docs/agent-prompts.md](docs/agent-prompts.md)：夥伴 Agent 的 prompt 模板
 - [docs/design.md](docs/design.md)：視覺語言（紙、墨、淡彩）與禁止清單
 - [docs/cloud-setup.md](docs/cloud-setup.md)：雲端與部署設定（非工程新手版）
 - [docs/ux-review.md](docs/ux-review.md)：新手手機路徑自測紀錄與修正狀態

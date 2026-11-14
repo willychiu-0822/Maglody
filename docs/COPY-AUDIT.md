@@ -2593,7 +2593,7 @@
 | `src/components/ProjectDialog.tsx` 還原版本摘要 | 一起看看這首歌現在的樣子。 | 摘要展示的是選中的舊版，不一定是現在桌上的歌；改為「一起看看這一版的樣子。」 |
 | 同上，還原頁開場 | 再聽一次那時的心情，決定要不要回去。 | 此頁沒有播放功能，容易讓人誤以為可以聽；改為「翻翻那時留下的樣子，再決定要不要回去。」 |
 
-還原頁前後截圖見 `COPY-VERIFY-2126.md`；全站審核仍未完成。
+還原頁前後截圖見 `archive/COPY-VERIFY-2126.md`；全站審核仍未完成。
 
 ## 2026-11-13 補充（codex/fable-maglody-copy-20261113）
-和聲、編曲、旋律、發想、錄音、歌詞的回饋句與離線大師回覆已改為夥伴口氣，詳見 docs/COPY-VERIFY-1113-*.md。仍待核：Mix、Hum 回饋句、Arrangement 長度偏短／偏長、KnowledgeSpark、MasterPanel、完整 UAT 矩陣。
+和聲、編曲、旋律、發想、錄音、歌詞的回饋句與離線大師回覆已改為夥伴口氣，詳見 docs/archive/COPY-VERIFY-1113-*.md。仍待核：Mix、Hum 回饋句、Arrangement 長度偏短／偏長、KnowledgeSpark、MasterPanel、完整 UAT 矩陣。

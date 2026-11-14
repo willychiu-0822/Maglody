@@ -3,11 +3,18 @@ import http from 'node:http'
 import { createProvider } from './llm/index.ts'
 import { createHandler } from './app.ts'
 
+const num = (name: string, fallback: number) => {
+  const value = Number(process.env[name] ?? fallback)
+  return Number.isFinite(value) && value >= 0 ? value : fallback
+}
 const port = Number(process.env.PORT ?? 8787)
 try {
   const provider = createProvider()
   const allowed = (process.env.ALLOW_ORIGIN ?? 'http://localhost:5173').split(',').map((x) => x.trim()).filter(Boolean)
-  const server = http.createServer(createHandler(provider, allowed))
+  const server = http.createServer(createHandler(provider, allowed, {
+    rate: { perMinute: num('RATE_PER_MINUTE', 20), perDay: num('RATE_PER_DAY', 3000) },
+    trustedHops: num('TRUST_PROXY_HOPS', 0),
+  }))
   server.requestTimeout = 15_000
   server.headersTimeout = 10_000
   server.on('error', (error) => { console.error('[master] Server failed:', error.message); process.exitCode = 1 })

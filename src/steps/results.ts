@@ -7,7 +7,7 @@ import { speakLyrics } from '../lib/lyricsAudio'
 
 export interface StepResult { label: string; available: (p: Project) => boolean; play: (p: Project) => void }
 
-function playHum(p: Project) {
+export function playHum(p: Project) {
   if (!p.hum) return
   const t0 = ac().currentTime + 0.05
   p.hum.notes.forEach((n) => tone(n.midi, t0 + n.start, Math.max(0.08, n.dur), { gain: 0.2 }))

@@ -53,7 +53,7 @@ A、B、C 都需要多架一個小小的「後端」。原因是：**AI 金鑰�
 
 ### 1-1　準備好程式碼的位置
 
-程式碼在 GitHub：`willychiu-0822/Maglody`，目前最新的內容在 **`feature/music-lab`** 分支。
+程式碼在 GitHub：`willychiu-0822/Maglody`，最新的內容在 **`main`** 分支。
 
 - **為什麼**：等一下的網站託管服務會直接從 GitHub 讀程式碼，你每次更新，網站就會自動跟著更新。
 - **建議**：確認一切正常後，把這個分支合併進 `main`。託管服務預設看 `main`，之後比較不容易選錯。
@@ -64,7 +64,7 @@ A、B、C 都需要多架一個小小的「後端」。原因是：**AI 金鑰�
 1. 到 <https://app.netlify.com/> 用 GitHub 帳號登入。
 2. 按 **Add new site → Import an existing project → GitHub**，選 `Maglody`。
 3. 設定以下欄位：
-   - **Branch to deploy**：`feature/music-lab`（或合併後的 `main`）
+   - **Branch to deploy**：`main`
    - **Build command**：`npm run build`
    - **Publish directory**：`dist`
 4. 按 **Deploy**。大約 1 分鐘後，你會拿到一個 `https://xxxx.netlify.app` 網址。
@@ -148,7 +148,7 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
 
 1. 到 <https://render.com/> 用 GitHub 登入 → **New → Web Service** → 選 `Maglody`。
 2. 填入以下設定：
-   - **Branch**：`feature/music-lab`（或 `main`）
+   - **Branch**：`main`
    - **Runtime**：Node
    - **Build Command**：`echo skip`（後端不需要建置）
    - **Start Command**：`node server/index.ts`
@@ -158,7 +158,8 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
    ALLOW_ORIGIN=https://你的網站.netlify.app
    NODE_VERSION=22.18.0
    ```
-   - **為什麼要 `ALLOW_ORIGIN`**：只允許你自己的網站呼叫這個後端，別人的網頁無法借用你的額度。
+   - **為什麼要 `ALLOW_ORIGIN`**：只允許你自己的網站呼叫這個後端，別人的網頁無法借用你的額度。（它只擋瀏覽器；直接用指令打的人擋不了，那一塊靠下面的限流與預算上限。）
+   - 另外加 `TRUST_PROXY_HOPS=1`，讓限流認得每位使用者的來源。
    - **為什麼要指定 Node 版本**：後端直接執行 TypeScript，需要 Node 22.18 以上。
 4. 按 **Create**。完成後你會拿到 `https://xxxx.onrender.com`。
 5. 測試：用瀏覽器打開 `https://xxxx.onrender.com/api/health`，看到類似 `{"provider":"openai-chat","model":"..."}` 就成功了。
@@ -172,7 +173,7 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
 
    ```bash
    gcloud config set project 你的專案ID
-   git clone -b feature/music-lab https://github.com/willychiu-0822/Maglody.git
+   git clone -b main https://github.com/willychiu-0822/Maglody.git
    cd Maglody
 
    # 讓 Cloud Run 的身分可以呼叫 Vertex AI
@@ -184,7 +185,7 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
    # 部署後端
    gcloud run deploy maglody-master --source server --region asia-east1 \
      --allow-unauthenticated --max-instances 2 \
-     --set-env-vars "LLM_PROVIDER=vertex,GCP_PROJECT=$(gcloud config get-value project),GCP_LOCATION=asia-east1,LLM_MODEL=模型名稱,GCP_USE_METADATA=1,ALLOW_ORIGIN=https://你的網站.netlify.app"
+     --set-env-vars "TRUST_PROXY_HOPS=1,RATE_PER_MINUTE=20,RATE_PER_DAY=3000,LLM_PROVIDER=vertex,GCP_PROJECT=$(gcloud config get-value project),GCP_LOCATION=asia-east1,LLM_MODEL=模型名稱,GCP_USE_METADATA=1,ALLOW_ORIGIN=https://你的網站.netlify.app"
    ```
 
 3. 如果系統詢問是否啟用某些 API，輸入 `y`。完成後會顯示 `Service URL: https://maglody-master-xxxx.a.run.app`。
@@ -194,6 +195,9 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
   - `roles/aiplatform.user`：只給「呼叫 Vertex AI」的權限，不多給。這叫最小權限原則。
   - `GCP_USE_METADATA=1`：讓後端在 Cloud Run 上自動取得服務帳戶的通行證，不需要任何金鑰檔。
   - `--max-instances 2`：限制最多同時開 2 台，避免費用暴衝。
+  - `--allow-unauthenticated`：瀏覽器沒辦法帶 Google 的登入憑證，不開放就叫不動後端。所以靠兩道牆擋濫用：後端自己的**限流**（`RATE_PER_MINUTE`／`RATE_PER_DAY`），加上前面設好的**預算上限**。
+  - `TRUST_PROXY_HOPS=1`：Cloud Run 在前面多一層代理，要告訴後端從 `X-Forwarded-For` 取來源，不然所有人會被算成同一個人。
+  - 限流計數存在每台機器的記憶體裡，重啟或多開幾台就各算各的，所以它是第一道牆，不是唯一一道。
 - **還能用在哪**：任何小型 API、LINE Bot、表單後端都能用 `gcloud run deploy --source` 這樣部署。
 
 ---
@@ -206,7 +210,7 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
    ```
 2. **Deploys → Trigger deploy → Deploy site**，重新建置一次。
    - **為什麼要重新建置**：`VITE_` 開頭的設定是在「打包網頁」時寫進去的，改了之後必須重新打包才會生效。
-3. 用手機打開網站 → 點底部的大師 → 對話框右上角應該顯示 **「LLM 模式」**（原本是「離線模式」）。問一句「為什麼這和弦？」試試看。
+3. 用手機打開網站 → 點畫面上的夥伴 → 對話框右上角應該顯示 **「LLM 模式」**（原本是「離線模式」）。問一句「為什麼這和弦？」試試看。
 
 ---
 
@@ -229,9 +233,10 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
 | `/api/health` 打不開 | 後端沒啟動 | 看 Render／Cloud Run 的 Logs，通常會寫「缺少環境變數 XXX」 |
 | 大師回答很慢才出現 | Render 免費方案在休眠 | 正常現象；需要即時回應可升級方案或改用 Cloud Run |
 | Vertex 出現 403 | 服務帳戶沒有權限，或 API 沒啟用 | 重做 3-2 的授權指令；確認已啟用 Vertex AI API |
-| 帳單變多 | 網址被別人使用 | 換一把金鑰、調低預算；`ALLOW_ORIGIN` 只能擋瀏覽器，擋不了直接呼叫，所以預算上限是最後一道防線 |
+| 帳單變多 | 網址被別人使用 | 換一把金鑰、調低預算；`ALLOW_ORIGIN` 只能擋瀏覽器，擋不了直接呼叫；後端的限流是第一道牆，預算上限是最後一道防線 |
 
 ## 目前的限制（誠實說明）
 
-- 後端還沒有「每人每分鐘次數限制」，目前靠預算上限和 Cloud Run 的實例數上限控制成本。
+- 後端有「每來源每分鐘」和「全服務每日」的次數限制（超過回 429，前端會自動改用離線夥伴），計數存在記憶體裡，重啟或多開幾台就各算各的；真正的成本上限仍靠預算上限和 Cloud Run 的實例數上限。
+- 後端只收資料，system prompt 與夥伴設定由後端自己帶。**前端和後端要一起更新**：舊版前端還在送 `system`／`messages`，新後端會回 400，前端會悄悄退回離線夥伴，聊天看起來就像沒接上。
 - 以上流程已用本機模擬端點驗證過請求格式；**尚未用真實金鑰實際呼叫 OpenAI、Gemini、Vertex**。第一次接上時，請先看 `/api/health`，再問一句試試。

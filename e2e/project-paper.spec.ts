@@ -1,4 +1,5 @@
 import { test, expect, setup, finished, go, primary, readProject, captureText, library } from './helpers'
+import { evidenceRoot } from './evidence-root'
 
 async function openVersions(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: '打開工作室選單' }).click()
@@ -28,7 +29,7 @@ test('UAT-76 保存、還原與新歌使用紙頁明確確認，取消不改稿'
   let dialog = await paperCheck(page, '留住這一版')
   await expect(dialog).toContainText('鑰匙留在門口')
   await dialog.getByRole('textbox', { name: '這一版的說明（選填）' }).fill('先保留雨聲的版本')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-15-save-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-15-save-${info.project.name}.png`, animations: 'disabled' })
   await dialog.locator('.primary-action').click()
   await expect(dialog).toContainText('存好了：Demo v1')
   await expect(page.locator('.version')).toContainText('先保留雨聲的版本')
@@ -42,7 +43,7 @@ test('UAT-76 保存、還原與新歌使用紙頁明確確認，取消不改稿'
   await restore.click()
   dialog = await paperCheck(page, '回到這一版')
   await expect(dialog).toContainText('Demo v1')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-15-restore-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-15-restore-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '先不換', exact: true }).click()
   expect((await readProject(page)).idea.hook).toBe('我改過的新句子')
   await expect(restore).toBeFocused()
@@ -52,7 +53,7 @@ test('UAT-76 保存、還原與新歌使用紙頁明確確認，取消不改稿'
   const reset = page.getByRole('button', { name: '重新開始一首新歌', exact: true })
   await reset.click()
   dialog = await paperCheck(page, '翻開新的一頁')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-15-new-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-15-new-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '繼續這首歌', exact: true }).click()
   expect((await readProject(page)).idea.hook).toBe('鑰匙留在門口')
   await reset.click()
@@ -81,7 +82,7 @@ test('UAT-77 版本保存失敗保留說明可重試，捕捉返回與重整不�
   await expect(dialog.getByRole('button', { name: '✎ 記一下', exact: true })).toBeFocused()
   await page.evaluate(() => {
     const original = Storage.prototype.setItem
-    ;(window as any).__restoreVersionStorage = () => { Storage.prototype.setItem = original }
+    ;(window as unknown as { __restoreVersionStorage: () => void }).__restoreVersionStorage = () => { Storage.prototype.setItem = original }
     Storage.prototype.setItem = function(k, v) { if (k === 'maglody-versions-v1') throw new DOMException('full', 'QuotaExceededError'); return original.call(this, k, v) }
   })
   await dialog.locator('.primary-action').click()
@@ -89,11 +90,11 @@ test('UAT-77 版本保存失敗保留說明可重試，捕捉返回與重整不�
   await expect(dialog).not.toContainText('存好了：')
   await expect(page.locator('.version')).toHaveCount(0)
   await expect(dialog.getByRole('textbox', { name: '這一版的說明（選填）' })).toHaveValue(note)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-15-retry-${info.project.name}.png`, animations: 'disabled' })
-  await page.evaluate(() => (window as any).__restoreVersionStorage())
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-15-retry-${info.project.name}.png`, animations: 'disabled' })
+  await page.evaluate(() => (window as unknown as { __restoreVersionStorage: () => void }).__restoreVersionStorage())
   await dialog.getByRole('button', { name: '再存一次', exact: true }).click()
   await expect(dialog).toContainText('存好了：Demo v1')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-15-saved-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-15-saved-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '好，回到工作室', exact: true }).click()
   await page.reload()
   await openVersions(page)

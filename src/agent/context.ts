@@ -12,7 +12,7 @@ export function songContext(p: Project): string {
   lines.push(`情緒：${p.idea.mood || '未選'}；速度 ${p.idea.bpm} BPM；vibe：${p.idea.vibe || '—'}`)
   if (p.idea.story) lines.push(`故事：${p.idea.story}`)
   if (p.idea.image) lines.push(`核心畫面：${p.idea.image}`)
-  if (p.idea.title || p.idea.hook) lines.push(`歌名：${p.idea.title || '—'}；Hook：${p.idea.hook || '—'}`)
+  if (p.idea.title || p.idea.hook) lines.push(`歌名：${p.idea.title || '—'}；一句話：${p.idea.hook || '—'}`)
   lines.push(`調：${keyName(p.harmony.root, p.harmony.mode)}；主歌和弦 ${prog(p.harmony.verse)}；副歌和弦 ${prog(p.harmony.chorus)}`)
   if (p.melody.verse.some((m) => m != null)) lines.push(`主歌旋律（每格半拍，.=休止，-=延長）：${mel(p.melody.verse)}`)
   if (p.melody.chorus.some((m) => m != null)) lines.push(`副歌旋律：${mel(p.melody.chorus)}`)

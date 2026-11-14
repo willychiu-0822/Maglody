@@ -31,6 +31,19 @@ export function ac(): AudioContext {
   return ctx
 }
 
+/**
+ * 離線渲染（存成聲音檔）：渲染期間所有合成函式改用傳進來的 OfflineAudioContext，
+ * 不碰即時的 AudioContext，也不登記進 stopAll 的名單。
+ */
+let renderTarget: BaseAudioContext | null = null
+const actx = (): BaseAudioContext => renderTarget ?? ac()
+const track = <T extends AudioScheduledSourceNode>(source: T): T => renderTarget ? source : trackAudioSource(source)
+export function withRenderContext<T>(c: BaseAudioContext, fn: () => T): T {
+  const previous = renderTarget
+  renderTarget = c
+  try { return fn() } finally { renderTarget = previous }
+}
+
 export type Wave = OscillatorType
 
 export interface ToneOpts {
@@ -42,8 +55,8 @@ export interface ToneOpts {
 }
 
 export function tone(midi: number, start: number, dur: number, o: ToneOpts = {}) {
-  const c = ac()
-  const osc = trackAudioSource(c.createOscillator())
+  const c = actx()
+  const osc = track(c.createOscillator())
   const g = c.createGain()
   osc.type = o.type ?? 'triangle'
   osc.frequency.value = midiToFreq(midi)
@@ -72,19 +85,21 @@ export function playChord(midis: number[], dur = 1.2, o: ToneOpts = {}) {
   midis.forEach((m, i) => tone(m, t + i * 0.015, dur, { gain: 0.14, type: 'triangle', release: 0.4, ...o }))
 }
 
-let noiseBuf: AudioBuffer | null = null
-function noise(c: AudioContext) {
-  if (!noiseBuf) {
-    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate)
-    const d = noiseBuf.getChannelData(0)
+const noiseBufs = new WeakMap<BaseAudioContext, AudioBuffer>()
+function noise(c: BaseAudioContext) {
+  let buf = noiseBufs.get(c)
+  if (!buf) {
+    buf = c.createBuffer(1, c.sampleRate, c.sampleRate)
+    const d = buf.getChannelData(0)
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
+    noiseBufs.set(c, buf)
   }
-  return noiseBuf
+  return buf
 }
 
 export function kick(t: number, dest: AudioNode, gain = 0.9) {
-  const c = ac()
-  const o = trackAudioSource(c.createOscillator())
+  const c = actx()
+  const o = track(c.createOscillator())
   const g = c.createGain()
   o.frequency.setValueAtTime(140, t)
   o.frequency.exponentialRampToValueAtTime(45, t + 0.12)
@@ -97,8 +112,8 @@ export function kick(t: number, dest: AudioNode, gain = 0.9) {
 }
 
 export function snare(t: number, dest: AudioNode, gain = 0.4) {
-  const c = ac()
-  const s = trackAudioSource(c.createBufferSource())
+  const c = actx()
+  const s = track(c.createBufferSource())
   s.buffer = noise(c)
   const f = c.createBiquadFilter()
   f.type = 'highpass'
@@ -113,8 +128,8 @@ export function snare(t: number, dest: AudioNode, gain = 0.4) {
 }
 
 export function hat(t: number, dest: AudioNode, gain = 0.12) {
-  const c = ac()
-  const s = trackAudioSource(c.createBufferSource())
+  const c = actx()
+  const s = track(c.createBufferSource())
   s.buffer = noise(c)
   const f = c.createBiquadFilter()
   f.type = 'highpass'
@@ -129,8 +144,8 @@ export function hat(t: number, dest: AudioNode, gain = 0.12) {
 }
 
 export function click(t: number, accent: boolean, dest?: AudioNode) {
-  const c = ac()
-  const o = trackAudioSource(c.createOscillator())
+  const c = actx()
+  const o = track(c.createOscillator())
   const g = c.createGain()
   o.frequency.value = accent ? 1600 : 1000
   g.gain.setValueAtTime(0.3, t)
@@ -232,13 +247,50 @@ export function stopAll() {
   window.speechSynthesis?.cancel()
 }
 
+/** 把一個段落（和弦、貝斯、鼓、旋律）排進 c；即時播放與離線渲染共用，所以兩邊聽到的是同一份。 */
+export function scheduleSection(spec: LoopSpec, t0: number, dest: (id: TrackId) => AudioNode, scheduled: AudioScheduledSourceNode[]) {
+  const eighth = 60 / spec.bpm / 2
+  const barDur = eighth * 8
+  const totalSteps = spec.bars.length * 8
+  spec.bars.forEach((voicing, b) => {
+    const bt = t0 + b * barDur
+    if (spec.layers.keys) {
+      for (let k = 0; k < 4; k++) {
+        voicing.slice(0, 3).forEach((m) => scheduled.push(tone(m, bt + k * eighth * 2, eighth * 1.6, { gain: 0.07, type: 'triangle', dest: dest('chords') })))
+      }
+    }
+    if (spec.layers.pad) {
+      voicing.slice(0, 3).forEach((m) => scheduled.push(tone(m + 12, bt, barDur * 0.95, { gain: 0.035, type: 'sawtooth', attack: 0.3, release: 0.4, dest: dest('chords') })))
+    }
+    if (spec.layers.bass && voicing.length) {
+      const root = voicing[voicing.length - 1] - 12
+      ;[0, 3, 4, 6].forEach((s) => scheduled.push(tone(root, bt + s * eighth, eighth * 0.9, { gain: 0.3, type: 'sine', dest: dest('bass') })))
+    }
+    if (spec.layers.drums) {
+      for (let s = 0; s < 8; s++) {
+        const st = bt + s * eighth
+        if (s === 0 || s === 5) scheduled.push(kick(st, dest('drums')))
+        if (s === 2 || s === 6) scheduled.push(snare(st, dest('drums')))
+        scheduled.push(hat(st, dest('drums')))
+      }
+    }
+  })
+  if (spec.layers.melody && spec.melody) {
+    spec.melody.slice(0, totalSteps).forEach((m, i) => {
+      if (m == null || m < 0) return
+      let len = 1
+      while (i + len < totalSteps && spec.melody![i + len] === -1) len++
+      scheduled.push(tone(m, t0 + i * eighth, eighth * len * 0.92, { gain: 0.22, type: 'square', attack: 0.02, release: 0.1, dest: dest('melody') }))
+    })
+  }
+}
+
 export function playLoop(spec: LoopSpec): Player {
   if (!spec.bars.length) return { stop() {} }
   const c = ac()
   const graph = spec.mix
   const dest = (id: TrackId): AudioNode => (graph ? graph.buses[id].input : c.destination)
   const eighth = 60 / spec.bpm / 2
-  const barDur = eighth * 8
   const totalSteps = spec.bars.length * 8
   let stopped = false
   let startAt = c.currentTime + 0.1
@@ -246,37 +298,7 @@ export function playLoop(spec: LoopSpec): Player {
   const scheduled: AudioScheduledSourceNode[] = []
 
   const scheduleCycle = (t0: number) => {
-    spec.bars.forEach((voicing, b) => {
-      const bt = t0 + b * barDur
-      if (spec.layers.keys) {
-        for (let k = 0; k < 4; k++) {
-          voicing.slice(0, 3).forEach((m) => scheduled.push(tone(m, bt + k * eighth * 2, eighth * 1.6, { gain: 0.07, type: 'triangle', dest: dest('chords') })))
-        }
-      }
-      if (spec.layers.pad) {
-        voicing.slice(0, 3).forEach((m) => scheduled.push(tone(m + 12, bt, barDur * 0.95, { gain: 0.035, type: 'sawtooth', attack: 0.3, release: 0.4, dest: dest('chords') })))
-      }
-      if (spec.layers.bass && voicing.length) {
-        const root = voicing[voicing.length - 1] - 12
-        ;[0, 3, 4, 6].forEach((s) => scheduled.push(tone(root, bt + s * eighth, eighth * 0.9, { gain: 0.3, type: 'sine', dest: dest('bass') })))
-      }
-      if (spec.layers.drums) {
-        for (let s = 0; s < 8; s++) {
-          const st = bt + s * eighth
-          if (s === 0 || s === 5) scheduled.push(kick(st, dest('drums')))
-          if (s === 2 || s === 6) scheduled.push(snare(st, dest('drums')))
-          scheduled.push(hat(st, dest('drums')))
-        }
-      }
-    })
-    if (spec.layers.melody && spec.melody) {
-      spec.melody.slice(0, totalSteps).forEach((m, i) => {
-        if (m == null || m < 0) return
-        let len = 1
-        while (i + len < totalSteps && spec.melody![i + len] === -1) len++
-        scheduled.push(tone(m, t0 + i * eighth, eighth * len * 0.92, { gain: 0.22, type: 'square', attack: 0.02, release: 0.1, dest: dest('melody') }))
-      })
-    }
+    scheduleSection(spec, t0, dest, scheduled)
     if (spec.onStep) {
       for (let s = 0; s < totalSteps; s++) {
         const delay = (t0 + s * eighth - c.currentTime) * 1000

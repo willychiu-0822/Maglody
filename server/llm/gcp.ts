@@ -1,5 +1,5 @@
-import { fetchJson, HttpError } from '../../src/lib/request.ts'
-import { isObject } from '../../src/agent/reply.ts'
+import { fetchJson, HttpError } from '../shared/request.ts'
+import { isObject } from '../shared/reply.ts'
 // Google provider：
 //  - vertex：Vertex AI Gemini（GCP 專案 + OAuth 存取權杖）
 //      env：GCP_PROJECT（必填）、GCP_LOCATION（預設 us-central1，可設 global）、LLM_MODEL

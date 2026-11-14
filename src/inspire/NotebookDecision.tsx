@@ -22,7 +22,7 @@ export function NotebookDecisionPage({ decision, project, error, onConfirm, onCa
     {decision.kind === 'start' ? <div className="decision-effect">
       <p>帶進這首歌：</p><p className="decision-song-title" tabIndex={0}>《{project.idea.title || '還沒取名字的歌'}》</p>
       <ul>
-        {(item.text || item.voice?.transcript) && <li>{item.tags.includes('title') ? '歌名與記憶點會換成這句話。' : '記憶點會換成這句話，歌名留在原處。'}這句話也會加進 Vibe。</li>}
+        {(item.text || item.voice?.transcript) && <li>{item.tags.includes('title') ? '歌名和這首歌的一句話，都會換成這一則。' : '這首歌的一句話會換成這一則，歌名留在原處。'}這一則也會加進這首歌的「感覺」。</li>}
         {item.tags.includes('image') && !project.idea.image && <li>這句話會成為核心畫面。</li>}
         {item.hum && <li>這段哼唱會換掉目前的哼唱種子與調性；格子裡已寫的旋律仍保留。</li>}
         <li>已有的歌詞、和弦格與編曲會保留；採用後回到構想檯。</li>

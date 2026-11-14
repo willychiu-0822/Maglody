@@ -1,0 +1,21 @@
+name: ci
+
+# 每次推送與 PR 都跑：型別檢查、lint、單元測試、邏輯與音訊檢查、build、部署煙霧測試。
+# 完整的 e2e 矩陣（約 6 分鐘、需要手機與桌面兩種尺寸）另外排，不在這裡。
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test

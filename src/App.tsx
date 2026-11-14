@@ -16,6 +16,8 @@ import { GentleContext, WhisperContext } from './components/ui'
 import { useMaster } from './agent/useMaster'
 import { DESK_ROLE, ROLES, type RoleId } from './agent/roles'
 import type { AgentAction } from './agent/types'
+import { downloadBackup, parseBackup } from './lib/backup'
+import { agentMode } from './agent/client'
 import { humStep } from './steps/Hum'
 import { ideationStep } from './steps/Ideation'
 import { lyricsStep } from './steps/Lyrics'
@@ -27,8 +29,25 @@ import { mixStep } from './steps/Mix'
 import { reviewStep } from './steps/Review'
 import { demoAvailable, playDemo } from './steps/results'
 import { InspirationHub } from './inspire/InspirationHub'
+import { asset } from './lib/asset'
 import { useInspirations } from './inspire/store'
 import type { StepDef } from './steps/types'
+
+const SAVE_NOTE_KEY = 'maglody-save-note-seen'
+const DESK_KEY = 'maglody-current-desk'
+
+/**
+ * 重新整理後回到剛才那一檯（記在這個分頁的 sessionStorage）。
+ * 只在存檔進度（unlocked）沒變的時候採用；進度被別處改過（換分頁、還原備份），就照存檔的進度走。
+ */
+function startDesk(unlocked: number): number {
+  const fallback = Math.min(unlocked, STEPS.length - 1)
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(DESK_KEY) ?? 'null') as { desk?: unknown; unlocked?: unknown } | null
+    if (saved && saved.unlocked === unlocked && Number.isInteger(saved.desk) && (saved.desk as number) >= 0 && (saved.desk as number) < STEPS.length) return saved.desk as number
+  } catch { /* 讀不到就照進度走 */ }
+  return fallback
+}
 
 // 工作室：發想 → 成形 → 打磨。每一檯都能隨時進出，沒有關卡。
 const STEPS: StepDef[] = [humStep, ideationStep, harmonyStep, melodyStep, lyricsStep, arrangementStep, recordingStep, mixStep, reviewStep]
@@ -42,7 +61,7 @@ export default function App() {
   const { project: p, setProject, update, reset, storageError } = useProject()
   // 一進工作室就記住實驗開關，不必先走到旋律檯或總檢討。
   useMidiLab()
-  const [cur, setCur] = useState(() => Math.min(p.unlocked, STEPS.length - 1))
+  const [cur, setCur] = useState(() => startDesk(p.unlocked))
   const [menu, setMenu] = useState(false)
   const [chat, setChat] = useState<RoleId | null>(null)
   const [chatRole, setChatRole] = useState<RoleId>('producer')
@@ -55,7 +74,9 @@ export default function App() {
   const inspo = useInspirations()
   const versions = useVersions()
   const [projectDecision, setProjectDecision] = useState<ProjectDecision | null>(null)
-  const skipEnter = useRef(false)
+  const importInput = useRef<HTMLInputElement>(null)
+  const [importError, setImportError] = useState('')
+  const [saveNote, setSaveNote] = useState(false)
   const step = STEPS[cur]
   const [entry, setEntry] = useState(() => ({ step: step.key, messageIds: new Set<string>() }))
   const role = ROLES[DESK_ROLE[step.key]]
@@ -71,24 +92,16 @@ export default function App() {
     : step.key === 'review' && !hasWrittenSound ? '先留下一點聲音：挑幾個和弦，或寫幾個音' : null
 
   useEffect(() => {
+    try { sessionStorage.setItem(DESK_KEY, JSON.stringify({ desk: cur, unlocked: pRef.current.unlocked })) } catch { /* 沒有就算了 */ }
     stopAll()
     window.scrollTo({ top: 0, behavior: 'smooth' })
     // History drops old messages once full; array offsets cannot mark a desk entry.
     setEntry({ step: step.key, messageIds: new Set(master.messages.map(m => m.id)) })
-    // 進場不再說開場白：角色登場那一句＋這一檯自己的一句話就夠了
-    skipEnter.current = false
   }, [cur]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 這一檯的夥伴最近說的一句話（只取進入這一檯之後的）
-  // 夥伴的話只停留 14 秒，之後讓位給這一檯當下該做的事
-  const [, tick] = useState(0)
-  const latestRaw = entry.step === step.key ? master.messages.filter((m) => !entry.messageIds.has(m.id) && m.role === 'master' && m.step === step.key && m.role_id === role.id).pop() : undefined
-  const latest = latestRaw && Date.now() - (latestRaw.at ?? 0) < 14000 ? latestRaw : undefined
-  useEffect(() => {
-    if (!latest) return
-    const t = window.setTimeout(() => tick((x) => x + 1), 14000 - (Date.now() - (latest.at ?? 0)))
-    return () => clearTimeout(t)
-  }, [latest])
+  // 夥伴的話留到你做下一個動作（有新的回應）或離開這一檯為止，不會自己消失
+  const latest = entry.step === step.key ? master.messages.filter((m) => !entry.messageIds.has(m.id) && m.role === 'master' && m.step === step.key && m.role_id === role.id).pop() : undefined
   const whisper = latest ? latest.text || latest.reply?.learned || null : null
   const speaker = latest?.role_id ? ROLES[latest.role_id as RoleId] : role
 
@@ -104,9 +117,10 @@ export default function App() {
       const done = [...p.done]
       done[cur] = true
       setProject({ ...p, done, unlocked: Math.max(p.unlocked, cur + 1) })
-      skipEnter.current = true
       master.notify(step.key, 'step.complete')
       setCur(cur + 1)
+      // 第一次走到下一檯，歌已經存下來了：用夥伴的口吻說一次存在哪裡
+      try { if (!storageError && !localStorage.getItem(SAVE_NOTE_KEY)) setSaveNote(true) } catch { /* 讀不到就不說 */ }
     },
   } : null
 
@@ -121,6 +135,16 @@ export default function App() {
     }
     update('harmony', { ...p.harmony, [a.part]: a.degs })
     playChord(chordVoicing(ch[a.degs[0]]))
+  }
+
+  const onPickBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setImportError('')
+    const result = parseBackup(await file.text().catch(() => ''))
+    if (!result.ok) { setImportError(result.reason); return }
+    setProjectDecision({ kind: 'import', project: result.project, fileName: file.name })
   }
 
   const openChat = (r: RoleId) => { setChatRole(r); setChat(r) }
@@ -139,11 +163,12 @@ export default function App() {
       </header>
 
       <InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
-        onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0 && i !== cur) { skipEnter.current = true; go(i) } }}
+        onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0 && i !== cur) go(i) }}
         onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
         open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
 
       {storageError && <div className="storage-notice" role="status"><span>這首歌還沒存好，先別離開這頁。騰出瀏覽器的儲存空間，再按「再存一次」。</span><button className="btn" onClick={() => setProject({ ...p })}>再存一次</button></div>}
+      {saveNote && !storageError && <div className="toast" role="status"><span>{role.name}：歌是存在這支手機的瀏覽器裡的。換手機或清掉瀏覽資料就沒了，想保險的話，到選單「更多」存一份備份。</span><button className="btn notice-ack" onClick={() => { try { localStorage.setItem(SAVE_NOTE_KEY, '1') } catch { /* 存不進去，下次再說一次也無妨 */ } setSaveNote(false) }}>好</button></div>}
       <main className="desk" key={step.key}>
         <div className="studio-corner">
         <StudioPresence role={role} whisper={whisper ? `${speaker.id !== role.id ? speaker.name + '：' : ''}${whisper}` : null} busy={master.isBusy(step.key, role.id)} onChat={() => openChat(role.id)} />
@@ -154,7 +179,7 @@ export default function App() {
             <strong>{missionPrerequisite ?? (unfinished ? unfinished.label : nextStep ? `這一頁準備好了，可以去${nextStep.title}` : '留下了自己的判斷，這一版由你決定')}</strong>
           </div>
           <ul>{[
-            { name: '一句靈感', kept: !!p.idea.hook.trim() },
+            { name: '一句話', kept: !!p.idea.hook.trim() },
             { name: '和弦', kept: [...p.harmony.verse, ...p.harmony.chorus].some(n => n != null) },
             { name: '旋律', kept: [...p.melody.verse, ...p.melody.chorus].some(n => n != null && n >= 0) },
             { name: '歌詞', kept: p.lyrics.some(s => s.text.trim()) },
@@ -163,7 +188,7 @@ export default function App() {
         </div>
         </div>
         <section className="workpage" aria-label={`${step.title}創作紙頁`}>
-        <div className="page-caption"><span>冒險手記 · {phase.name}篇</span><span>第 {cur + 1} 頁</span></div>
+        <div className="page-caption"><span>工作室 · {phase.name}篇</span><span>第 {cur + 1} 頁</span></div>
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
             <Comp goTo={goKey} p={p} update={update} notify={notify} next={next} />
@@ -179,7 +204,7 @@ export default function App() {
             <div className="row between"><strong className="menu-title">工作室</strong><button className="link-btn modal-capture" onClick={() => setInspoOpen('capture')}>✎ 記一下</button><button className="icon-btn" onClick={() => setMenu(false)} aria-label="關閉">✕</button></div>
             <button className="primary-action menu-return" onClick={() => setMenu(false)}>回到{step.title}，繼續創作</button>
             <nav className="studio-map" aria-label="創作地圖">
-            <div className="map-intro"><p>一首歌的探險地圖</p><span>可以跳著走，隨時回來。每一檯，都有人陪你。</span></div>
+            <div className="map-intro"><p>一首歌的工作室地圖</p><span>可以跳著走，隨時回來。每一檯，都有人陪你。</span></div>
             <div className="map-regions">
             {PHASES.map((ph, phaseIndex) => (
               <div key={ph.name} className="map-region" data-phase={phaseIndex}>
@@ -190,7 +215,7 @@ export default function App() {
                   const companion = ROLES[DESK_ROLE[k]]
                   return (
                     <button key={k} className={`menu-desk map-stop ${i === cur ? 'on' : ''}`} aria-current={i === cur ? 'location' : undefined} onClick={() => go(i)}>
-                      <img src={`/studio/roles/${companion.id}.webp`} alt="" width="40" height="48" />
+                      <img src={asset(`/studio/roles/${companion.id}.webp`)} alt="" width="40" height="48" />
                       <span className="map-stop-copy"><span>{STEPS[i].title}</span><small>{companion.name}陪你</small></span>
                       <span className="map-stop-mark">{i === cur ? '你在這裡' : p.done[i] ? '留過足跡' : '隨時來坐'}</span>
                     </button>
@@ -210,6 +235,12 @@ export default function App() {
                 <summary>更多</summary>
                 <SongSheet p={p} />
                 <div className="versions">
+                  <div className="row wrap">
+                    <button className="btn small" onClick={() => downloadBackup(p)}>存一份備份</button>
+                    <button className="btn btn-ghost small" onClick={() => importInput.current?.click()}>打開備份檔</button>
+                    <input ref={importInput} type="file" accept=".json,application/json" hidden aria-label="選擇備份檔" onChange={onPickBackup} />
+                  </div>
+                  {importError && <p className="small" role="status">{importError}</p>}
                   <button className="btn small" onClick={() => setProjectDecision({ kind: 'save' })}>存成新的一版</button>
                   {versions.list.map((v) => (
                     <div key={v.id} className="version">
@@ -217,10 +248,17 @@ export default function App() {
                       <span className="row">
                         <button className="btn btn-ghost small" aria-label={`試聽 ${v.name}`} onClick={() => { stopAll(); playDemo(v.project) }}>▶</button>
                         <button className="btn btn-ghost small" onClick={() => setProjectDecision({ kind: 'restore', version: v })}>回到這版</button>
+                        <button className="btn btn-ghost small" aria-label={`刪掉 ${v.name}`} onClick={() => setProjectDecision({ kind: 'remove', version: v })}>刪掉</button>
                       </span>
                     </div>
                   ))}
                 </div>
+                <details className="data-note">
+                  <summary>你的東西放在哪</summary>
+                  <p>歌、靈感和錄音都存在這支裝置的瀏覽器裡，沒有放到網路上。換手機、或清掉瀏覽資料，它們就不見了，想保險就先存一份備份。</p>
+                  <p>用「說」記靈感時，是請瀏覽器的語音辨識幫忙打成字，聲音可能會經過瀏覽器供應商的語音服務。想完全留在手機裡，選「只錄音」就好。</p>
+                  <p>{agentMode() === 'llm' ? '這個版本接了線上夥伴：跟夥伴聊天時，歌的文字摘要（和弦、旋律、你寫的詞和問的話）會送到夥伴的伺服器和模型供應商；錄音和照片不會。' : '夥伴現在是離線的，聊天內容不會送到任何地方。'}</p>
+                </details>
                 <ReaperGuide step={['arrange', 'record', 'mix'].includes(step.key) ? step.key : 'arrange'} p={p} />
                 <button className="btn btn-ghost small" onClick={() => setProjectDecision({ kind: 'reset' })}>重新開始一首新歌</button>
               </details>
@@ -230,12 +268,13 @@ export default function App() {
 
 
 
-      {projectDecision && <ProjectDialog decision={projectDecision} project={p} onSave={note => versions.save(p, note)}
+      {projectDecision && <ProjectDialog decision={projectDecision} project={p} full={versions.list.length >= 20 ? versions.list[versions.list.length - 1].name : null} onRemove={v => versions.remove(v.id)} onSave={note => versions.save(p, note)}
         onRestore={v => { stopAll(); master.clear(); setProject(structuredClone(v.project)) }}
         onReset={() => { stopAll(); master.clear(); reset(); setCur(0); setMenu(false) }}
+        onImport={imported => { versions.save(p, '打開備份前'); stopAll(); master.clear(); setProject(imported); setCur(Math.min(imported.unlocked, STEPS.length - 1)); setMenu(false) }}
         onCapture={() => setInspoOpen('capture')} onClose={() => setProjectDecision(null)} />}
 
-      <MasterPanel key={master.session} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
+      <MasterPanel key={master.session} p={p} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
         messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />
     </div>
   )

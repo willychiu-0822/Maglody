@@ -1,4 +1,5 @@
 import { test, expect, setup, primary, readProject } from './helpers'
+import { evidenceRoot } from './evidence-root'
 
 function shortWav() {
   const sampleRate = 22050, samples = sampleRate * 2
@@ -40,7 +41,7 @@ test('UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保�
     await expect(primary(page)).toHaveCount(1)
     if (attempt === 0) {
       await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-      await page.screenshot({ path: `docs/uat/evidence/A-UI-16-error-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+      await page.screenshot({ path: `${evidenceRoot}/A-UI-16-error-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
     }
     await notice.getByRole('button', { name: '好', exact: true }).click()
     await expect(notice).toHaveCount(0)
@@ -58,5 +59,5 @@ test('UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保�
   expect(native).toEqual([])
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-16-upload-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-16-upload-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
 })

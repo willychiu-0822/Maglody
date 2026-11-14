@@ -40,7 +40,7 @@ export function analyzeSection(s: LyricSection, hook: string) {
   if (s.kind === 'chorus') {
     const h = cleanLine(hook)
     const has = h && cleanLine(s.text).includes(h)
-    fb.push(has ? { level: 'good', text: '副歌包含你的記憶點。' } : { level: 'bad', text: '副歌裡還沒看到記憶點那一句。', tip: `把「${hook || '你那句話'}」放進副歌，這一頁的小清單就能打勾，往下一步也更順。` })
+    fb.push(has ? { level: 'good', text: '副歌有你的一句話。' } : { level: 'warn', text: '副歌裡還沒看到你的一句話。', tip: `想留著它的話，把「${hook || '你的一句話'}」放進副歌；改了主意也沒關係。` })
   }
   // 5. 句長
   const long = lens.filter((n) => n > 14).length
@@ -52,6 +52,12 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   const secs = p.lyrics
   const setSec = (id: string, patch: Partial<LyricSection>) => update('lyrics', secs.map((s) => (s.id === id ? { ...s, ...patch } : s)))
   const add = (kind: SectionKind) => { const id = uid(); update('lyrics', [...secs, { id, kind, text: '' }]); setCurId(id) }
+  // 寫歌的人改掉最早那句話很正常，所以這只是問一句，不擋前進
+  const hook = cleanLine(p.idea.hook)
+  const chorus = secs.find((s) => s.kind === 'chorus' && lines(s.text).length >= 2) ?? secs.find((s) => s.kind === 'chorus')
+  const hookDrifted = !!hook && secs.some((s) => s.kind === 'verse' && lines(s.text).length >= 2) && secs.some((s) => s.kind === 'chorus' && lines(s.text).length >= 2) && !secs.some((s) => s.kind === 'chorus' && cleanLine(s.text).includes(hook))
+  const keepHook = () => { if (chorus) setSec(chorus.id, { text: `${chorus.text.replace(/\s+$/, '')}\n${p.idea.hook.trim()}` }) }
+  const changeMind = () => { const first = chorus ? lines(chorus.text)[0] : undefined; if (first) update('idea', { ...p.idea, hook: cleanLine(first) }) }
   const remove = (id: string) => update('lyrics', secs.filter((s) => s.id !== id))
   const move = (i: number, d: number) => {
     const n = [...secs]
@@ -67,9 +73,8 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   const a = cur ? analyzeSection(cur, p.idea.hook) : null
   const target = cur ? melodyOnsets(p, cur.kind === 'chorus' ? 'chorus' : 'verse') : 0
   const ready = lyricsStep.requirements(p).every((r) => r.ok)
-  const missingHook = !!p.idea.hook.trim() && secs.some(s => s.kind === 'chorus' && lines(s.text).length >= 2) && !lyricsStep.requirements(p)[2].ok
-  const say = missingHook ? `副歌再放進「${p.idea.hook}」，就能繼續。` : !cur ? '' : !cur.text.trim()
-    ? cur.kind === 'chorus' ? `副歌。把「${p.idea.hook || '你那句話'}」放進來。${target ? `大約 ${target} 個字。` : ''}` : `${KIND_ZH[cur.kind]}。先寫你看到的畫面。${target ? `大約 ${target} 個字。` : ''}`
+  const say = hookDrifted ? `最早那句「${p.idea.hook.trim()}」還要留嗎？不急，也可以先往下走。` : !cur ? '' : !cur.text.trim()
+    ? cur.kind === 'chorus' ? `副歌。把「${p.idea.hook || '你的一句話'}」放進來。${target ? `大約 ${target} 個字。` : ''}` : `${KIND_ZH[cur.kind]}。先寫你看到的畫面。${target ? `大約 ${target} 個字。` : ''}`
     : '寫下來就好，之後還能改。'
   return (
     <>
@@ -103,6 +108,16 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {hookDrifted && (
+        <div className="hook-ask" role="group" aria-label="最早那句還要留嗎">
+          <p>最早那句「{p.idea.hook.trim()}」還要留嗎？</p>
+          <div className="row wrap">
+            <button className="btn small" onClick={keepHook}>放進副歌</button>
+            <button className="btn btn-ghost small" onClick={changeMind}>我改主意了</button>
           </div>
         </div>
       )}
@@ -158,7 +173,6 @@ export const lyricsStep: StepDef = {
   requirements: (p) => [
     { label: '至少一段主歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'verse' && lines(s.text).length >= 2) },
     { label: '至少一段副歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'chorus' && lines(s.text).length >= 2) },
-    { label: '把那句話放進副歌', ok: !cleanLine(p.idea.hook) || p.lyrics.some((s) => s.kind === 'chorus' && !!cleanLine(p.idea.hook) && cleanLine(s.text).includes(cleanLine(p.idea.hook))) },
   ],
 }
 

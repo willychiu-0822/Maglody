@@ -1,4 +1,4 @@
-import { test, expect, desks, setup, go, primary, act, readProject, finished, harmony, shot, captureText, library, stopRecording } from './helpers'
+import { test, expect, desks, setup, go, primary, act, readProject, finished, harmony, shot } from './helpers'
 import fs from 'node:fs/promises'
 
 test('UAT-01 首次進入與九檯上手', async ({ page }) => {
@@ -41,9 +41,10 @@ test('UAT-03 空白哼唱到完成一首歌的九檯完整旅程', async ({ page
   await harmony(page)
   await shot(page,info,'03-harmony')
   await act(page,/旋律/)
-  await act(page,/哼唱當草稿/)
-  await page.locator('.seg-quiet button').filter({hasText:'主歌'}).click()
-  await act(page,/哼唱當草稿/)
+  // M-08：旋律檯一進來停在第一個沒完成的主歌，主按鈕講明倒進哪一段
+  await act(page,/把哼唱倒進主歌/)
+  await page.locator('.seg-quiet button').filter({hasText:'副歌'}).click()
+  await act(page,/把哼唱倒進副歌/)
   await shot(page,info,'04-melody')
   await act(page,/歌詞/)
   await page.locator('.lyric-input').fill('雨落在鞋櫃上\n鑰匙安靜發光')
@@ -67,7 +68,9 @@ test('UAT-03 空白哼唱到完成一首歌的九檯完整旅程', async ({ page
   await page.locator('textarea.one-line').fill('副歌那句我很喜歡，下一版想讓主歌更短。')
   await expect(page.locator('main')).toContainText('鑰匙留在門口')
   const download=page.waitForEvent('download')
-  await page.getByRole('button',{name:'下載 MIDI，帶進 REAPER',exact:true}).click()
+  // M-07／M-10：主畫面的次要動作改成「先聽你一開始哼的」，MIDI 下載收在工具箱的「把歌帶走」
+  await page.locator('.toolbox > summary').click()
+  await page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true}).click()
   expect((await download).suggestedFilename()).toMatch(/\.mid$/)
   await shot(page,info,'09-review')
   await page.reload()
@@ -145,7 +148,7 @@ test('UAT-08 主副歌歌詞保存與前進', async ({ page }) => {
 
 test('UAT-09 編曲段落與副歌樂器', async ({ page }) => {
   await setup(page,finished)
-  await page.evaluate(()=>{const k='music-lab-project-v2';const p=JSON.parse(localStorage.getItem(k)!);p.arrangement=[];localStorage.setItem(k,JSON.stringify(p))})
+  await page.evaluate(()=>{const k='maglody-project-v2';const p=JSON.parse(localStorage.getItem(k)!);p.arrangement=[];localStorage.setItem(k,JSON.stringify(p))})
   await page.reload()
   await go(page,'編曲')
   await act(page,/骨架/)
@@ -185,18 +188,22 @@ test('UAT-12 匯出可使用的 MIDI、歌詞和專案備份', async ({ page }) 
   await go(page,'總檢討')
   await page.locator('textarea.one-line').fill('下一版把主歌縮短。')
   const midi=page.waitForEvent('download')
-  await page.getByRole('button',{name:'下載 MIDI，帶進 REAPER',exact:true}).click()
+  // M-07／M-10：主畫面的次要動作改成「先聽你一開始哼的」，MIDI 下載收在工具箱的「把歌帶走」
+  await page.locator('.toolbox > summary').click()
+  await page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true}).click()
   const data=await fs.readFile((await (await midi).path())!)
   expect(data.subarray(0,4).toString()).toBe('MThd')
   expect(data.length).toBeGreaterThan(100)
-  await page.locator('.toolbox > summary').click()
   const text=page.waitForEvent('download')
   await page.getByRole('button',{name:'下載歌詞＋和弦表（.txt）',exact:true}).click()
   const lyrics=await fs.readFile((await (await text).path())!,'utf8')
   expect(lyrics).toContain('鑰匙留在門口')
   expect(lyrics).toContain('雨落在鞋櫃上')
+  // M-13：備份只留在選單「更多」一處（總檢討工具箱不再有第二顆）
+  await page.getByRole('button',{name:'打開工作室選單'}).click()
+  await page.locator('.menu-more > summary').click()
   const backup=page.waitForEvent('download')
-  await page.getByRole('button',{name:'備份這首歌（.json）',exact:true}).click()
+  await page.getByRole('button',{name:'存一份備份',exact:true}).click()
   const saved=JSON.parse(await fs.readFile((await (await backup).path())!,'utf8'))
   expect(saved.review.verdict).toBe('下一版把主歌縮短。')
 })

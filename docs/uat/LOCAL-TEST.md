@@ -17,7 +17,7 @@ npm run dev -- --host localhost --port 4101 --strictPort
 npm run test:e2e
 ```
 
-E2E 自行 build、啟動 production preview 4102、使用系統 Chrome，執行後關閉它啟動的 server。請先關閉佔用 4102 的手動 server。E2E 不會下載瀏覽器；錄音用 Chrome 假裝置，API 用 mock。新結果在 UAT-RESULTS.md / UAT-STATUS.json，每輪證據在 evidence/。
+E2E 自行 build、啟動 production preview 4102、使用系統 Chrome，執行後關閉它啟動的 server。請先關閉佔用 4102 的手動 server。E2E 不會下載瀏覽器；錄音用 Chrome 假裝置，API 用 mock。**預設只寫到 `test-results/`（git 忽略），不會動任何已追蹤的檔案。**要把這一輪記成正式結果，用 `UAT_RECORD=1 npm run test:e2e`：才會更新 UAT-RESULTS.md / UAT-STATUS.json / UAT-RUNS.json，並把每輪截圖與 trace 寫到本機的 `docs/uat/evidence/`（不進 git，見該資料夾的 README）。
 
 另跑舊手機 selftest：先 `npm run build`，在另一終端啟動 `npm run preview -- --host 127.0.0.1 --port 4101 --strictPort`，再執行 `npm run selftest`，結束關閉該 preview。
 

@@ -1,10 +1,11 @@
 import { test, expect, type Page } from './helpers'
 import { readFile } from 'node:fs/promises'
+import { evidenceRoot } from './evidence-root'
 const visit = async (page: Page, name: string) => { await page.getByRole('button',{name:'打開工作室選單'}).click(); await page.locator('.menu-desk').filter({has:page.locator('span',{hasText:new RegExp(`^${name}$`)})}).click() }
 const primary=(page:Page)=>page.locator('main .primary-action')
-const shot=async(page:Page,id:string,viewport:string)=>page.screenshot({path:`docs/uat/evidence/${id}-${viewport}.png`,fullPage:true,animations:'disabled'})
+const shot=async(page:Page,id:string,viewport:string)=>page.screenshot({path:`${evidenceRoot}/${id}-${viewport}.png`,fullPage:true,animations:'disabled'})
 const fixture = async(page:Page)=>{
-  await page.evaluate(()=>{const key='music-lab-project-v2';const p=JSON.parse(localStorage.getItem(key)!);p.harmony.verse=[0,3,4,0];p.harmony.chorus=[3,4,0,4];p.melody.verse[0]=60;p.melody.chorus[0]=67;p.mix.tracks.melody.vol=1.2;localStorage.setItem(key,JSON.stringify(p))});await page.reload()
+  await page.evaluate(()=>{const key='maglody-project-v2';const p=JSON.parse(localStorage.getItem(key)!);p.harmony.verse=[0,3,4,0];p.harmony.chorus=[3,4,0,4];p.melody.verse[0]=60;p.melody.chorus[0]=67;p.mix.tracks.melody.vol=1.2;localStorage.setItem(key,JSON.stringify(p))});await page.reload()
 }
 test.beforeEach(async({page})=>{await page.goto('/')})
 test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async({page},info)=>{
@@ -19,8 +20,9 @@ test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async(
   for(const i of [3,4,0,4]) await page.locator('.chord').nth(i).click()
   await primary(page).click()
   await primary(page).click()
-  await page.locator('.seg-quiet button').filter({hasText:'主歌'}).click()
-  await expect(primary(page)).toHaveText('用我的哼唱當草稿');await primary(page).click()
+  // M-08：第一下已經把哼唱倒進預設停著的主歌，再切到副歌倒一次
+  await page.locator('.seg-quiet button').filter({hasText:'副歌'}).click()
+  await expect(primary(page)).toHaveText('把哼唱倒進副歌');await primary(page).click()
   await expect(primary(page)).toContainText('歌詞');await primary(page).click()
   await page.getByRole('textbox',{name:'主歌歌詞'}).fill('雨落在鞋櫃上\n鑰匙安靜發光')
   await page.locator('.seg-quiet button').filter({hasText:'副歌'}).click()
@@ -36,7 +38,9 @@ test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async(
   await page.getByRole('textbox',{name:'我對這首歌的想法'}).fill('喜歡副歌，下一版讓主歌短一些。')
   await primary(page).click();await expect(primary(page)).toHaveText('■ 停');await primary(page).click()
   const downloaded=page.waitForEvent('download')
-  await page.getByRole('button',{name:'下載 MIDI，帶進 REAPER',exact:true}).click()
+  // M-07／M-10：主畫面的次要動作改成「先聽你一開始哼的」，MIDI 下載收在工具箱的「把歌帶走」
+  await page.locator('.toolbox > summary').click()
+  await page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true}).click()
   const download=await downloaded
   expect(download.suggestedFilename()).toContain('鑰匙留在門口')
   const bytes=await readFile((await download.path())!)
@@ -86,7 +90,7 @@ test('UAT-42 照片拼貼後刪原靈感仍保留媒體',async({page},info)=>{
   await page.getByRole('dialog',{name:'移除這張紙片',exact:true}).getByRole('button',{name:'確定移除這張紙片',exact:true}).click()
   await expect(original).toHaveCount(0)
   await page.reload();await page.getByRole('button',{name:'記一下靈感',exact:true}).click();await page.getByRole('button',{name:/翻翻本子/}).click()
-  const collage=page.locator('.inspo-card').filter({has:page.locator('.inspo-text',{hasText:/照片原稿.*負罪前行/s})})
+  const collage=page.locator('.inspo-card').filter({has:page.locator('.inspo-text',{hasText:/照片原稿.*窗外的雨剛停/s})})
   await collage.locator('.inspo-card-head').click()
   const thumb=collage.locator('img.inspo-thumb');await expect(thumb).toBeVisible()
   await expect.poll(()=>thumb.evaluate((e:HTMLImageElement)=>e.naturalWidth>0)).toBeTruthy()
@@ -168,7 +172,10 @@ test('UAT-49 媒體寫入失敗後先救回錄音，再換成哼唱',async({page
   })
   await page.getByRole('button',{name:'記一下靈感',exact:true}).click()
   const media=page.locator('.inspo-media .inspo-big')
-  await media.nth(0).click();await expect(page.locator('.inspo-big.rec')).toBeVisible();await page.waitForTimeout(400)
+  await media.nth(0).click()
+  // M-21：第一次按「說」先出現聽寫說明
+  await page.getByRole('button',{name:'好，開始說',exact:true}).click()
+  await expect(page.locator('.inspo-big.rec')).toBeVisible();await page.waitForTimeout(400)
   await media.nth(0).click();await expect(page.locator('.toast')).toContainText('還沒收好')
   await media.nth(1).click()
   // No recording yet does not mean the asynchronous IDB retry has settled.
@@ -246,6 +253,6 @@ test('UAT-52 新手忘記按停止，25 秒後也會關麥並保留分析',async
   // Deliberately leave recording alone, as a first-time user might.
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {stream:MediaStream}).stream.getTracks().every(t=>t.readyState==='ended')),{timeout:32000,intervals:[500]}).toBeTruthy()
   await expect(primary(page)).not.toHaveText('■ 哼完了')
-  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('music-lab-project-v2')!)?.hum?.duration||0)).toBeGreaterThanOrEqual(24)
+  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('maglody-project-v2')!)?.hum?.duration||0)).toBeGreaterThanOrEqual(24)
   await shot(page,'UAT-52',info.project.name)
 })

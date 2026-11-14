@@ -120,7 +120,7 @@ test('?lab=midi 打開後，鍵盤在工具箱裡能寫進格子，Ableton 下�
   await expect(hint).toHaveAttribute('data-status', 'connected')
   await expect(hint).toContainText('練習用鍵盤')
   await page.evaluate('window.__labMidi.play(60)')
-  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('music-lab-project-v2')!).melody.chorus[0])).toBe(60)
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('maglody-project-v2')!).melody.verse[0])).toBe(60) // M-08：旋律檯預設停在第一個沒完成的主歌
 
   await go(page, '總檢討')
   await page.locator('main .toolbox > summary').click()

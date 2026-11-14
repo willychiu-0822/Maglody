@@ -1,4 +1,5 @@
 import { test, expect, setup, finished, library, readProject, type Page } from './helpers'
+import { evidenceRoot } from './evidence-root'
 
 async function checkPaper(page: Page, name: string) {
   const dialog = page.getByRole('dialog', { name, exact: true })
@@ -15,7 +16,7 @@ async function checkPaper(page: Page, name: string) {
 async function failNotebookWrites(page: Page) {
   await page.evaluate(() => {
     const original = Storage.prototype.setItem
-    ;(window as any).__restoreNotebookWrites = () => { Storage.prototype.setItem = original }
+    ;(window as unknown as { __restoreNotebookWrites: () => void }).__restoreNotebookWrites = () => { Storage.prototype.setItem = original }
     Storage.prototype.setItem = function(k, v) { if (k === 'maglody-inspirations-v1') throw new DOMException('full', 'QuotaExceededError'); return original.call(this, k, v) }
   })
 }
@@ -26,16 +27,16 @@ test('UAT-79 採用靈感先看紙頁、取消不改歌，隨手記與失敗重�
   await setup(page, finished)
   const before = await readProject(page)
   await library(page)
-  const card = page.locator('.inspo-card').filter({ hasText: '負罪前行' })
+  const card = page.locator('.inspo-card').filter({ hasText: '窗外的雨剛停' })
   await card.locator('.inspo-card-head').click()
   const opener = card.getByRole('button', { name: '從這則靈感開始一首歌', exact: true })
   await opener.click()
   await expect(page.getByRole('button', { name: '先不帶入', exact: true })).toBeFocused()
   let dialog = await checkPaper(page, '把這則靈感帶進歌裡')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-adopt-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-adopt-${info.project.name}.png`, animations: 'disabled' })
   await expect(dialog).toContainText('鑰匙留在門口')
-  await expect(dialog).toContainText('負罪前行')
-  await expect(dialog).toContainText('歌名與記憶點會換成這句話')
+  await expect(dialog).toContainText('窗外的雨剛停')
+  await expect(dialog).toContainText('歌名和這首歌的一句話，都會換成這一則')
   expect(await readProject(page)).toEqual(before)
   await dialog.getByRole('button', { name: '先不帶入', exact: true }).click()
   expect(await readProject(page)).toEqual(before)
@@ -55,21 +56,21 @@ test('UAT-79 採用靈感先看紙頁、取消不改歌，隨手記與失敗重�
   await dialog.getByRole('button', { name: '帶進這首歌', exact: true }).click()
   await expect(dialog.getByRole('status')).toContainText('歌曲尚未更動')
   expect(await readProject(page)).toEqual(before)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-adopt-retry-${info.project.name}.png`, animations: 'disabled' })
-  await page.evaluate(() => (window as any).__restoreNotebookWrites())
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-adopt-retry-${info.project.name}.png`, animations: 'disabled' })
+  await page.evaluate(() => (window as unknown as { __restoreNotebookWrites: () => void }).__restoreNotebookWrites())
   await dialog.getByRole('button', { name: '重試採用', exact: true }).click()
   await expect(page.locator('.desk-name')).toContainText('構想')
   const after = await readProject(page)
-  expect(after.idea.title).toBe('負罪前行')
-  expect(after.idea.hook).toBe('負罪前行')
-  expect(after.idea.vibe).toContain('負罪前行')
+  expect(after.idea.title).toBe('窗外的雨剛停')
+  expect(after.idea.hook).toBe('窗外的雨剛停')
+  expect(after.idea.vibe).toContain('窗外的雨剛停')
   expect(after.lyrics).toEqual(before.lyrics)
   expect(after.harmony).toEqual(before.harmony)
   expect(after.melody).toEqual(before.melody)
   expect(after.arrangement).toEqual(before.arrangement)
   await page.getByRole('button', { name: '好', exact: true }).click()
   await page.reload()
-  expect((await readProject(page)).idea.title).toBe('負罪前行')
+  expect((await readProject(page)).idea.title).toBe('窗外的雨剛停')
   await library(page)
   await expect(page.locator('.inspo-card').filter({ hasText: '採用之前，又想起一陣風' })).toHaveCount(1)
   expect(native).toEqual([])
@@ -94,7 +95,7 @@ test('UAT-80 移除紙片先預覽、可取消，保存失敗保留原片並能�
   let dialog = await checkPaper(page, '移除這張紙片')
   await expect(dialog).toContainText('把雨聲留在琴邊')
   await expect(dialog).toContainText('無法復原')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-remove-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-remove-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '留在本子裡', exact: true }).click()
   await expect(opener).toBeFocused()
   await opener.click()
@@ -102,9 +103,9 @@ test('UAT-80 移除紙片先預覽、可取消，保存失敗保留原片並能�
   await failNotebookWrites(page)
   await dialog.getByRole('button', { name: '確定移除這張紙片', exact: true }).click()
   await expect(dialog.getByRole('status')).toContainText('紙片仍在本子裡')
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('maglody-inspirations-v1')!).some((x: any) => x.text === '把雨聲留在琴邊'))).toBe(true)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-remove-retry-${info.project.name}.png`, animations: 'disabled' })
-  await page.evaluate(() => (window as any).__restoreNotebookWrites())
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('maglody-inspirations-v1')!).some((x: { text: string }) => x.text === '把雨聲留在琴邊'))).toBe(true)
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-remove-retry-${info.project.name}.png`, animations: 'disabled' })
+  await page.evaluate(() => (window as unknown as { __restoreNotebookWrites: () => void }).__restoreNotebookWrites())
   await dialog.getByRole('button', { name: '重試移除', exact: true }).click()
   await expect(card).toHaveCount(0)
   const notebook = page.getByRole('dialog', { name: '靈感', exact: true })
@@ -115,7 +116,7 @@ test('UAT-80 移除紙片先預覽、可取消，保存失敗保留原片並能�
   await page.reload()
   await library(page)
   await expect(card).toHaveCount(0)
-  await expect(page.locator('.inspo-card').filter({ hasText: '負罪前行' })).toHaveCount(1)
+  await expect(page.locator('.inspo-card').filter({ hasText: '窗外的雨剛停' })).toHaveCount(1)
   expect(native).toEqual([])
 })
 
@@ -148,9 +149,9 @@ test('UAT-81 長歌名與長靈感能分區閱讀，捲到確認鈕仍能隨手�
     }), '捲到頁尾時捕捉入口仍可見、按得到').toBe(true)
     await expect(dialog.locator('.primary-action:visible')).toHaveCount(1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-    if (viewport === info.project.use.viewport) await page.screenshot({ path: `docs/uat/evidence/A-UI-18-long-${info.project.name}.png`, animations: 'disabled' })
+    if (viewport === info.project.use.viewport) await page.screenshot({ path: `${evidenceRoot}/A-UI-18-long-${info.project.name}.png`, animations: 'disabled' })
   }
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-18-short-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-18-short-${info.project.name}.png`, animations: 'disabled' })
   await capture.click()
   await page.getByRole('textbox', { name: '靈感文字' }).fill('長紙頁裡又記下一片光')
   await page.getByRole('button', { name: '夾進本子', exact: true }).click()

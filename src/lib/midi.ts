@@ -87,7 +87,7 @@ export function midiTrackNames(bytes: Uint8Array): string[] {
     pos = end
     if (id !== 'MTrk') continue
     let i = start, running = 0, name = ''
-    const readVlq = () => { let n = 0, b = 0; do { b = bytes[i++]; n = n * 128 + (b & 0x7f) } while (b & 0x80 && i < end); return n }
+    const readVlq = () => { let n = 0, b: number; do { b = bytes[i++]; n = n * 128 + (b & 0x7f) } while (b & 0x80 && i < end); return n }
     while (i < end) {
       readVlq()
       let status = bytes[i]
