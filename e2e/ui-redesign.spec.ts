@@ -1,4 +1,5 @@
 import { test, expect, setup, go, primary, finished } from './helpers'
+import { evidenceRoot } from './evidence-root'
 
 test('UAT-65 工作室手記隨自己的創作長出素材，跳檯與重整仍看得到', async ({ page }, info) => {
   await setup(page)
@@ -6,7 +7,9 @@ test('UAT-65 工作室手記隨自己的創作長出素材，跳檯與重整仍�
   const paper = page.getByRole('region', { name: '哼唱解析創作紙頁' })
   const roomBox = await room.boundingBox()
   const paperBox = await paper.boundingBox()
-  expect(roomBox!.height, '人物應在清楚可見的場景中').toBeGreaterThanOrEqual(220)
+  // M-03：手機直向把夥伴縮成紙頁上方一列（至少 70px 高），好讓主按鈕進第一屏；桌面維持整幅場景。
+  expect(roomBox!.height, '人物應在清楚可見的場景中').toBeGreaterThanOrEqual(info.project.name === 'desktop' ? 220 : 70)
+  await expect(page.locator('.studio-character')).toBeVisible()
   if (info.project.name === 'desktop') expect(paperBox!.x).toBeGreaterThan(roomBox!.x + roomBox!.width)
   else expect(paperBox!.y).toBeGreaterThan(roomBox!.y + roomBox!.height)
   await expect(page.locator('.song-trail li[data-kept="true"]')).toHaveCount(0)
@@ -39,7 +42,7 @@ test('UAT-66 創作地圖標記目前工作檯，能自由拜訪並帶著作品�
   const imgs = map.locator('img')
   await expect(imgs).toHaveCount(9)
   await expect.poll(() => imgs.evaluateAll(es => es.every(e => (e as HTMLImageElement).complete && (e as HTMLImageElement).naturalWidth > 0))).toBe(true)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-04-map-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-04-map-${info.project.name}.png`, animations: 'disabled' })
   await map.getByRole('button', { name: /歌詞/ }).click()
   await page.locator('.lyric-input').fill('地圖的另一邊，也能開始寫歌')
   await page.reload()
@@ -61,7 +64,7 @@ test('UAT-67 夥伴的小任務隨素材更新，保持唯一主動作與自由�
   const mission = page.getByRole('status', { name: '當下的小任務' })
   await expect(mission).toContainText('作曲家陪你')
   await expect(mission).toContainText('先留一段聲音')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-05-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-05-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   await go(page, '構想')
   await expect(mission).toContainText('製作人陪你')
   await expect(mission).toContainText('選一個情緒')
@@ -72,7 +75,7 @@ test('UAT-67 夥伴的小任務隨素材更新，保持唯一主動作與自由�
   await expect(mission).toContainText('可以去和聲')
   await expect(primary(page)).toHaveCount(1)
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-05-ready-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-05-ready-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   await hook.fill('')
   await expect(mission).toContainText('留下一句話')
   await hook.fill('走過巷口的風')
@@ -105,7 +108,7 @@ test('UAT-68 空白跳到打磨區，小任務先帶回需要的素材而不提�
   await expect(mission).toHaveAttribute('data-ready', 'false')
   await expect(mission).not.toContainText('這一版由你決定')
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-07-review-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-07-review-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   await primary(page).click()
   await expect(page.locator('.desk-name')).toContainText('和聲')
   await page.locator('.chord-grid .chord').first().click()
@@ -116,7 +119,7 @@ test('UAT-68 空白跳到打磨區，小任務先帶回需要的素材而不提�
   await go(page, '混音觀念')
   await expect(mission).toContainText('先留一小句副歌旋律')
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-07-mix-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-07-mix-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
 })
 
 
@@ -154,7 +157,7 @@ test('UAT-69 紙箋對話保留每位回答者，長對話仍能輸入與隨手�
     expect(box!.y).toBeGreaterThanOrEqual(0)
     expect(box!.y + box!.height).toBeLessThanOrEqual(page.viewportSize()!.height)
   }
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-08-chat-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-08-chat-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '✎ 記一下', exact: true }).click()
   await page.locator('.inspo-capture textarea').fill('紙箋對話時想到：雨落在琴上')
   await page.getByRole('button', { name: '夾進本子', exact: true }).click()
@@ -171,7 +174,7 @@ test('UAT-69 紙箋對話保留每位回答者，長對話仍能輸入與隨手�
   }
   await expect(dialog.locator('[data-character-portrait]')).toHaveAttribute('src', '/studio/roles/lyricist.webp')
   await page.emulateMedia({ colorScheme: 'dark' })
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-08-dark-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-08-dark-${info.project.name}.png`, animations: 'disabled' })
   expect(await dialog.locator('.chat-sheet').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)
 })
 
@@ -194,7 +197,7 @@ test('UAT-70 手機橫向或縮短視窗仍可讀夥伴回覆、繼續提問', a
     const listBox = await list.boundingBox()
     const replyBox = await page.locator('.msg-master').last().boundingBox()
     expect(replyBox!.y + replyBox!.height).toBeLessThanOrEqual(listBox!.y + listBox!.height + 1)
-    if (viewport.width === 844) await page.screenshot({ path: `docs/uat/evidence/A-UI-09-landscape-${info.project.name}.png`, animations: 'disabled' })
+    if (viewport.width === 844) await page.screenshot({ path: `${evidenceRoot}/A-UI-09-landscape-${info.project.name}.png`, animations: 'disabled' })
     for (const element of [page.locator('.master-input'), page.locator('.chat-sheet .modal-capture'), page.getByRole('button', { name: '關閉', exact: true })]) {
       const box = await element.boundingBox()
       expect(box!.y).toBeGreaterThanOrEqual(0)
@@ -226,7 +229,7 @@ test('UAT-71 翻開素材手記能看自己的詞曲，更新及重整不混入�
   await expect(journal.getByRole('article', { name: '和弦片段' })).toContainText('C → G → Am → F')
   await expect(journal.getByRole('article', { name: '旋律片段' })).toContainText('C4 · D4 · E4 · G4')
   await expect(journal.getByRole('article', { name: '詞句片段' })).toContainText('雨落在鞋櫃上')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-10-journal-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-10-journal-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   await expect(primary(page)).toHaveCount(1)
   await go(page, '歌詞')
   await page.locator('.lyric-input').fill('琴蓋上留著今晚的風\n窗邊還有我的腳步')
@@ -237,7 +240,7 @@ test('UAT-71 翻開素材手記能看自己的詞曲，更新及重整不混入�
   await journal.getByText('翻開素材手記', { exact: true }).click()
   await expect(journal).toContainText('琴蓋上留著今晚的風')
   await page.emulateMedia({ colorScheme: 'dark' })
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-10-dark-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-10-dark-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 })
 
@@ -253,7 +256,7 @@ test('UAT-72 隨手記紙頁顯示原工作檯，九檯保存與返回不迷路'
     await expect(capture.getByLabel('記下後的返回位置')).toHaveText(`收好後，回到「${desk}」繼續。`)
     await capture.getByRole('textbox', { name: '靈感文字' }).fill(`${desk}途中，想到窗邊的一陣風`)
     await expect(capture.locator('.primary-action')).toHaveCount(1)
-    if (desk === '歌詞') await page.screenshot({ path: `docs/uat/evidence/A-UI-11-capture-${info.project.name}.png`, animations: 'disabled' })
+    if (desk === '歌詞') await page.screenshot({ path: `${evidenceRoot}/A-UI-11-capture-${info.project.name}.png`, animations: 'disabled' })
     await capture.getByRole('button', { name: '夾進本子', exact: true }).click()
     await expect(capture).toBeHidden()
     await expect(page.locator('.desk-name')).toContainText(desk)
@@ -264,6 +267,6 @@ test('UAT-72 隨手記紙頁顯示原工作檯，九檯保存與返回不迷路'
   const notebook = page.getByRole('dialog', { name: '靈感', exact: true })
   await expect(notebook.getByRole('heading', { name: '靈感本子', exact: true })).toBeVisible()
   for (const desk of desks) await expect(notebook).toContainText(`${desk}途中，想到窗邊的一陣風`)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-11-library-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-11-library-${info.project.name}.png`, animations: 'disabled' })
   expect(await notebook.locator('.inspo-sheet').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)
 })
