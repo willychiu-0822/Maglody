@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Card, Coach, DeskActions, FeedbackList, Light, Toolbox, Why, type Feedback, type Level } from '../components/ui'
+import { Card, Coach, DeskActions, FeedbackList, Toolbox, type Feedback } from '../components/ui'
 import { SongSheet } from '../components/SongSheet'
 import { AbletonGuide } from '../components/AbletonGuide'
 import { afterSound, playSequence, stopAll, type Player } from '../lib/audio'
@@ -14,7 +14,6 @@ import { arrangementFeedback } from './Arrangement'
 import { renderSong, songSpecs } from './songFile'
 import { playHum } from './results'
 import { safeFileName, shareOrDownload } from '../lib/share'
-import { downloadBackup } from '../lib/backup'
 import { mixFeedback } from './Mix'
 import type { StepDef, StepProps } from './types'
 
@@ -28,21 +27,12 @@ const DIMENSIONS: { id: string; q: string; source: (p: Project) => Feedback[] }[
   { id: 'me', q: '這首歌像「我」嗎？我想再聽一次嗎？', source: () => [] },
 ]
 
+// 清單只留三項：太長會變成作業
 const FINAL_CHECKS = [
   { id: 'sing', label: '跟著伴奏唱一遍', why: '聽聽有沒有哪個字卡住，或哪裡想換口氣。' },
-  { id: 'tone', label: '聽聽字和旋律合不合', why: '如果有字聽起來不太清楚，可以換個唱法試試。' },
   { id: 'sleep', label: '明天再聽一次', why: '歇一晚，說不定會聽見新的地方。' },
   { id: 'friend', label: '放給朋友聽，問問「你記得哪一句？」', why: '聽聽別人帶走了哪一句，也挺有趣。' },
-  { id: 'demo', label: '用手機錄一版', why: '留住現在的樣子，以後想比較時就能拿出來聽。' },
-  { id: 'three', label: '記下想再試的地方', why: '一個也好，三個也好，留給下次慢慢玩。' },
 ]
-
-function summarize(items: Feedback[]): Level | null {
-  if (!items.length) return null
-  if (items.some((f) => f.level === 'bad')) return 'bad'
-  const g = items.filter((f) => f.level === 'good').length / items.length
-  return g >= 0.7 ? 'good' : 'warn'
-}
 
 function exportText(p: Project) {
   const chords = diatonicChords(p.harmony.root, p.harmony.mode)
@@ -118,13 +108,20 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
     finally { setSaving(false) }
   }
 
-  const rate = (id: string, v: number) => update('review', { ...r, ratings: { ...r.ratings, [id]: v } })
+  // 只問一題，不打分：哪一段最想再聽？（存成 checks 的 fav:xxx，同時只留一個）
+  const FAVS = [{ id: 'verse', label: '主歌' }, { id: 'chorus', label: '副歌' }, { id: 'all', label: '整首' }]
+  const fav = FAVS.find((f) => r.checks[`fav:${f.id}`])?.id
+  const pickFav = (id: string) => update('review', { ...r, checks: { ...Object.fromEntries(Object.entries(r.checks).filter(([k]) => !k.startsWith('fav:'))), ...(fav === id ? {} : { [`fav:${id}`]: true }) } })
+  const observations = DIMENSIONS.flatMap((d) => d.source(p)).filter((f) => f.level !== 'good').slice(0, 5)
 
   return (
     <>
       <Coach short={!hasScore ? '歌還是一張空白紙。先挑幾個和弦，或去旋律檯寫幾個音。' : playing >= 0 ? `正在播：${KIND_ZH[p.arrangement[playing]?.kind ?? (playing === 0 ? 'verse' : 'chorus')]}` : r.verdict.trim() ? '寫下來了。這是你的歌。' : '一起從頭聽聽。哪一句你最想再聽？'} />
 
-      <SongSheet p={p} />
+      <details className="material-journal">
+        <summary><span>翻看這首歌現在的樣子</span><span className="journal-fold" aria-hidden="true">＋</span></summary>
+        <SongSheet p={p} />
+      </details>
       {missing.length > 0 && <p className="demo-missing small muted">草稿還缺：{missing.map(item=>item.label).join('、')}。{hasScore ? '可以先聽已有的部分。' : '先留下一點聲音。'}</p>}
 
       <textarea aria-label="我對這首歌的想法" className="one-line" rows={3} value={r.verdict} placeholder="哪裡讓你想再聽一次？想留什麼給下次？" onChange={(e) => update('review', { ...r, verdict: e.target.value })} />
@@ -136,32 +133,22 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
       ) : listened ? (
         <DeskActions primary={{ label: saving ? '正在把歌錄成聲音檔……' : '把歌存成聲音檔', onClick: saveSong, disabled: saving }} secondary={{ label: '再聽一遍', onClick: playSong }} />
       ) : (
-        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: playSong }} secondary={missing.length ? { label: `去補${missing[0].label} →`, onClick: () => goTo?.(missing[0].step) } : p.hum ? { label: '先聽你一開始哼的，再聽現在的', onClick: playHumThenSong } : { label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
+        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: playSong }} secondary={missing.length ? { label: `去補${missing[0].label} →`, onClick: () => goTo?.(missing[0].step) } : p.hum ? { label: '先聽你一開始哼的，再聽現在的', onClick: playHumThenSong } : undefined} />
       )}
       {saveNote && <p className="demo-missing small muted" role="status">{saveNote}</p>}
 
       <Toolbox>
-      <Card title="聽完覺得呢？（1 想再試試，5 很喜歡）">
-        {DIMENSIONS.map((d) => {
-          const items = d.source(p)
-          const lvl = summarize(items)
-          const tips = items.filter((f) => f.level !== 'good').slice(0, 2)
-          return (
-            <div key={d.id} className="dim">
-              <div className="row between">
-                <strong>{d.q}</strong>
-                {lvl && <span className="row small muted"><Light level={lvl} />夥伴的小發現</span>}
-              </div>
-              <div className="stars">
-                {[1, 2, 3, 4, 5].map((v) => (
-                  <button key={v} className={`star ${(r.ratings[d.id] ?? 0) >= v ? 'on' : ''}`} onClick={() => rate(d.id, v)} aria-label={`${v} 分`}>{v}</button>
-                ))}
-              </div>
-              {tips.length > 0 && <FeedbackList items={tips} />}
-            </div>
-          )
-        })}
-      </Card>
+      <div className="fav-ask" role="group" aria-label="哪一段最想再聽">
+        <strong>哪一段最想再聽？</strong>
+        {FAVS.map((f) => <button key={f.id} className={`chip ${fav === f.id ? 'on' : ''}`} aria-pressed={fav === f.id} onClick={() => pickFav(f.id)}>{f.label}</button>)}
+      </div>
+
+      {observations.length > 0 && (
+        <details className="material-journal">
+          <summary><span>想看夥伴的小發現</span><span className="journal-fold" aria-hidden="true">＋</span></summary>
+          <FeedbackList items={observations} />
+        </details>
+      )}
 
       <Card title="再聽聽這些地方">
         <ul className="checklist">
@@ -169,7 +156,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
             <li key={c.id}>
               <label>
                 <input type="checkbox" checked={!!r.checks[c.id]} onChange={(e) => update('review', { ...r, checks: { ...r.checks, [c.id]: e.target.checked } })} />
-                <span>{c.label}<span className="muted small block">{c.why}</span></span>
+                <span title={c.why}>{c.label}</span>
               </label>
             </li>
           ))}
@@ -178,18 +165,13 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
 
       <Card title="把歌帶走">
         <div className="row wrap">
-          <button className="btn" disabled={!hasScore || saving} onClick={saveSong}>存成聲音檔（.wav）</button>
-          <button className="btn" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
-          <button className="btn" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
-          <button className="btn btn-ghost" onClick={() => downloadBackup(p)}>備份這首歌（.json）</button>
+          <button className="btn small" disabled={!hasScore || saving} onClick={saveSong}>存成聲音檔（.wav）</button>
+          <button className="btn small" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
+          <button className="btn small" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
         </div>
       </Card>
 
       {lab && <AbletonGuide p={p} />}
-
-      <Why title="為什麼留一點自己的想法？" apply="下次回來聽，也能想起當時喜歡哪裡。">
-        <p>小提示可以陪你找找不同的地方；喜不喜歡，還是交給你的耳朵。先記下一處你想再聽的地方就好。</p>
-      </Why>
       </Toolbox>
     </>
   )

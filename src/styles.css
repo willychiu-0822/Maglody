@@ -1297,3 +1297,7 @@ body::before { opacity: .12; }
 .dictation-ask p { margin: 0 0 8px; line-height: 1.7; }
 .data-note { margin: 8px 0; font-size: .85rem; line-height: 1.7; }
 .data-note p { margin: 6px 0; }
+
+/* M-13 · 總檢討只問一題 */
+.fav-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 4px 0; }
+.fav-ask strong { font-family: var(--font-title); font-weight: 400; }

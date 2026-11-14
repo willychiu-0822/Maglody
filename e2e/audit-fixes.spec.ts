@@ -294,3 +294,27 @@ test.describe('M-23／M-26 重新整理回到同一檯；夥伴的話不會自�
     await expect(line).toHaveText(said)
   })
 })
+
+test.describe('M-13 總檢討：不像成績單，也不是一面下載牆', () => {
+  const song = { unlocked: 8, idea: { mood: 'warm', vibe: '', theme: '', image: '', story: '', title: '雨停了', hook: '雨停了你還沒來', bpm: 90 }, harmony: { root: 0, mode: 'major', verse: [0, 4, 5, 3], chorus: [3, 4, 0, 4], quizRight: 0, quizTotal: 0 }, melody: { verse: notes(5), chorus: notes(5), reflections: '' }, lyrics: [{ id: 'v', kind: 'verse', text: '雨落在鞋櫃上\n鑰匙安靜發光' }, { id: 'c', kind: 'chorus', text: '雨停了你還沒來\n我一個人等著' }], arrangement: [{ id: 'v', kind: 'verse', bars: 8, layers: { drums: false, bass: true, keys: true, pad: false, melody: true } }, { id: 'c', kind: 'chorus', bars: 8, layers: { drums: true, bass: true, keys: true, pad: true, melody: true } }] }
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+  test('390×844 工具箱全開，整頁不超過 2,000 px；沒有成排的 1–5 分鈕；下載 .mid 只有一顆', async ({ page }) => {
+    await open(page, song)
+    await page.locator('.toolbox > summary').click()
+    await page.getByText('想看夥伴的小發現').click()
+    const height = await page.evaluate(() => document.documentElement.scrollHeight)
+    expect(height, `整頁高 ${height}px`).toBeLessThanOrEqual(2000)
+    await expect(page.locator('.stars, .star')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /MIDI|\.mid/ })).toHaveCount(1)
+  })
+  test('只問一題「哪一段最想再聽？」，選了會記住、再按一次取消', async ({ page }) => {
+    await open(page, song)
+    await page.locator('.toolbox > summary').click()
+    await page.getByRole('button', { name: '副歌', exact: true }).click()
+    expect(await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).review.checks['fav:chorus'], KEY)).toBe(true)
+    await page.getByRole('button', { name: '主歌', exact: true }).click()
+    const checks = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!).review.checks, KEY)
+    expect(checks['fav:verse']).toBe(true)
+    expect(checks['fav:chorus']).toBeUndefined()
+  })
+})
