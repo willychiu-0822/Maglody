@@ -6,6 +6,7 @@
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import net from 'node:net'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
@@ -31,7 +32,8 @@ for (const raw of dockerfile) {
 }
 // WORKDIR /app 在容器裡就是根；這裡把它當成暫存資料夾裡的 app/
 const cwd = path.join(tmp, workdir)
-const port = 8700 + Math.floor(Math.random() * 200)
+// 向系統要一個真的空著的埠；固定或亂數的埠可能剛好有別的服務在回 /api/health，會讓測試誤判通過
+const port = await new Promise((resolve) => { const probe = net.createServer(); probe.listen(0, '127.0.0.1', () => { const { port } = probe.address(); probe.close(() => resolve(port)) }) })
 const child = spawn(cmd[0], cmd.slice(1), { cwd, env: { PATH: process.env.PATH, PORT: String(port), LLM_PROVIDER: 'mock' }, stdio: ['ignore', 'pipe', 'pipe'] })
 let log = ''
 child.stdout.on('data', (d) => { log += d })
@@ -44,7 +46,7 @@ for (let i = 0; i < 40 && exited === null; i++) {
   try {
     const res = await fetch(`http://127.0.0.1:${port}/api/health`)
     detail = `HTTP ${res.status} ${await res.text()}`
-    ok = res.status === 200
+    ok = res.status === 200 && exited === null && detail.includes('"provider":"mock"')
     break
   } catch { await new Promise((r) => setTimeout(r, 100)) }
 }
