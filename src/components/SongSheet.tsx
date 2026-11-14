@@ -20,7 +20,7 @@ export function SongSheet({ p }: { p: Project }) {
         <dd>{mood ? `${mood.name} · ${p.idea.bpm} BPM` : '—'}</dd>
         <dt>畫面</dt>
         <dd>{p.idea.image || '—'}</dd>
-        <dt>記憶點</dt>
+        <dt>一句話</dt>
         <dd>{p.idea.hook ? `「${p.idea.hook}」` : '—'}</dd>
         <dt>歌詞</dt>
         <dd>{p.lyrics.filter((s) => s.text.trim()).map((s) => `${KIND_ZH[s.kind]} ${lyricLines(s.text).length} 句`).join('、') || '—'}</dd>

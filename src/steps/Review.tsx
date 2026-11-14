@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Card, Coach, DeskActions, FeedbackList, Light, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { SongSheet } from '../components/SongSheet'
 import { AbletonGuide } from '../components/AbletonGuide'
-import { playSequence, type Player } from '../lib/audio'
+import { afterSound, playSequence, stopAll, type Player } from '../lib/audio'
 import { useMidiLab } from '../lib/lab'
 import type { Project } from '../lib/store'
 import { downloadMidi } from '../lib/midi'
@@ -10,7 +10,11 @@ import { diatonicChords, keyName } from '../lib/theory'
 import { analyzeSection, KIND_ZH } from './Lyrics'
 import { progressionFeedback } from './Harmony'
 import { melodyFeedback } from './Melody'
-import { arrangementFeedback, arrangedAudio } from './Arrangement'
+import { arrangementFeedback } from './Arrangement'
+import { renderSong, songSpecs } from './songFile'
+import { playHum } from './results'
+import { safeFileName, shareOrDownload } from '../lib/share'
+import { downloadBackup } from '../lib/backup'
 import { mixFeedback } from './Mix'
 import type { StepDef, StepProps } from './types'
 
@@ -46,7 +50,7 @@ function exportText(p: Project) {
   const out = [
     `《${p.idea.title || '未命名'}》`,
     `調：${keyName(p.harmony.root, p.harmony.mode)}　速度：${p.idea.bpm} BPM`,
-    `記憶點：${p.idea.hook}`,
+    `一句話：${p.idea.hook}`,
     '',
     `主歌和弦：| ${prog(p.harmony.verse)} |`,
     `副歌和弦：| ${prog(p.harmony.chorus)} |`,
@@ -82,13 +86,36 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
     {label:'副歌歌詞', step:'lyrics', ok:p.lyrics.some(s=>s.kind==='chorus'&&s.text.trim())},
   ].filter(item=>!item.ok)
   const [playing, setPlaying] = useState<number>(-1)
+  const [humPlaying, setHumPlaying] = useState(false)
+  const [listened, setListened] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveNote, setSaveNote] = useState('')
   const playerRef = useRef<Player | null>(null)
-  const stopSong = () => { playerRef.current?.stop(); setPlaying(-1) }
+  const stopSong = () => { stopAll(); playerRef.current?.stop(); setPlaying(-1); setHumPlaying(false) }
   useEffect(() => () => { playerRef.current?.stop() }, [])
   const playSong = () => {
     playerRef.current?.stop()
-    const plan = p.arrangement.length ? p.arrangement : (['verse','chorus'] as const).map(kind => ({id:kind,kind,bars:4,layers:{drums:false,bass:true,keys:true,pad:false,melody:true}}))
-    playerRef.current = playSequence(plan.map(s => ({bpm:p.idea.bpm, ...arrangedAudio(p,s), layers:s.layers})), setPlaying, () => { setPlaying(-1); notify('review.play','') })
+    setHumPlaying(false)
+    playerRef.current = playSequence(songSpecs(p), setPlaying, () => { setPlaying(-1); setListened(true); notify('review.play','') })
+  }
+  // 整趟旅程最有感的一刻：先聽你一開始哼的，再聽現在長成的樣子
+  const playHumThenSong = () => {
+    if (!p.hum) return playSong()
+    stopAll()
+    setHumPlaying(true)
+    playHum(p)
+    const last = p.hum.notes[p.hum.notes.length - 1]
+    afterSound(playSong, ((last ? last.start + last.dur : 1) + 0.9) * 1000)
+  }
+  const saveSong = async () => {
+    setSaving(true); setSaveNote('')
+    try {
+      const { wav } = await renderSong(p)
+      const name = safeFileName(p.idea.title, '我的第一首歌')
+      const result = await shareOrDownload(new File([wav], `${name}.wav`, { type: 'audio/wav' }), name)
+      setSaveNote(result === 'shared' ? '送出去了。' : result === 'downloaded' ? '存好了，在手機的下載資料夾裡。用一般的播放器就能播，也能傳給朋友聽。' : '')
+    } catch { setSaveNote('這次沒錄成，再按一次試試。') }
+    finally { setSaving(false) }
   }
 
   const rate = (id: string, v: number) => update('review', { ...r, ratings: { ...r.ratings, [id]: v } })
@@ -104,11 +131,14 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
 
       {!hasScore ? (
         <DeskActions primary={{label:'先去挑幾個和弦',onClick:()=>goTo?.('harmony')}} />
-      ) : playing >= 0 ? (
+      ) : playing >= 0 || humPlaying ? (
         <DeskActions primary={{ label: '■ 停', onClick: stopSong }} />
+      ) : listened ? (
+        <DeskActions primary={{ label: saving ? '正在把歌錄成聲音檔……' : '把歌存成聲音檔', onClick: saveSong, disabled: saving }} secondary={{ label: '再聽一遍', onClick: playSong }} />
       ) : (
-        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: playSong }} secondary={missing.length ? { label: `去補${missing[0].label} →`, onClick: () => goTo?.(missing[0].step) } : { label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
+        <DeskActions primary={{ label: '▶ 從頭聽我的歌', onClick: playSong }} secondary={missing.length ? { label: `去補${missing[0].label} →`, onClick: () => goTo?.(missing[0].step) } : p.hum ? { label: '先聽你一開始哼的，再聽現在的', onClick: playHumThenSong } : { label: '下載 MIDI，帶進 REAPER', onClick: () => downloadMidi(p) }} />
       )}
+      {saveNote && <p className="demo-missing small muted" role="status">{saveNote}</p>}
 
       <Toolbox>
       <Card title="聽完覺得呢？（1 想再試試，5 很喜歡）">
@@ -148,9 +178,10 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
 
       <Card title="把歌帶走">
         <div className="row wrap">
+          <button className="btn" disabled={!hasScore || saving} onClick={saveSong}>存成聲音檔（.wav）</button>
           <button className="btn" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
           <button className="btn" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
-          <button className="btn btn-ghost" onClick={() => download('music-lab-project.json', JSON.stringify(p, null, 2), 'application/json')}>備份這首歌（.json）</button>
+          <button className="btn btn-ghost" onClick={() => downloadBackup(p)}>備份這首歌（.json）</button>
         </div>
       </Card>
 

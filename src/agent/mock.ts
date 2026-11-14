@@ -62,7 +62,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
         lyrics: `旋律有了，現在讓字「住進」音符裡。副歌旋律有 ${p.melody.chorus.filter((m) => m != null && m >= 0).length} 個音，前兩句大約就是這麼多字。`,
         arrange: '詞曲都在了。現在當導演：哪一段要安靜、哪一段要全員到齊？',
         record: '準備錄一版了。先暖暖嗓，再試一下音量，我陪你聽。',
-        mix: '我故意把混音弄亂了：主旋律太小。播放，用耳朵把它們放回該在的位置。',
+        mix: '按播放聽聽。主旋律有沒有被伴奏蓋住？把它推近一點，用耳朵決定它站在哪裡。',
         review: '來，從頭聽聽這一版。哪一段讓你想再多聽一次？',
       }
       return { text: bridge[step] ?? '', next: prev ? `（上一檯：${STEP_ZH[prev]}，隨時可以回去改）` : undefined }
@@ -73,7 +73,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
       return {
         text: `${h.source === 'demo' ? '示範裡有' : h.source === 'file' ? '音檔裡有' : '你哼了'} ${h.notes.length} 個音，停留最久、最常回去的是 ${NOTE_NAMES[h.keyRoot]}。耳朵會把這種「一直回去的音」當成家。`,
         learned: `這叫「主音」，以它為中心的 7 個音就是 ${keyName(h.keyRoot, h.keyMode)}。`,
-        next: `按「加上主音襯底」聽聽看：你的旋律每次碰到 ${NOTE_NAMES[h.keyRoot]} 都會特別穩。`,
+        next: `按「聽聽整理後的音」聽聽看：你的旋律每次碰到 ${NOTE_NAMES[h.keyRoot]} 都會特別穩。`,
         suggestions: [{ label: '前往構想', action: { type: 'goStep', step: 'idea' } }],
       }
     }
@@ -110,7 +110,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
     case 'lyrics.edit': {
       const sec = p.lyrics.find((s) => s.kind === detail) ?? p.lyrics[0]
       if (!sec) return { text: '' }
-      const r = fromFeedback(analyzeSection(sec, p.idea.hook).fb, sec.kind === 'chorus' ? '副歌可以是整首歌的「結論」，Hook 在這裡回來最有感覺。' : '主歌可以先「演」出來：給聽的人一個看得見的畫面。', '大聲唸一遍，聽句尾的韻母是不是同一個。')
+      const r = fromFeedback(analyzeSection(sec, p.idea.hook).fb, sec.kind === 'chorus' ? '副歌可以是整首歌的「結論」，這首歌的一句話在這裡回來最有感覺。' : '主歌可以先「演」出來：給聽的人一個看得見的畫面。', '大聲唸一遍，聽句尾的韻母是不是同一個。')
       return { ...r, text: `（${KIND_ZH[sec.kind]}）${r.text}` }
     }
     case 'arrange.change':
@@ -140,7 +140,7 @@ function eventReply(p: Project, step: string, kind: string, detail: string): Age
       const feel = heavy ? '有重量，像壓著東西往前走——這種張力很適合小調、中慢速（約 70–85 BPM），讓每一步都踩得到' : bright ? '很明亮，適合大調、中快速，讓它往上飄' : '情緒還很開放，等你在構想裡選一個方向'
       if (kind === 'inspiration.saved') return { text: `記下了${t ? `「${t}」` : ''}。不急著用它，先回到你剛剛在做的事。`, learned: '先記下來、不打斷手上的事，之後再回來挑，很多創作者都這樣累積素材。', next: t ? `這幾個字${feel}。` : undefined }
       if (kind === 'inspiration.start') return {
-        text: `用「${t}」開一首歌。${t ? `這幾個字${feel}。` : ''}我已經把它放進歌名／Vibe 板。`,
+        text: `用「${t}」開一首歌。${t ? `這幾個字${feel}。` : ''}我已經把它放進歌名和這首歌的「感覺」。`,
         learned: '從一個核心意象出發，後面每個選擇都能問自己：「這像不像它？」',
         next: heavy ? '在情緒裡試試「憂傷失落」或「熱血衝刺」，兩種都聽，選一個更像它的；接著去哼唱，心裡默念這幾個字。' : '先選一個情緒，再去哼唱或排和弦。',
         suggestions: [{ label: '去哼唱', action: { type: 'goStep', step: 'hum' } }, { label: '去排和弦', action: { type: 'goStep', step: 'harmony' } }],
@@ -246,7 +246,7 @@ function questionReply(p: Project, step: string, q: string): AgentReply {
     const ch = lastChar(p.idea.hook)
     const r = rhymeOf(ch)
     return r
-      ? { text: `你的 Hook 結尾「${ch}」屬於「${r.group}」轍（${r.sound}）。同韻的字有：${RHYME_GROUPS[r.idx].sample}。挑一個跟你的畫面有關的，放在另一句的句尾。`, learned: '十三轍：中文歌的韻母相近，耳朵就聽得出押韻。' }
+      ? { text: `你的一句話結尾「${ch}」屬於「${r.group}」轍（${r.sound}）。同韻的字有：${RHYME_GROUPS[r.idx].sample}。挑一個跟你的畫面有關的，放在另一句的句尾。`, learned: '十三轍：中文歌的韻母相近，耳朵就聽得出押韻。' }
       : { text: `「${ch || '你的句尾字'}」不在我的韻表裡。大聲唸出來，聽它的韻母（a、ang、ing…），再到韻腳小抄找同組的字。` }
   }
   if (/(旋律|怎麼寫曲|音符)/.test(q)) {

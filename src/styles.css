@@ -1283,3 +1283,17 @@ body::before { opacity: .12; }
   .workpage .primary-action { min-height: 54px; padding: 10px 18px; }
   .workpage .desk-actions .link-btn { padding: 4px 12px; min-height: 44px; }
 }
+
+/* M-14 · 最早那句話只是問一句，不擋前進 */
+.hook-ask { padding: 10px 14px 12px; border: 1px dashed var(--grid-strong); border-radius: 4px 11px 5px 9px; background: color-mix(in srgb, var(--wash-ochre) 35%, var(--paper)); }
+.hook-ask p { margin: 0 0 8px; font-family: var(--font-title); line-height: 1.7; overflow-wrap: anywhere; }
+
+/* M-16 · 每個彈窗底部都有一顆有字的離開鈕 */
+.modal-leave { align-self: center; margin-top: 6px; }
+.chat-sheet .modal-leave { margin: 0 auto; flex: none; }
+
+/* M-21 · 第一次聽寫前的說明 */
+.dictation-ask { padding: 10px 14px 12px; border: 1px dashed var(--grid-strong); border-radius: 4px 11px 5px 9px; background: color-mix(in srgb, var(--wash-indigo) 40%, var(--paper)); }
+.dictation-ask p { margin: 0 0 8px; line-height: 1.7; }
+.data-note { margin: 8px 0; font-size: .85rem; line-height: 1.7; }
+.data-note p { margin: 6px 0; }

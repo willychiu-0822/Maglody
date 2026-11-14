@@ -8,7 +8,7 @@ import type { Project, Update } from '../lib/store'
 import { uid } from '../lib/store'
 import { keyName } from '../lib/theory'
 import { pullOptions, collageOptions, type PullOption } from './pull'
-import { useRecorder, type Recording } from './recorder'
+import { canTranscribe, useRecorder, type Recording } from './recorder'
 import { DeskActions } from '../components/ui'
 import { TAG_ZH, type InspoApi, type InspoTag, type Inspiration } from './store'
 
@@ -52,6 +52,7 @@ function playHumNotes(h: NonNullable<Inspiration['hum']>) {
 }
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+const DICTATION_KEY = 'maglody-dictation'
 
 interface Props {
   api: InspoApi
@@ -82,6 +83,8 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   const pendingRecording = useRef<{ kind: 'voice' | 'hum'; value: Recording } | null>(null)
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [dictation, setDictation] = useState<'ask' | 'on' | 'off'>(() => { try { return localStorage.getItem(DICTATION_KEY) === 'on' ? 'on' : 'ask' } catch { return 'ask' } })
+  const [dictationAsk, setDictationAsk] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [picked, setPicked] = useState<string[]>([])
   const [collage, setCollage] = useState(false)
@@ -136,8 +139,17 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       if (pendingRecording.current) await toggleRec(pendingRecording.current.kind)
       if (rec.completed) await toggleRec(rec.completed)
       if (rec.recording) await toggleRec(rec.recording)
-      await rec.start(kind)
+      if (kind === 'voice' && canTranscribe() && dictation === 'ask') { setDictationAsk(true); return }
+      await rec.start(kind, { transcribe: dictation !== 'off' })
     }
+  }
+
+  // 第一次按「說」之前，先講清楚聽寫是請瀏覽器幫忙，聲音會經過它的語音服務；可以選只錄音
+  const answerDictation = (choice: 'on' | 'off') => {
+    setDictation(choice)
+    setDictationAsk(false)
+    if (choice === 'on') { try { localStorage.setItem(DICTATION_KEY, 'on') } catch { /* 存不進去，下次再問一次也無妨 */ } }
+    void rec.start('voice', { transcribe: choice === 'on' }).catch(() => {})
   }
 
   const addImages = async (files: FileList | null) => {
@@ -265,7 +277,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
       {toast && !open && <div className="toast" role="status"><span>{toast}</span><button className="btn notice-ack" onClick={() => setToast(null)}>好</button></div>}
 
       {open && (
-        <Modal label={decision && open === 'library' ? decisionTitle(decision) : '靈感'} className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'} ${decision && open === 'library' ? 'decision-notebook' : ''}`} onClose={closeNotebook}>
+        <Modal label={decision && open === 'library' ? decisionTitle(decision) : '靈感'} className={`notebook-sheet ${open === 'capture' ? 'capture-notebook' : 'library-notebook'} ${decision && open === 'library' ? 'decision-notebook' : ''}`} onClose={closeNotebook} closeLabel={open === 'capture' ? '先不記' : '闔上本子'}>
             <div className="row between notebook-tools">
               {open === 'capture'
                 ? <button className="link-btn" onClick={() => setOpen('library')}>翻翻本子（{api.list.length}）</button>
@@ -294,6 +306,15 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages(e.target.files); e.target.value = '' }} />
                 </div>
+                {dictationAsk && (
+                  <div className="dictation-ask" role="group" aria-label="語音聽寫說明">
+                    <p>我會請瀏覽器幫忙把你說的話打成字，聲音會經過它的語音服務。不想的話，選「只錄音」，我就只幫你收著聲音。</p>
+                    <div className="row wrap">
+                      <button className="btn small" onClick={() => answerDictation('on')}>好，開始說</button>
+                      <button className="btn btn-ghost small" onClick={() => answerDictation('off')}>只錄音</button>
+                    </div>
+                  </div>
+                )}
                 {mediaSaveError && <p className="small muted">錄音還沒收好，聲音暫留在這頁。可以再試一次，或先另存文字。</p>}
                 {rec.completed && <p className="small muted" role="status">剛才的錄音還在，按「夾進本子」收好。</p>}
                 {rec.pending && <p className="small muted" role="status">等麥克風許可……也可以先寫文字。</p>}
@@ -360,7 +381,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                             secondary={moreOpen === x.id ? undefined : { label: '其他用法…', onClick: () => setMoreOpen(x.id) }} />
                           {moreOpen === x.id && <div className="inspo-more">
                             {here.map((o) => <button key={o.how + o.label} className="link-btn" onClick={() => pull(x, o)}>{o.label}</button>)}
-                            {x.id !== 'seed-fuzui-qianxing' && <button className="link-btn muted" data-notebook-remove onClick={() => choose({ kind: 'remove', item: x })}>刪除</button>}
+                            <button className="link-btn muted" data-notebook-remove onClick={() => choose({ kind: 'remove', item: x })}>刪除</button>
                           </div>}
                         </div>
                       )}

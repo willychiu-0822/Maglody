@@ -87,3 +87,21 @@ test('M-06: the status sentence appears only when there is something to say, and
   const second = (await ask(p, '旋律怎麼寫？', 'composer', [{ role: 'assistant', content: JSON.stringify(first) }])).reply
   assert.ok(!/副歌用了/.test(second.text), '同一句狀態報告不該再貼一次')
 })
+
+// M-12：夥伴嘴裡說「按『…』」「點『…』」的按鈕，畫面上要真的有這個字。
+import fs from 'node:fs'
+import path from 'node:path'
+test('M-12: every button the offline coach tells you to press exists somewhere in the UI text', () => {
+  const root = path.resolve(import.meta.dirname, '../../src')
+  const files = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? files(path.join(dir, e.name)) : /\.tsx$/.test(e.name) ? [path.join(dir, e.name)] : [])
+  const ui = files(root).map((f) => fs.readFileSync(f, 'utf8')).join('\n')
+  const mock = fs.readFileSync(path.join(root, 'agent/mock.ts'), 'utf8')
+  const named = [...mock.matchAll(/[按點]「([^」$]+)」/g)].map((m) => m[1])
+  assert.ok(named.length >= 2)
+  const missing = named.filter((name) => !ui.includes(name))
+  assert.deepEqual(missing, [], `夥伴提到畫面上找不到的按鈕：${missing.join('、')}`)
+})
+test('M-12: recording toolbox cards are not numbered from 2', () => {
+  const rec = fs.readFileSync(path.resolve(import.meta.dirname, '../../src/steps/Recording.tsx'), 'utf8')
+  assert.ok(!/title="\d\./.test(rec))
+})

@@ -4,6 +4,7 @@ import type { AgentAction, AgentMessage } from '../agent/types'
 import { ROLES, ROLE_ORDER, type RoleId } from '../agent/roles'
 import { quickPrompts } from '../agent/quick'
 import type { Project } from '../lib/store'
+import { asset } from '../lib/asset'
 
 interface Props {
   p: Project
@@ -29,29 +30,29 @@ export function MasterPanel({ p, open, roleId, setRoleId, onClose, onCapture, me
   const send = (text: string) => { if (!text.trim()) return; onAsk(text.trim(), roleId); setQ('') }
 
   return (
-    <Modal label={`跟${role.name}聊`} className="chat-sheet" onClose={onClose}>
+    <Modal label={`跟${role.name}聊`} className="chat-sheet" onClose={onClose} closeLabel="聊到這裡，回去做歌">
         <div className="row between chat-toolbar">
           <div className="role-switch" role="tablist" aria-label="選擇夥伴">
             {ROLE_ORDER.map((id) => (
-              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name} aria-label={ROLES[id].name}><img src={`/studio/roles/${id}.webp`} width="40" height="40" alt="" /></button>
+              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name} aria-label={ROLES[id].name}><img src={asset(`/studio/roles/${id}.webp`)} width="40" height="40" alt="" /></button>
             ))}
           </div>
           <button className="link-btn modal-capture" onClick={onCapture}>✎ 記一下</button>
           <button className="icon-btn" onClick={onClose} aria-label="關閉">✕</button>
         </div>
         <div className="chat-identity">
-          <img className="chat-room" src="/studio/room.webp" width="1000" height="563" alt="" />
-          <img data-character-portrait src={`/studio/roles/${role.id}.webp`} width="84" height="112" alt={`${role.name}，工作室夥伴`} />
+          <img className="chat-room" src={asset('/studio/room.webp')} width="1000" height="563" alt="" />
+          <img data-character-portrait src={asset(`/studio/roles/${role.id}.webp`)} width="84" height="112" alt={`${role.name}，工作室夥伴`} />
           <div className="chat-companion-note"><span>工作室裡，慢慢聊</span><strong>{role.name}</strong><p>{role.focus}</p></div>
         </div>
 
         <div className="master-list" ref={listRef}>
-          {messages.length === 0 && <div className="msg chat-empty"><div className="msg-avatar" aria-hidden="true"><img src={`/studio/roles/${role.id}.webp`} width="40" height="48" alt="" /></div><div className="msg-body"><strong className="msg-speaker">{role.name}</strong>{role.name}把椅子拉過來了。靈感、卡住的地方、哪一版比較好，都可以慢慢說。下面有幾個開場句，點一下就行。</div></div>}
+          {messages.length === 0 && <div className="msg chat-empty"><div className="msg-avatar" aria-hidden="true"><img src={asset(`/studio/roles/${role.id}.webp`)} width="40" height="48" alt="" /></div><div className="msg-body"><strong className="msg-speaker">{role.name}</strong>{role.name}把椅子拉過來了。靈感、卡住的地方、哪一版比較好，都可以慢慢說。下面有幾個開場句，點一下就行。</div></div>}
           {messages.map((m) => {
             const r = m.role_id ? ROLES[m.role_id as RoleId] : null
             return (
               <div key={m.id} className={`msg msg-${m.role}`}>
-                {m.role === 'master' && <div className="msg-avatar" aria-hidden="true">{r && <img src={`/studio/roles/${r.id}.webp`} width="40" height="48" alt="" />}</div>}
+                {m.role === 'master' && <div className="msg-avatar" aria-hidden="true">{r && <img src={asset(`/studio/roles/${r.id}.webp`)} width="40" height="48" alt="" />}</div>}
                 <div className="msg-body">
                   {m.role === 'master' && <strong className="msg-speaker">{r?.name ?? '工作室夥伴'}</strong>}
                   {m.text && <div>{m.text}</div>}
@@ -77,7 +78,7 @@ export function MasterPanel({ p, open, roleId, setRoleId, onClose, onCapture, me
               </div>
             )
           })}
-          {busy && <div className="msg msg-master"><div className="msg-avatar" aria-hidden="true"><img src={`/studio/roles/${role.id}.webp`} width="40" height="48" alt="" /></div><div className="msg-body typing"><strong className="msg-speaker">{role.name}</strong>想一下……</div></div>}
+          {busy && <div className="msg msg-master"><div className="msg-avatar" aria-hidden="true"><img src={asset(`/studio/roles/${role.id}.webp`)} width="40" height="48" alt="" /></div><div className="msg-body typing"><strong className="msg-speaker">{role.name}</strong>想一下……</div></div>}
         </div>
 
         <div className="master-quick">

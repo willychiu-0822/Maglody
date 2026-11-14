@@ -1,7 +1,8 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 
 /** Native modal makes the background inert, traps focus and restores the opener. */
-export function Modal({ label, className = '', onClose, children }: { label: string; className?: string; onClose: () => void; children: ReactNode }) {
+/** closeLabel：每個彈窗底部一顆有字的離開鈕（右上角的 ✕ 只是備用）。 */
+export function Modal({ label, className = '', onClose, closeLabel, children }: { label: string; className?: string; onClose: () => void; closeLabel?: string; children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const dialog = ref.current!
@@ -17,6 +18,6 @@ export function Modal({ label, className = '', onClose, children }: { label: str
     if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog)) { e.preventDefault(); last?.focus() }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus() }
   }} onCancel={e => { e.preventDefault(); onClose() }}>
-    <div className={`inspo-sheet ${className}`}>{children}</div>
+    <div className={`inspo-sheet ${className}`}>{children}{closeLabel && <button type="button" className="link-btn modal-leave" onClick={onClose}>{closeLabel}</button>}</div>
   </dialog>
 }

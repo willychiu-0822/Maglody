@@ -7,7 +7,7 @@
 │  App（旅程、章節切換、本章成果、完成條件）                       │
 │   ├─ steps/*        9 個章節：練習 UI + 回饋規則 + 完成條件       │
 │   ├─ steps/results  每章「可聽成果」                             │
-│   ├─ MasterPanel    大師旁白條／對話（底部操作帶）               │
+│   ├─ MasterPanel    夥伴對話視窗（點夥伴頭像打開）               │
 │   ├─ inspire/*      靈感庫：記下（多模態）、翻本子、拉進創作     │
 │   └─ ReaperGuide    REAPER 操作步驟 + MIDI 下載                  │
 │                                                                 │
@@ -87,5 +87,5 @@ interface Inspiration {
 - iOS：`navigator.audioSession.type` 播放時設為 `playback`（不受靜音鍵影響），錄音時設為 `play-and-record`。
 - 錄音：章節練習用 ScriptProcessor（相容性最好）；靈感用 MediaRecorder，並以 Web Speech API 做 zh-TW 聽寫（不支援時只存錄音）。
 - 照片在前端縮到長邊 1280px 的 JPEG，再存進 IndexedDB。
-- 手機版旋律格一次顯示 1 小節，每格約 36×38px；底部操作帶依序是「▶ 成果｜大師｜記一下」。
+- 手機版旋律格一次顯示 1 小節，每格 44px 高；手機直向時夥伴縮成紙頁上方一列，主按鈕貼在畫面底部。
 - `npm run dev:mobile` 以自簽 https 在區網開放，供手機測試麥克風。

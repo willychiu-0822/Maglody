@@ -99,7 +99,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
       )}
 
       <Toolbox>
-      <Card title="2. 暖嗓：音準跟唱">
+      <Card title="暖嗓：音準跟唱">
         <p className="muted small">點一個音，聽完後跟著唱「啊～」，撐住。指針在中間綠區停留約 0.6 秒，就算一次命中。{notes.length ? '這幾個音來自你旋律的音域。' : p.hum ? '這幾個音來自剛才的音域。' : '先拿這幾個音暖暖嗓。'}</p>
         <div className="row wrap">
           {targets.map((m) => (
@@ -125,7 +125,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
         )}
       </Card>
 
-      <Card title="3. 錄音環境清單">
+      <Card title="錄音環境清單">
         <ul className="checklist">
           {REC_CHECKS.map((c) => (
             <li key={c.id}>
@@ -141,7 +141,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
         </ul>
       </Card>
 
-      <Card title="4. 節拍器（你的歌速度）">
+      <Card title="節拍器（你的歌速度）">
         <div className="row">
           {metro == null ? <button className="btn" onClick={() => setMetro(Date.now())}>▶ {p.idea.bpm} BPM</button> : <button className="btn btn-danger" onClick={() => setMetro(null)}>■ 停止</button>}
           <span className="muted small">錄音時戴耳機聽它，人聲才會跟伴奏對齊。</span>

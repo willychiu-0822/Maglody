@@ -30,17 +30,18 @@ export interface Inspiration {
 const KEY = 'maglody-inspirations-v1'
 const SEEDED = 'maglody-inspirations-seeded'
 
-/** 使用者第一則真實靈感，作為靈感庫的 seed */
-export const SEED: Inspiration = {
-  id: 'seed-fuzui-qianxing',
-  createdAt: Date.UTC(2026, 10, 5),
-  text: '負罪前行',
-  note: '主題／情緒 vibe，可能當歌名或核心意象。',
+/** 本子第一次打開時放的一張範例紙片：內容中性、明講是範例、可以像任何一則一樣丟掉。丟掉之後不會再出現。 */
+export const EXAMPLE_TEXT = '窗外的雨剛停'
+const exampleInspiration = (): Inspiration => ({
+  id: 'example-inspiration',
+  createdAt: Date.now(),
+  text: EXAMPLE_TEXT,
+  note: '這是一張範例紙片，示範靈感長什麼樣子。可以直接丟掉。',
   tags: ['title', 'vibe', 'image'],
   images: [],
   fromStep: 'idea',
   used: [],
-}
+})
 
 function load(): Inspiration[] {
   try {
@@ -80,13 +81,13 @@ function load(): Inspiration[] {
         used: Array.isArray(x.used) ? x.used.filter(v => typeof record(v).step === 'string' && typeof record(v).how === 'string') as Inspiration['used'] : [],
       }]
     }) : []
-    if (!localStorage.getItem(SEEDED) && !list.some((x) => x.id === SEED.id)) {
-      list.unshift(SEED)
+    if (!localStorage.getItem(SEEDED)) {
+      list.unshift(exampleInspiration())
       localStorage.setItem(SEEDED, '1')
     }
     return list
   } catch {
-    return [SEED]
+    return []
   }
 }
 

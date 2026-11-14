@@ -100,7 +100,7 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   return fb
 }
 
-/** 手機直向：一次顯示 2 小節，格子才夠大好點 */
+/** 手機直向：一次顯示 1 小節，格子才夠大好點 */
 function useNarrow() {
   const q = '(max-width: 640px)'
   const [n, setN] = useState(() => typeof window !== 'undefined' && window.matchMedia(q).matches)
@@ -116,7 +116,8 @@ function useNarrow() {
 function MelodyStep({ p, update, notify, next }: StepProps) {
   const narrow = useNarrow()
   const [page, setPage] = useState(0)
-  const [part, setPart] = useState<Part>('chorus')
+  // 一進來就停在「第一個還沒完成的那一段」，這樣小任務、亮著的分頁、主按鈕講的是同一段
+  const [part, setPart] = useState<Part>(() => p.melody.verse.filter((m) => m != null && m >= 0).length >= 4 ? 'chorus' : 'verse')
   const [hold, setHold] = useState(false)
   const [penta, setPenta] = useState(() => ![...p.melody.verse, ...p.melody.chorus].some((m) => m != null && m >= 0 && isAvoid(m, p.harmony.root, p.harmony.mode)))
   const [col, setCol] = useState(-1)
@@ -199,6 +200,10 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
   const missingChords = prog.some((d) => d == null)
   const notes = cells.filter((m) => m != null && m >= 0).length
   const empty = notes === 0
+  const partName = part === 'verse' ? '主歌' : '副歌'
+  const other: Part = part === 'verse' ? 'chorus' : 'verse'
+  const otherNotes = p.melody[other].filter((m) => m != null && m >= 0).length
+  const switchTo = notes >= 4 && otherNotes < 4 ? other : null
   const bothReady = p.melody.verse.filter((m) => m != null && m >= 0).length >= 4 && p.melody.chorus.filter((m) => m != null && m >= 0).length >= 4
 
   return (
@@ -257,12 +262,12 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
       {player ? (
         <DeskActions primary={{ label: '■ 停', onClick: stop }} />
       ) : empty && p.hum ? (
-        <DeskActions primary={{ label: '用我的哼唱當草稿', onClick: importHum }} />
+        <DeskActions primary={{ label: `把哼唱倒進${partName}`, onClick: importHum }} />
       ) : bothReady && next ? (
         <DeskActions primary={{ label: <>旋律有了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 循環聽', onClick: play }} />
       ) : (
         <DeskActions primary={{ label: '▶ 循環聽', onClick: play, disabled: notes === 0 }}
-          secondary={part === 'verse' && notes >= 4 && p.melody.chorus.every((m) => m == null) ? { label: '換副歌 →', onClick: () => setPart('chorus') } : undefined} />
+          secondary={switchTo ? { label: `換${switchTo === 'verse' ? '主歌' : '副歌'} →`, onClick: () => setPart(switchTo) } : undefined} />
       )}
 
       <Toolbox>

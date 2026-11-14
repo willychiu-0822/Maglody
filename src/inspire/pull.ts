@@ -42,7 +42,7 @@ export function pullOptions(x: Inspiration, step: string, p: Project): { here: P
       idea('vibe', '加進 Vibe 板')
       if (x.tags.includes('image')) idea('image', '設為核心畫面')
       if (x.tags.includes('story')) idea('story', '加進故事')
-      idea('hook', '設為記憶點（Hook）')
+      idea('hook', '設為這首歌的一句話')
     }
     if (step === 'lyrics' || x.tags.includes('lyric')) {
       p.lyrics.forEach((s, i) => here.push({

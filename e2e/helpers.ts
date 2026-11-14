@@ -5,7 +5,7 @@ import { evidenceRoot } from './evidence-root'
 export { expect }
 export type { Page }
 export const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
-export const projectKey = 'music-lab-project-v2'
+export const projectKey = 'maglody-project-v2'
 export async function shot(page: Page, info: TestInfo, suffix = '') {
   const id = info.title.match(/UAT-\d+/)![0]
   const file = path.resolve(`${evidenceRoot}/${process.env.UAT_RUN_ID}/${info.project.name}/${id}${suffix ? '-'+suffix : ''}.png`)

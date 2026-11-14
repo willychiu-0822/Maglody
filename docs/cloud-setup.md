@@ -53,7 +53,7 @@ A、B、C 都需要多架一個小小的「後端」。原因是：**AI 金鑰�
 
 ### 1-1　準備好程式碼的位置
 
-程式碼在 GitHub：`willychiu-0822/Maglody`，目前最新的內容在 **`feature/music-lab`** 分支。
+程式碼在 GitHub：`willychiu-0822/Maglody`，最新的內容在 **`main`** 分支。
 
 - **為什麼**：等一下的網站託管服務會直接從 GitHub 讀程式碼，你每次更新，網站就會自動跟著更新。
 - **建議**：確認一切正常後，把這個分支合併進 `main`。託管服務預設看 `main`，之後比較不容易選錯。
@@ -64,7 +64,7 @@ A、B、C 都需要多架一個小小的「後端」。原因是：**AI 金鑰�
 1. 到 <https://app.netlify.com/> 用 GitHub 帳號登入。
 2. 按 **Add new site → Import an existing project → GitHub**，選 `Maglody`。
 3. 設定以下欄位：
-   - **Branch to deploy**：`feature/music-lab`（或合併後的 `main`）
+   - **Branch to deploy**：`main`
    - **Build command**：`npm run build`
    - **Publish directory**：`dist`
 4. 按 **Deploy**。大約 1 分鐘後，你會拿到一個 `https://xxxx.netlify.app` 網址。
@@ -210,7 +210,7 @@ Vertex 不使用金鑰，而是使用「服務帳戶」證明身分，後端放�
    ```
 2. **Deploys → Trigger deploy → Deploy site**，重新建置一次。
    - **為什麼要重新建置**：`VITE_` 開頭的設定是在「打包網頁」時寫進去的，改了之後必須重新打包才會生效。
-3. 用手機打開網站 → 點底部的大師 → 對話框右上角應該顯示 **「LLM 模式」**（原本是「離線模式」）。問一句「為什麼這和弦？」試試看。
+3. 用手機打開網站 → 點畫面上的夥伴 → 對話框右上角應該顯示 **「LLM 模式」**（原本是「離線模式」）。問一句「為什麼這和弦？」試試看。
 
 ---
 

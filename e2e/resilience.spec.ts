@@ -34,6 +34,8 @@ test('UAT-14 同一則文字語音哼唱照片保存', async ({ page }) => {
   await page.getByRole('button',{name:'記一下靈感'}).click()
   await page.locator('.inspo-capture textarea').fill('雨中的一首歌')
   await page.locator('.inspo-big').filter({hasText:'說'}).click()
+  // M-21：第一次按「說」之前先說明聽寫是請瀏覽器幫忙
+  await page.getByRole('button',{name:'好，開始說',exact:true}).click()
   await expect(page.locator('.inspo-big.rec')).toBeVisible()
   await page.waitForTimeout(700)
   await stopRecording(page)
@@ -63,6 +65,8 @@ test('UAT-15 錄音中直接保存不遺失最後附件', async ({ page }) => {
   await page.getByRole('button',{name:'記一下靈感'}).click()
   await page.locator('.inspo-capture textarea').fill('邊說邊記')
   await page.locator('.inspo-big').filter({hasText:'說'}).click()
+  // M-21：第一次按「說」之前先說明聽寫是請瀏覽器幫忙
+  await page.getByRole('button',{name:'好，開始說',exact:true}).click()
   await expect(page.locator('.inspo-big.rec')).toBeVisible()
   await page.waitForTimeout(800)
   await page.getByRole('button',{name:'夾進本子',exact:true}).click()
@@ -84,6 +88,8 @@ test('UAT-16 媒體儲存失敗可以恢復文字捕捉', async ({ page }) => {
   await page.getByRole('button',{name:'記一下靈感'}).click()
   await page.locator('.inspo-capture textarea').fill('文字仍要留下')
   await page.locator('.inspo-big').filter({hasText:'說'}).click()
+  // M-21：第一次按「說」之前先說明聽寫是請瀏覽器幫忙
+  await page.getByRole('button',{name:'好，開始說',exact:true}).click()
   await expect(page.locator('.inspo-big.rec')).toBeVisible()
   await page.waitForTimeout(700)
   await page.locator('.inspo-big.rec').click()
@@ -101,11 +107,11 @@ test('UAT-17 從靈感開始與拼貼', async ({ page }) => {
   await setup(page)
   await captureText(page,'夜車與路燈')
   await library(page)
-  const seed=page.locator('.inspo-card').filter({hasText:'負罪前行'})
+  const seed=page.locator('.inspo-card').filter({hasText:'窗外的雨剛停'})
   await seed.locator('.inspo-card-head').click()
   await seed.locator('.primary-action').click()
   await expect(page.locator('.desk-name')).toContainText('構想')
-  expect((await readProject(page)).idea.title).toBe('負罪前行')
+  expect((await readProject(page)).idea.title).toBe('窗外的雨剛停')
   await library(page)
   await page.getByRole('button',{name:'拼貼：挑幾則拼成新東西'}).click()
   await page.locator('.pick input').nth(0).check()
@@ -114,7 +120,7 @@ test('UAT-17 從靈感開始與拼貼', async ({ page }) => {
   await library(page)
   await expect(page.locator('.inspo-card')).toHaveCount(3)
   await expect(page.locator('.inspo-card').first()).toContainText('夜車與路燈')
-  await expect(page.locator('.inspo-card').first()).toContainText('負罪前行')
+  await expect(page.locator('.inspo-card').first()).toContainText('窗外的雨剛停')
 })
 
 test('UAT-18 知識先小火花、主動展開收合', async ({ page }) => {
@@ -151,19 +157,21 @@ test('UAT-19 本子空白仍能新增', async ({ page }) => {
 test('UAT-20 破損資料可恢復、不白屏', async ({ page },info) => {
   await setup(page)
   const corruptions: [string,unknown][] = [
-    ['music-lab-project-v2',{unlocked:-2,idea:{hook:'可恢復的句子'},lyrics:null,harmony:{verse:null},mix:{tracks:{melody:null}}}],
+    ['maglody-project-v2',{unlocked:-2,idea:{hook:'可恢復的句子'},lyrics:null,harmony:{verse:null},mix:{tracks:{melody:null}}}],
     ['maglody-inspirations-v1',{not:'an array'}],
     ['maglody-versions-v1',{not:'an array'}],
     ['maglody-inspirations-v1',[null,{id:'broken',text:'還能讀的靈感',tags:null,images:[null],used:null}]],
     ['maglody-versions-v1',[null,{id:'v',name:'Demo v1',project:{lyrics:null}}]],
     ['maglody-inspirations-v1',[{id:'voice-bad',text:'',voice:{assetId:'missing',transcript:{}},tags:[],images:[],used:[]}]],
-    ['music-lab-project-v2',null],
+    ['maglody-project-v2',null],
+    // M-24：改名前存下來的舊鍵（破損的）也要能恢復，並搬到新鍵
+    ['music-lab-project-v2',{unlocked:-2,idea:{hook:'可恢復的句子'},lyrics:null,harmony:{verse:null},mix:{tracks:{melody:null}}}],
   ]
   for(const [key,value] of corruptions) {
     await page.evaluate(({key,value})=>{localStorage.clear();localStorage.setItem(key,JSON.stringify(value))},{key,value})
     await page.reload()
     await expect(page.locator('.desk-name')).toBeVisible()
-    if(key==='music-lab-project-v2' && value!==null) expect((await readProject(page)).idea.hook).toBe('可恢復的句子')
+    if((key==='maglody-project-v2'||key==='music-lab-project-v2') && value!==null) expect((await readProject(page)).idea.hook).toBe('可恢復的句子')
     await page.getByRole('button',{name:'打開工作室選單'}).click()
     await expect(page.getByRole('dialog',{name:'工作室',exact:true})).toBeVisible()
     await shot(page,info,key)

@@ -14,7 +14,7 @@ export function SongMaterials({ p }: { p: Project }) {
     <summary><span>翻開素材手記</span><span className="journal-fold" aria-hidden="true">＋</span></summary>
     <div className="journal-pages">
       {!hasMaterials && <p className="journal-empty">第一筆還在醞釀。你留下的詞和聲音，會慢慢收在這裡。</p>}
-      {!!p.idea.hook.trim() && <article className="material-note" data-material="idea" aria-label="一句靈感"><h2>一句靈感</h2><p>{p.idea.hook.slice(0, 120)}{p.idea.hook.length > 120 ? '…' : ''}</p></article>}
+      {!!p.idea.hook.trim() && <article className="material-note" data-material="idea" aria-label="一句話"><h2>一句話</h2><p>{p.idea.hook.slice(0, 120)}{p.idea.hook.length > 120 ? '…' : ''}</p></article>}
       {!!harmonies.length && <article className="material-note" data-material="harmony" aria-label="和弦片段"><h2>和弦的顏色</h2>{harmonies.map(part => <p key={part.key}><small>{part.name}</small><span>{p.harmony[part.key].map(n => n == null ? '＿' : chords[n].name).join(' → ')}</span></p>)}</article>}
       {!!(melodies.length || hum.length) && <article className="material-note" data-material="melody" aria-label="旋律片段"><h2>旋律的腳步</h2>{(melodies.length ? melodies : [{ key: 'hum', name: '哼唱種子', notes: hum }]).map(part => <p key={part.key}><small>{part.name} · 開頭幾個音</small><span>{part.notes.map(noteNameOct).join(' · ')}</span></p>)}</article>}
       {!!lyrics.length && <article className="material-note" data-material="lyrics" aria-label="詞句片段"><h2>留在紙上的詞</h2>{lyrics.map(section => <p key={section.id}>{section.text.trim().slice(0, 100)}{section.text.trim().length > 100 ? '…' : ''}</p>)}</article>}

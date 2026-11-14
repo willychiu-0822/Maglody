@@ -65,11 +65,13 @@ export const defaultProject = (): Project => ({
   review: { ratings: {}, checks: {}, verdict: '' },
 })
 
-const KEY = 'music-lab-project-v2'
+export const PROJECT_KEY = 'maglody-project-v2'
+/** 舊名（專案改名前）：讀得到就搬到新的鍵，使用者的歌不會消失 */
+export const LEGACY_PROJECT_KEY = 'music-lab-project-v2'
 
-function load(): Project {
+export function loadProject(): Project {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(PROJECT_KEY) ?? localStorage.getItem(LEGACY_PROJECT_KEY)
     if (!raw) return defaultProject()
     return restoreProject(JSON.parse(raw), defaultProject())
   } catch {
@@ -78,10 +80,10 @@ function load(): Project {
 }
 
 export function useProject() {
-  const [project, setProject] = useState<Project>(load)
+  const [project, setProject] = useState<Project>(loadProject)
   const [storageError, setStorageError] = useState(false)
   useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(project)); setStorageError(false) } catch { setStorageError(true) }
+    try { localStorage.setItem(PROJECT_KEY, JSON.stringify(project)); localStorage.removeItem(LEGACY_PROJECT_KEY); setStorageError(false) } catch { setStorageError(true) }
   }, [project])
   const update = useCallback(<K extends keyof Project>(key: K, value: Project[K] | ((prev: Project[K]) => Project[K])) => {
     setProject((p) => ({ ...p, [key]: typeof value === 'function' ? (value as (x: Project[K]) => Project[K])(p[key]) : value }))

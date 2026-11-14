@@ -18,7 +18,7 @@ export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
   const others = (['chords', 'bass', 'drums'] as TrackId[]).map((id) => t[id].mute ? 0 : t[id].vol)
   const loudest = Math.max(...others)
   fb.push(!t.melody.mute && t.melody.vol > 0 && t.melody.vol >= loudest * 0.9 ? { level: 'good', text: '旋律跟伴奏的音量差不多，主角站得出來嗎？聽聽看。' } : { level: 'bad', text: '旋律現在比伴奏小聲，或是被靜音了，可能有點被蓋住。', tip: '想讓旋律靠近一點，先把伴奏拉小一點，再聽聽看。' })
-  fb.push(Math.abs(t.bass.pan) <= 0.15 ? { level: 'good', text: '貝斯站在中間，低音穩穩的。' } : { level: 'bad', text: '貝斯偏到一邊去了。', tip: '試試把它放回中間，聽聽兩邊差在哪。' })
+  fb.push(Math.abs(t.bass.pan) <= 0.15 ? { level: 'good', text: '貝斯站在中間，低音穩穩的。' } : { level: 'warn', text: '貝斯偏到一邊去了。', tip: '試試把它放回中間，聽聽兩邊差在哪。' })
   fb.push(Math.abs(t.melody.pan) <= 0.15 ? { level: 'good', text: '旋律站在中間，像站在舞台正中央。' } : { level: 'warn', text: '旋律偏向一邊。', tip: '放回中間也行，聽聽你喜歡它站哪裡。' })
   fb.push(Math.abs(t.chords.pan) >= 0.2 ? { level: 'good', text: '和弦往旁邊站了一點，聽聽它跟旋律隔了多遠。' } : { level: 'warn', text: '和弦跟旋律站在差不多的位置。', tip: '往左或右推一點，聽聽空間有沒有變。' })
   fb.push(t.chords.hp && t.melody.hp ? { level: 'good', text: '和弦和旋律都開了低頻切除，下面的位置留給貝斯和鼓。' } : { level: 'warn', text: '和弦或旋律還沒開低頻切除。', tip: '開開看，再關掉比一比，聽聽差在哪。' })
@@ -166,6 +166,7 @@ export const mixStep: StepDef = {
   Component: MixStep,
   requirements: (p) => [
     { label: '聽聽這段混音', ok: p.mix.listened && p.melody.chorus.some(m => m != null && m >= 0) },
-    { label: '把紅燈調到消失', ok: !mixFeedback(p, null).some((f) => f.level === 'bad') },
+    // 任務只講畫面上看得到的東西：主畫面的「主旋律」那條推桿
+    { label: '「主旋律」那條推桿被伴奏蓋住了，往右推近一點', ok: !mixFeedback(p, null).some((f) => f.level === 'bad') },
   ],
 }

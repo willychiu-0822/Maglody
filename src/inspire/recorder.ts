@@ -31,7 +31,7 @@ export function useRecorder() {
   const stopPromise = useRef<Promise<Recording | null> | null>(null)
   const r = useRef<{ rec?: MediaRecorder; stream?: MediaStream; result?: Recording; chunks: Blob[]; t0: number; sr?: SR | null; text: string; timer?: number; finishTimer?: number; resolve?: (x: Recording) => void }>({ chunks: [], t0: 0, text: '' })
 
-  const start = useCallback(async (kind: 'voice' | 'hum') => {
+  const start = useCallback(async (kind: 'voice' | 'hum', options: { transcribe?: boolean } = {}) => {
     if (requesting.current || r.current.rec || r.current.result || stopPromise.current) return
     requesting.current = true
     setPending(true)
@@ -67,7 +67,7 @@ export function useRecorder() {
         st.resolve?.(value)
       }
       recorder.start(250)
-      if (kind === 'voice') {
+      if (kind === 'voice' && options.transcribe !== false) {
         const sr = speechRecognition()
         st.sr = sr
         if (sr) {
@@ -92,7 +92,7 @@ export function useRecorder() {
       if (token !== generation.current) return
       r.current.stream?.getTracks().forEach(t => t.stop())
       setAudioSession('playback')
-      setError('這次沒能用上麥克風。看看網址列旁有沒有允許使用麥克風，網址也要是 https 或 localhost。想先寫下來也可以。')
+      setError('這次沒收到聲音。看看瀏覽器有沒有擋住麥克風，再按一次；想先寫下來也可以。')
     } finally {
       if (token === generation.current) { requesting.current = false; setPending(false) }
     }
