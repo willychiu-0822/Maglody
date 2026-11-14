@@ -17,7 +17,7 @@
     "test:webaudio": "node scripts/webaudio-check.mjs",
     "test:deploy": "node scripts/deploy-smoke.mjs",
     "test:logic": "node scripts/audio-regression.cjs && node scripts/logic-regression.cjs",
-    "selftest:unit": "node --import ./scripts/test-loader.mjs --test --test-isolation=none scripts/tests/*.test.mjs",
+    "selftest:unit": "node --import ./scripts/test-loader.mjs --test scripts/tests/*.test.mjs",
     "test": "npm run typecheck && npm run lint && npm run selftest:unit && npm run test:logic && npm run build && npm run test:deploy",
     "test:all": "npm test && npm run test:webaudio"
   },
