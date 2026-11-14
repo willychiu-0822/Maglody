@@ -265,7 +265,7 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
     } catch { flash('拼貼還沒全部存好，先留在這頁，釋出瀏覽器空間後再試。') }
   }
 
-  const recBtn = (kind: 'voice' | 'hum', label: string, _sub: string) => (
+  const recBtn = (kind: 'voice' | 'hum', label: string) => (
     <button className={`inspo-big ${rec.recording === kind ? 'rec' : ''}`} onClick={() => { void toggleRec(kind).catch(() => {}) }} disabled={busy || rec.pending}>
       <span className="inspo-big-icon">{rec.recording === kind ? '■' : kind === 'voice' ? '說' : '哼'}</span>
       <span className="small">{rec.recording === kind ? fmt(rec.elapsed) : label}</span>
@@ -298,8 +298,8 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
                 <textarea aria-label="靈感文字" autoFocus rows={3} value={draft.text} placeholder="幾個字就好……" onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
                 {rec.recording === 'voice' && rec.live && <div className="inspo-live">聽寫中：{rec.live}</div>}
                 <div className="inspo-media">
-                  {recBtn('voice', '說', '')}
-                  {recBtn('hum', '哼', '')}
+                  {recBtn('voice', '說')}
+                  {recBtn('hum', '哼')}
                   <button className="inspo-big" disabled={busy || rec.pending} onClick={() => fileRef.current?.click()}>
                     <span className="inspo-big-icon">拍</span>
                     <span className="small">拍照</span>

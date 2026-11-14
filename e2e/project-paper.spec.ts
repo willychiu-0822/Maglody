@@ -82,7 +82,7 @@ test('UAT-77 版本保存失敗保留說明可重試，捕捉返回與重整不�
   await expect(dialog.getByRole('button', { name: '✎ 記一下', exact: true })).toBeFocused()
   await page.evaluate(() => {
     const original = Storage.prototype.setItem
-    ;(window as any).__restoreVersionStorage = () => { Storage.prototype.setItem = original }
+    ;(window as unknown as { __restoreVersionStorage: () => void }).__restoreVersionStorage = () => { Storage.prototype.setItem = original }
     Storage.prototype.setItem = function(k, v) { if (k === 'maglody-versions-v1') throw new DOMException('full', 'QuotaExceededError'); return original.call(this, k, v) }
   })
   await dialog.locator('.primary-action').click()
@@ -91,7 +91,7 @@ test('UAT-77 版本保存失敗保留說明可重試，捕捉返回與重整不�
   await expect(page.locator('.version')).toHaveCount(0)
   await expect(dialog.getByRole('textbox', { name: '這一版的說明（選填）' })).toHaveValue(note)
   await page.screenshot({ path: `${evidenceRoot}/A-UI-15-retry-${info.project.name}.png`, animations: 'disabled' })
-  await page.evaluate(() => (window as any).__restoreVersionStorage())
+  await page.evaluate(() => (window as unknown as { __restoreVersionStorage: () => void }).__restoreVersionStorage())
   await dialog.getByRole('button', { name: '再存一次', exact: true }).click()
   await expect(dialog).toContainText('存好了：Demo v1')
   await page.screenshot({ path: `${evidenceRoot}/A-UI-15-saved-${info.project.name}.png`, animations: 'disabled' })

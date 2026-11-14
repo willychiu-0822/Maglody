@@ -15,4 +15,5 @@ export async function shareOrDownload(file: File, title: string): Promise<'share
 }
 
 /** 檔名不能有的字元換掉，空的就用預設名。 */
+// eslint-disable-next-line no-control-regex -- 檔名不能有控制字元，這裡就是要比對它們
 export const safeFileName = (name: string, fallback: string) => (name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').trim().slice(0, 40) || fallback)

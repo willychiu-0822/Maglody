@@ -14,6 +14,7 @@ export default class UatReporter implements Reporter {
     const id = test.title.match(/UAT-\d+/)?.[0] ?? test.title
     const evidence = `${evidenceRoot}/${process.env.UAT_RUN_ID}/${test.parent.project()?.name}/${id}.png`
     this.rows.push({ case: id, viewport: test.parent.project()?.name ?? '', status: result.status === 'passed' ? 'pass' : result.status === 'skipped' ? 'blocked' : 'fail',
+      // eslint-disable-next-line no-control-regex -- 去掉 ANSI 色碼
       reason: (result.errors.map(e => (e.message ?? '').replace(/\u001b\[[0-9;]*m/g, '')).join(' | ') || '').slice(0, 2500),
       evidence: fs.existsSync(evidence) ? evidence : '',
     })

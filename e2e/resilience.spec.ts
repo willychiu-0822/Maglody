@@ -1,4 +1,4 @@
-import { test, expect, desks, setup, go, primary, act, readProject, finished, shot, captureText, library, stopRecording } from './helpers'
+import { test, expect, desks, setup, go, primary, readProject, finished, shot, captureText, library, stopRecording } from './helpers'
 
 test('UAT-13 九檯隨時記靈感、保存留在原地', async ({ page }) => {
   await setup(page)

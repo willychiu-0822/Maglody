@@ -1,4 +1,4 @@
-import { test, expect, desks, setup, go, primary, act, readProject, finished, harmony, shot, captureText, library, stopRecording } from './helpers'
+import { test, expect, desks, setup, go, primary, act, readProject, finished, harmony, shot } from './helpers'
 import fs from 'node:fs/promises'
 
 test('UAT-01 首次進入與九檯上手', async ({ page }) => {

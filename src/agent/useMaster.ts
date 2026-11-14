@@ -37,7 +37,7 @@ export function useMaster(getProject: () => Project) {
       const { reply, source } = await askMaster(getProject(), { step, ...input, persona: { name: r.name, focus: r.focus, voice: r.voice }, personaId: rid, history: history() })
       if (song === generation.current && (reply.text || reply.learned)) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
     } finally { setPending(xs => xs.filter(request => request.id !== id)) }
-  }, [getProject]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getProject])
 
   const notify = useCallback((step: string, kind: string, detail = '') => {
     const key = `${step}:${kind}:${detail}`

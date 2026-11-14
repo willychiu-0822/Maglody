@@ -16,7 +16,7 @@ async function checkPaper(page: Page, name: string) {
 async function failNotebookWrites(page: Page) {
   await page.evaluate(() => {
     const original = Storage.prototype.setItem
-    ;(window as any).__restoreNotebookWrites = () => { Storage.prototype.setItem = original }
+    ;(window as unknown as { __restoreNotebookWrites: () => void }).__restoreNotebookWrites = () => { Storage.prototype.setItem = original }
     Storage.prototype.setItem = function(k, v) { if (k === 'maglody-inspirations-v1') throw new DOMException('full', 'QuotaExceededError'); return original.call(this, k, v) }
   })
 }
@@ -57,7 +57,7 @@ test('UAT-79 採用靈感先看紙頁、取消不改歌，隨手記與失敗重�
   await expect(dialog.getByRole('status')).toContainText('歌曲尚未更動')
   expect(await readProject(page)).toEqual(before)
   await page.screenshot({ path: `${evidenceRoot}/A-UI-17-adopt-retry-${info.project.name}.png`, animations: 'disabled' })
-  await page.evaluate(() => (window as any).__restoreNotebookWrites())
+  await page.evaluate(() => (window as unknown as { __restoreNotebookWrites: () => void }).__restoreNotebookWrites())
   await dialog.getByRole('button', { name: '重試採用', exact: true }).click()
   await expect(page.locator('.desk-name')).toContainText('構想')
   const after = await readProject(page)
@@ -103,9 +103,9 @@ test('UAT-80 移除紙片先預覽、可取消，保存失敗保留原片並能�
   await failNotebookWrites(page)
   await dialog.getByRole('button', { name: '確定移除這張紙片', exact: true }).click()
   await expect(dialog.getByRole('status')).toContainText('紙片仍在本子裡')
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('maglody-inspirations-v1')!).some((x: any) => x.text === '把雨聲留在琴邊'))).toBe(true)
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('maglody-inspirations-v1')!).some((x: { text: string }) => x.text === '把雨聲留在琴邊'))).toBe(true)
   await page.screenshot({ path: `${evidenceRoot}/A-UI-17-remove-retry-${info.project.name}.png`, animations: 'disabled' })
-  await page.evaluate(() => (window as any).__restoreNotebookWrites())
+  await page.evaluate(() => (window as unknown as { __restoreNotebookWrites: () => void }).__restoreNotebookWrites())
   await dialog.getByRole('button', { name: '重試移除', exact: true }).click()
   await expect(card).toHaveCount(0)
   const notebook = page.getByRole('dialog', { name: '靈感', exact: true })
