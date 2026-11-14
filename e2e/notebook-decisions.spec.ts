@@ -1,4 +1,5 @@
 import { test, expect, setup, finished, library, readProject, type Page } from './helpers'
+import { evidenceRoot } from './evidence-root'
 
 async function checkPaper(page: Page, name: string) {
   const dialog = page.getByRole('dialog', { name, exact: true })
@@ -32,7 +33,7 @@ test('UAT-79 採用靈感先看紙頁、取消不改歌，隨手記與失敗重�
   await opener.click()
   await expect(page.getByRole('button', { name: '先不帶入', exact: true })).toBeFocused()
   let dialog = await checkPaper(page, '把這則靈感帶進歌裡')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-adopt-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-adopt-${info.project.name}.png`, animations: 'disabled' })
   await expect(dialog).toContainText('鑰匙留在門口')
   await expect(dialog).toContainText('負罪前行')
   await expect(dialog).toContainText('歌名與記憶點會換成這句話')
@@ -55,7 +56,7 @@ test('UAT-79 採用靈感先看紙頁、取消不改歌，隨手記與失敗重�
   await dialog.getByRole('button', { name: '帶進這首歌', exact: true }).click()
   await expect(dialog.getByRole('status')).toContainText('歌曲尚未更動')
   expect(await readProject(page)).toEqual(before)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-adopt-retry-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-adopt-retry-${info.project.name}.png`, animations: 'disabled' })
   await page.evaluate(() => (window as any).__restoreNotebookWrites())
   await dialog.getByRole('button', { name: '重試採用', exact: true }).click()
   await expect(page.locator('.desk-name')).toContainText('構想')
@@ -94,7 +95,7 @@ test('UAT-80 移除紙片先預覽、可取消，保存失敗保留原片並能�
   let dialog = await checkPaper(page, '移除這張紙片')
   await expect(dialog).toContainText('把雨聲留在琴邊')
   await expect(dialog).toContainText('無法復原')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-remove-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-remove-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '留在本子裡', exact: true }).click()
   await expect(opener).toBeFocused()
   await opener.click()
@@ -103,7 +104,7 @@ test('UAT-80 移除紙片先預覽、可取消，保存失敗保留原片並能�
   await dialog.getByRole('button', { name: '確定移除這張紙片', exact: true }).click()
   await expect(dialog.getByRole('status')).toContainText('紙片仍在本子裡')
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('maglody-inspirations-v1')!).some((x: any) => x.text === '把雨聲留在琴邊'))).toBe(true)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-17-remove-retry-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-17-remove-retry-${info.project.name}.png`, animations: 'disabled' })
   await page.evaluate(() => (window as any).__restoreNotebookWrites())
   await dialog.getByRole('button', { name: '重試移除', exact: true }).click()
   await expect(card).toHaveCount(0)
@@ -148,9 +149,9 @@ test('UAT-81 長歌名與長靈感能分區閱讀，捲到確認鈕仍能隨手�
     }), '捲到頁尾時捕捉入口仍可見、按得到').toBe(true)
     await expect(dialog.locator('.primary-action:visible')).toHaveCount(1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-    if (viewport === info.project.use.viewport) await page.screenshot({ path: `docs/uat/evidence/A-UI-18-long-${info.project.name}.png`, animations: 'disabled' })
+    if (viewport === info.project.use.viewport) await page.screenshot({ path: `${evidenceRoot}/A-UI-18-long-${info.project.name}.png`, animations: 'disabled' })
   }
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-18-short-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-18-short-${info.project.name}.png`, animations: 'disabled' })
   await capture.click()
   await page.getByRole('textbox', { name: '靈感文字' }).fill('長紙頁裡又記下一片光')
   await page.getByRole('button', { name: '夾進本子', exact: true }).click()

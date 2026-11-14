@@ -1,8 +1,9 @@
 import { test, expect, type Page } from './helpers'
 import { readFile } from 'node:fs/promises'
+import { evidenceRoot } from './evidence-root'
 const visit = async (page: Page, name: string) => { await page.getByRole('button',{name:'打開工作室選單'}).click(); await page.locator('.menu-desk').filter({has:page.locator('span',{hasText:new RegExp(`^${name}$`)})}).click() }
 const primary=(page:Page)=>page.locator('main .primary-action')
-const shot=async(page:Page,id:string,viewport:string)=>page.screenshot({path:`docs/uat/evidence/${id}-${viewport}.png`,fullPage:true,animations:'disabled'})
+const shot=async(page:Page,id:string,viewport:string)=>page.screenshot({path:`${evidenceRoot}/${id}-${viewport}.png`,fullPage:true,animations:'disabled'})
 const fixture = async(page:Page)=>{
   await page.evaluate(()=>{const key='music-lab-project-v2';const p=JSON.parse(localStorage.getItem(key)!);p.harmony.verse=[0,3,4,0];p.harmony.chorus=[3,4,0,4];p.melody.verse[0]=60;p.melody.chorus[0]=67;p.mix.tracks.melody.vol=1.2;localStorage.setItem(key,JSON.stringify(p))});await page.reload()
 }

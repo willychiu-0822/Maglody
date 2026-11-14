@@ -1,7 +1,8 @@
 import { test, expect, type Page } from './helpers'
+import { evidenceRoot } from './evidence-root'
 const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
 const visit = async (page: Page, name: string) => { await page.getByRole('button', { name: '打開工作室選單' }).click(); await page.locator('.menu-desk').filter({has: page.locator('span', {hasText: new RegExp(`^${name}$`)})}).click() }
-const shot = async (page: Page, id: string, project: string) => page.screenshot({ path: `docs/uat/evidence/A-${id}-${project}.png`, fullPage: true, animations: 'disabled' })
+const shot = async (page: Page, id: string, project: string) => page.screenshot({ path: `${evidenceRoot}/A-${id}-${project}.png`, fullPage: true, animations: 'disabled' })
 test.beforeEach(async ({page}) => { await page.goto('/') })
 test('UAT-28 R1 紙墨在手機與桌面可讀且無溢出', async ({page}, info) => {
   await expect(page.locator('.studio-scene')).toBeVisible()

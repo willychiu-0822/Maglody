@@ -1,17 +1,18 @@
 import type { Reporter, TestCase, TestResult, FullResult } from '@playwright/test/reporter'
 import fs from 'node:fs'
 import path from 'node:path'
+import { RECORD, evidenceRoot } from './evidence-root'
 export default class UatReporter implements Reporter {
   rows: { case: string; viewport: string; status: string; reason: string; evidence: string }[] = []
   onTestEnd(test: TestCase, result: TestResult) {
     const trace = result.attachments.find(a => a.name === 'trace' && a.path)
     if (trace?.path && fs.existsSync(trace.path)) {
-      const target = `docs/uat/evidence/${process.env.UAT_RUN_ID}/${test.parent.project()?.name}/${test.title.match(/UAT-\d+/)?.[0]}-trace.zip`
+      const target = `${evidenceRoot}/${process.env.UAT_RUN_ID}/${test.parent.project()?.name}/${test.title.match(/UAT-\d+/)?.[0]}-trace.zip`
       fs.mkdirSync(path.dirname(target), { recursive: true })
       fs.copyFileSync(trace.path, target)
     }
     const id = test.title.match(/UAT-\d+/)?.[0] ?? test.title
-    const evidence = `docs/uat/evidence/${process.env.UAT_RUN_ID}/${test.parent.project()?.name}/${id}.png`
+    const evidence = `${evidenceRoot}/${process.env.UAT_RUN_ID}/${test.parent.project()?.name}/${id}.png`
     this.rows.push({ case: id, viewport: test.parent.project()?.name ?? '', status: result.status === 'passed' ? 'pass' : result.status === 'skipped' ? 'blocked' : 'fail',
       reason: (result.errors.map(e => (e.message ?? '').replace(/\u001b\[[0-9;]*m/g, '')).join(' | ') || '').slice(0, 2500),
       evidence: fs.existsSync(evidence) ? evidence : '',
@@ -40,8 +41,10 @@ export default class UatReporter implements Reporter {
       requirements:outcomes(checks), novice_feedback:outcomes(novice),
       exploration:outcomes({A_N08_long_conversation:['UAT-61'],A_N09_role_waiting:['UAT-62'],A_N10_mic_limit_without_frames:['UAT-52','UAT-43'],A_N11_new_song_conversation:['UAT-63'],text_first_song:['UAT-64'],studio_song_journal:['UAT-65'],studio_map:['UAT-66'],companion_mission:['UAT-67','UAT-68'],companion_paper_chat:['UAT-69'],short_viewport_chat:['UAT-70'],personal_materials:['UAT-71'],capture_notebook:['UAT-72'],explicit_confirmation:['UAT-73'],button_targets:['UAT-74'],long_page_confirmation:['UAT-75'],paper_revisions:['UAT-76'],revision_retry:['UAT-77'],audio_upload_controls:['UAT-78'],notebook_decisions:['UAT-79','UAT-80'],long_notebook_decisions:['UAT-81']}),
       notes: `Chrome；desktop 1280x800/mobile 390x844；run=${run}；${fullMatrix ? '完整矩陣' : '部分重跑，不能作為整體通過依據'}；Web Audio 實際播放、麥克風假裝置、LLM 本機教練，實機/API 未驗證${visualOpen ? '；A 尚有未結缺失待驗收' : ''}${allEvidence ? '' : '；有案例缺少截圖證據'}` }
-    fs.mkdirSync(`docs/uat/evidence/${run}`, { recursive: true })
-    fs.writeFileSync(`docs/uat/evidence/${run}/results.json`, JSON.stringify({ ...status, rows }, null, 2)+'\n')
+    fs.mkdirSync(`${evidenceRoot}/${run}`, { recursive: true })
+    fs.writeFileSync(`${evidenceRoot}/${run}/results.json`, JSON.stringify({ ...status, rows }, null, 2)+'\n')
+    // 預設不動 docs/uat/ 的狀態檔；要記錄正式結果時用 UAT_RECORD=1
+    if (!RECORD) return
     fs.writeFileSync('docs/uat/UAT-STATUS.json', JSON.stringify(status,null,2)+'\n')
     const historyPath='docs/uat/UAT-RUNS.json'
     const history=fs.existsSync(historyPath)?JSON.parse(fs.readFileSync(historyPath,'utf8')):[]

@@ -1,4 +1,5 @@
 import { test, expect, setup, go, desks, primary, finished } from './helpers'
+import { evidenceRoot } from './evidence-root'
 
 async function outsideClick(page: import('@playwright/test').Page) {
   // The full-screen dialog receives this outside-sheet click on both layouts.
@@ -21,7 +22,7 @@ test('UAT-73 彈窗用明確按鈕關閉，保存提示按好才收起', async (
   await page.getByRole('button', { name: '夾進本子', exact: true }).click()
   const notice = page.locator('.toast[role="status"]')
   await expect(notice).toContainText('收好了')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-12-notice-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-12-notice-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
   await page.getByRole('button', { name: '記一下靈感' }).click()
   await expect(page.getByRole('dialog').locator('.toast')).toContainText('收好了')
   await page.getByRole('dialog').getByRole('button', { name: '好', exact: true }).click()
@@ -53,7 +54,7 @@ test('UAT-74 九檯與彈窗的墨線按鈕至少44px，按下有回饋且只有
     })
     expect(bounds.top, '人物必須完整站在場景內').toBeGreaterThanOrEqual(bounds.sceneTop)
     expect(bounds.bottom).toBeLessThanOrEqual(bounds.sceneBottom + 4)
-    await page.screenshot({ path: `docs/uat/evidence/A-UI-13-page-${index + 1}-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
+    await page.screenshot({ path: `${evidenceRoot}/A-UI-13-page-${index + 1}-${info.project.name}.png`, fullPage: true, animations: 'disabled' })
     // Check every progressively disclosed tool, including nested details.
     await page.locator('main details').evaluateAll(elements => elements.forEach(e => { (e as HTMLDetailsElement).open = true }))
     await checkTargets(page)
@@ -62,13 +63,13 @@ test('UAT-74 九檯與彈窗的墨線按鈕至少44px，按下有回饋且只有
   let dialog = page.getByRole('dialog')
   await expect(dialog.locator('.primary-action')).toHaveCount(1)
   await checkTargets(page, 'dialog')
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-13-map-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-13-map-${info.project.name}.png`, animations: 'disabled' })
   await dialog.locator('.primary-action').click()
   await page.locator('.presence').click()
   dialog = page.getByRole('dialog')
   await checkTargets(page, 'dialog')
   await expect(dialog.locator('.primary-action')).toHaveCount(1)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-13-chat-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-13-chat-${info.project.name}.png`, animations: 'disabled' })
   await dialog.getByRole('button', { name: '關閉', exact: true }).click()
   await page.getByRole('button', { name: '記一下靈感' }).click()
   await page.getByRole('textbox', { name: '靈感文字' }).fill('把窗邊的風留在下一頁')
@@ -83,11 +84,11 @@ test('UAT-74 九檯與彈窗的墨線按鈕至少44px，按下有回饋且只有
   await expect(page.getByRole('dialog')).toBeHidden()
   await page.getByRole('button', { name: '好', exact: true }).click()
   await page.getByRole('button', { name: '記一下靈感' }).click()
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-13-capture-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-13-capture-${info.project.name}.png`, animations: 'disabled' })
   await page.getByRole('button', { name: /翻翻本子/ }).click()
   await checkTargets(page, 'dialog')
   await expect(page.getByRole('dialog').locator('.primary-action')).toHaveCount(1)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-13-library-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-13-library-${info.project.name}.png`, animations: 'disabled' })
 })
 
 test('UAT-75 長頁面記下靈感後，確認按鈕在眼前且保留創作原稿', async ({ page }, info) => {
@@ -108,7 +109,7 @@ test('UAT-75 長頁面記下靈感後，確認按鈕在眼前且保留創作原�
     const header = document.querySelector('.top-min')!.getBoundingClientRect()
     return bounds.top >= header.bottom && bounds.bottom <= innerHeight
   }), { message: '確認提示與好按鈕應在目前視窗內，不必回頁首尋找' }).toBe(true)
-  await page.screenshot({ path: `docs/uat/evidence/A-UI-14-confirm-${info.project.name}.png`, animations: 'disabled' })
+  await page.screenshot({ path: `${evidenceRoot}/A-UI-14-confirm-${info.project.name}.png`, animations: 'disabled' })
   await notice.getByRole('button', { name: '好', exact: true }).click()
   await expect(notice).toHaveCount(0)
   await expect(page.locator('.lyric-input')).toHaveValue(lyrics)
