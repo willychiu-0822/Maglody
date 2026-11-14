@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback, type Level } from '../components/ui'
 import { MidiKeyboardHint } from '../components/MidiKeyboardHint'
 import { playLoop, playNote, type Player } from '../lib/audio'
+import { useMidiLab } from '../lib/lab'
 import { useMidiKeyboard } from '../lib/midiInput'
 import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, scaleNote, snapToScale, SCALES, type Chord, type Mode } from '../lib/theory'
 import { cleanLine } from '../lib/rhyme'
@@ -148,6 +149,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
   const cellsRef = useRef(cells)
   cellsRef.current = cells
   const [midiSaid, setMidiSaid] = useState('')
+  const lab = useMidiLab()
   const midi = useMidiKeyboard((m) => {
     playNote(m, 0.3, { type: 'square', gain: 0.15 })
     if (!rows.includes(m)) { setMidiSaid('這個音不在現在的格子裡，我先聽著，沒寫進去。'); return }
@@ -160,7 +162,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
     setCells(n)
     setPage(Math.floor(at / 8))
     setMidiSaid('')
-  })
+  }, undefined, lab)
 
   const play = () => {
     player?.stop()
@@ -202,7 +204,6 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
   return (
     <>
       <Coach short={empty && p.hum ? '先把你的哼唱倒進格子裡，再一格一格修。' : missingChords ? '先點格子寫旋律；和弦之後再補也可以。' : notes < 4 ? '點格子放音。綠色的最穩。' : '播放，哪裡聽起來怪就改哪裡。'} />
-      <MidiKeyboardHint status={midi.status} deviceName={midi.deviceName} lastNote={midi.lastNote} onConnect={midi.connect} note={midiSaid} />
       <div className="seg seg-quiet">
         <button className={part === 'verse' ? 'on' : ''} onClick={() => { stop(); setPart('verse') }}>主歌</button>
         <button className={part === 'chorus' ? 'on' : ''} onClick={() => { stop(); setPart('chorus') }}>副歌</button>
@@ -265,6 +266,9 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
       )}
 
       <Toolbox>
+        {lab && midi.status !== 'unsupported' && (
+          <MidiKeyboardHint status={midi.status} deviceName={midi.deviceName} lastNote={midi.lastNote} onConnect={midi.connect} note={midiSaid} />
+        )}
         <div className="row wrap">
           <button className={`btn small ${penta ? 'on' : ''}`} onClick={() => setPenta(!penta)}>{penta ? '只用五聲音階（安全）' : '用完整音階'}</button>
           <button className={`btn small ${hold ? 'on' : ''}`} onClick={() => setHold(!hold)}>{hold ? '點格子＝拉長前一個音' : '拉長模式'}</button>

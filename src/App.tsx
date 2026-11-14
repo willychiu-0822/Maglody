@@ -5,6 +5,7 @@ import { StudioPresence } from './components/StudioPresence'
 import { KnowledgeSpark } from './components/KnowledgeSpark'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useProject } from './lib/store'
+import { useMidiLab } from './lib/lab'
 import { playChord, playLoop, stopAll } from './lib/audio'
 import { chordVoicing, diatonicChords } from './lib/theory'
 import { useVersions } from './lib/versions'
@@ -39,6 +40,8 @@ const PHASES = [
 
 export default function App() {
   const { project: p, setProject, update, reset, storageError } = useProject()
+  // 一進工作室就記住實驗開關，不必先走到旋律檯或總檢討。
+  useMidiLab()
   const [cur, setCur] = useState(() => Math.min(p.unlocked, STEPS.length - 1))
   const [menu, setMenu] = useState(false)
   const [chat, setChat] = useState<RoleId | null>(null)

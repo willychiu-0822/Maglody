@@ -3,6 +3,7 @@ import { Card, Coach, DeskActions, FeedbackList, Light, Toolbox, Why, type Feedb
 import { SongSheet } from '../components/SongSheet'
 import { AbletonGuide } from '../components/AbletonGuide'
 import { playSequence, type Player } from '../lib/audio'
+import { useMidiLab } from '../lib/lab'
 import type { Project } from '../lib/store'
 import { downloadMidi } from '../lib/midi'
 import { diatonicChords, keyName } from '../lib/theory'
@@ -69,6 +70,7 @@ function download(name: string, content: string, type: string) {
 
 function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
   void next
+  const lab = useMidiLab()
   const r = p.review
   const hasScore = [...p.harmony.verse, ...p.harmony.chorus].some(d=>d!=null) || [...p.melody.verse, ...p.melody.chorus].some(m=>m!=null && m>=0)
   const missing = [
@@ -152,7 +154,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
         </div>
       </Card>
 
-      <AbletonGuide p={p} />
+      {lab && <AbletonGuide p={p} />}
 
       <Why title="為什麼留一點自己的想法？" apply="下次回來聽，也能想起當時喜歡哪裡。">
         <p>小提示可以陪你找找不同的地方；喜不喜歡，還是交給你的耳朵。先記下一處你想再聽的地方就好。</p>

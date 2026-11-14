@@ -158,6 +158,8 @@ export interface MidiKeyboard {
 export function useMidiKeyboard(
   onNote?: (midiNote: number, velocity: number) => void,
   onPad?: (msg: MidiMessage) => void,
+  /** 預設開。草稿開關關掉時傳 false：不詢問權限、不接線、不寫進格子。 */
+  enabled = true,
 ): MidiKeyboard {
   const [state, setState] = useState<MidiState>(() => ({ status: midiSupported() ? 'idle' : 'unsupported' }))
   const [lastNote, setLastNote] = useState<number | null>(null)
@@ -174,7 +176,7 @@ export function useMidiKeyboard(
   })
 
   const connect = useCallback(() => {
-    if (busyRef.current) return
+    if (!enabled || busyRef.current) return
     busyRef.current = true
     disposeRef.current?.()
     disposeRef.current = null
@@ -192,9 +194,10 @@ export function useMidiKeyboard(
       if (aliveRef.current) disposeRef.current = dispose
       else dispose()
     })
-  }, [])
+  }, [enabled])
 
   useEffect(() => {
+    if (!enabled) return
     aliveRef.current = true
     let cancelled = false
     if (midiSupported()) {
@@ -210,7 +213,7 @@ export function useMidiKeyboard(
       disposeRef.current?.()
       disposeRef.current = null
     }
-  }, [connect])
+  }, [connect, enabled])
 
   return { status: state.status, deviceName: state.deviceName, lastNote, connect }
 }
