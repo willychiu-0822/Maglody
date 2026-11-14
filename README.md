@@ -22,7 +22,7 @@ npm test               # 型別檢查、lint、單元、邏輯、音訊、build�
 npm run test:e2e       # 手機 390×844／桌面 1280×800 的完整驗收矩陣（約 6 分鐘，預設只寫 test-results/）
 ```
 
-現況：自動測試全過，`ready_for_user_test` 仍是 false。沒驗過的：實體手機與 iOS Safari、真實麥克風、真實 OpenAI／Gemini／Vertex 金鑰。驗收計畫與歷次紀錄見 [docs/uat/](docs/uat/UAT-PLAN.md)；舊的逐輪流水帳在 [docs/HANDOFF-20261113.md](docs/HANDOFF-20261113.md)。舊手機 selftest 需另開 `npm run preview -- --host 127.0.0.1 --port 4101 --strictPort`，跑完請關掉。
+現況：自動測試大致全過（有兩個已知的不穩定處：webaudio 檢查在沒有音訊裝置的環境會隨機失敗；完整 e2e 在機器忙的時候偶爾有 1～2 個「element is not stable」逾時，單獨重跑會過），`ready_for_user_test` 仍是 false。沒驗過的：實體手機與 iOS Safari、真實麥克風、真實 OpenAI／Gemini／Vertex 金鑰。驗收計畫與歷次紀錄見 [docs/uat/](docs/uat/UAT-PLAN.md)；舊的逐輪流水帳在 [docs/HANDOFF-20261113.md](docs/HANDOFF-20261113.md)。舊手機 selftest 需另開 `npm run preview -- --host 127.0.0.1 --port 4101 --strictPort`，跑完請關掉。
 
 ## 📱 手機可直接使用
 

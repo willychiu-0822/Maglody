@@ -69,9 +69,9 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
     await screen(page, '和聲 完成')
     await pclick(page, /旋律/); await page.waitForTimeout(600)
     await screen(page, '旋律 首屏')
-    await pclick(page, /哼唱當草稿/)
-    await page.locator('.seg-quiet button', { hasText: '主歌' }).click()
-    await pclick(page, /哼唱當草稿/); await page.waitForTimeout(200)
+    await pclick(page, /把哼唱倒進主歌/)
+    await page.locator('.seg-quiet button', { hasText: '副歌' }).click()
+    await pclick(page, /把哼唱倒進副歌/); await page.waitForTimeout(200)
     await screen(page, '旋律 完成')
     await pclick(page, /歌詞/); await page.waitForTimeout(600)
     check('角色登場：歌詞是作詞人', (await page.locator('.presence-avatar').textContent()) === '詞')
@@ -121,7 +121,8 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
     check('貼紙展開前沒有媒體按鈕', true)
     await screen(page, '記一下 展開')
     await page.locator('.inspo-capture textarea').fill('背著什麼往前走')
-    await page.locator('.inspo-media button', { hasText: '說' }).click(); await page.waitForTimeout(1200)
+    await page.locator('.inspo-media button', { hasText: '說' }).click()
+    await page.getByRole('button', { name: '好，開始說', exact: true }).click(); await page.waitForTimeout(1200) // M-21：第一次先說明聽寫
     await page.locator('.inspo-capture input[type=file]').setInputFiles(require('path').join(__dirname, '..', 'public/icons/icon-512.png')); await page.waitForTimeout(600)
     await page.locator('.inspo-media button', { hasText: '■' }).click(); await page.waitForTimeout(1200)
     await page.locator('.inspo-media button', { hasText: '哼' }).click(); await page.waitForTimeout(1800)
@@ -132,16 +133,16 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
     const deskBefore = await page.locator('.desk-name').textContent()
     await page.locator('.inspo-sheet .primary-action').click(); await page.waitForTimeout(400)
     check('靈感：存完留在原地', (await page.locator('.desk-name').textContent()) === deskBefore && await page.locator('.inspo-overlay').count() === 0, deskBefore)
-    check('保存提示有明確「好」按鈕', await page.getByRole('button', { name: '好', exact: true }).isVisible())
-    await page.getByRole('button', { name: '好', exact: true }).click()
-    await expect(page.locator('.toast')).toHaveCount(0)
+    check('保存提示有明確「好」按鈕', await page.locator('.toast', { hasText: '收好了' }).getByRole('button', { name: '好', exact: true }).isVisible())
+    await page.locator('.toast', { hasText: '收好了' }).getByRole('button', { name: '好', exact: true }).click()
+    await expect(page.locator('.toast', { hasText: '收好了' })).toHaveCount(0)
     await page.locator('.sticker').click()
     await page.locator('.inspo-sheet .link-btn', { hasText: '翻翻本子' }).click(); await page.waitForTimeout(300)
     await screen(page, '本子 列表')
     check('靈感：本子裡有「窗外的雨剛停」', await page.locator('.inspo-card:has-text("窗外的雨剛停")').count() === 1)
     await page.locator('.inspo-card:has-text("窗外的雨剛停") .inspo-card-head').click()
     const lib = await screen(page, '本子 展開窗外的雨剛停')
-    check('本子展開：除了導覽（記新的／✕／拼貼）與媒體播放外沒有多餘按鈕', lib.extra.filter((t) => !/記新的|✕|拼貼|▶/.test(t)).length === 0, JSON.stringify(lib.extra))
+    check('本子展開：除了導覽（記新的／✕／拼貼）與媒體播放外沒有多餘按鈕', lib.extra.filter((t) => !/記新的|✕|拼貼|▶|闔上本子/.test(t)).length === 0, JSON.stringify(lib.extra))
     const songBeforeAdopt = await page.evaluate(() => localStorage.getItem('maglody-project-v2'))
     await page.locator('.inspo-card:has-text("窗外的雨剛停") .primary-action').click()
     const adoption = page.getByRole('dialog', { name: '把這則靈感帶進歌裡', exact: true })
@@ -159,7 +160,7 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
     const opts = await page.locator('.collage-bar .btn').allInnerTexts()
     check('拼貼：勾兩則出現拼貼選項', opts.length >= 1, opts.join(' / '))
     await page.locator('.collage-bar .btn', { hasText: '合成一則新靈感' }).click(); await page.waitForTimeout(300)
-  } catch (e) { check('靈感流程', false, e.message.split('\n')[0]) }
+  } catch (e) { check('靈感流程', false, e.message.split('\n').slice(0,4).join(' | ')) }
 
   // 角色自由聊：在構想檯跟 5 位都聊
   try {

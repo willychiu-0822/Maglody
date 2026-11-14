@@ -318,3 +318,21 @@ test.describe('M-13 總檢討：不像成績單，也不是一面下載牆', () 
     expect(checks['fav:chorus']).toBeUndefined()
   })
 })
+
+test.describe('M-07 第一次存檔後，夥伴說一次歌存在哪裡', () => {
+  test('第一次按前進後出現；按「好」收起；重新整理後不再出現', async ({ page }) => {
+    await open(page, { harmony: { root: 0, mode: 'major', verse: [0, 4, 5, 3], chorus: [3, 4, 0, 4], quizRight: 0, quizTotal: 0 } })
+    await expect(page.getByText('歌是存在這支手機的瀏覽器裡的')).toHaveCount(0)
+    await page.getByRole('button', { name: '沒有麥克風？聽示範' }).click()
+    await page.locator('main .primary-action').filter({ hasText: '用這段繼續' }).click()
+    const note = page.locator('.toast', { hasText: '歌是存在這支手機的瀏覽器裡的' })
+    await expect(note).toContainText('存一份備份')
+    await note.getByRole('button', { name: '好', exact: true }).click()
+    await expect(note).toHaveCount(0)
+    await page.reload()
+    await visit(page, '哼唱解析')
+    await page.locator('main .primary-action').filter({ hasText: '用這段繼續' }).click() // 哼唱結果已存下來，再前進一次
+    await expect(page.locator('.desk-name')).toContainText('構想')
+    await expect(page.getByText('歌是存在這支手機的瀏覽器裡的')).toHaveCount(0)
+  })
+})
