@@ -11,8 +11,8 @@
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "allowImportingTsExtensions": false,
+    "allowImportingTsExtensions": true,
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src", "server/shared"]
 }

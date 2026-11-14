@@ -1,5 +1,5 @@
-import { fetchJson, HttpError } from '../../src/lib/request.ts'
-import { isObject } from '../../src/agent/reply.ts'
+import { fetchJson, HttpError } from '../shared/request.ts'
+import { isObject } from '../shared/reply.ts'
 // OpenAI provider：支援 Chat Completions（預設）與 Responses API。
 // env：OPENAI_API_KEY（必填）、LLM_MODEL、OPENAI_API_STYLE=chat|responses、OPENAI_BASE_URL（可接相容端點）
 import { env, ProviderError, type LlmProvider, type LlmRequest } from './types.ts'

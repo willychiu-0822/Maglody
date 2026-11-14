@@ -52,7 +52,7 @@ interface LlmProvider {
 }
 ```
 
-Vertex 的權杖取得順序：`GCP_ACCESS_TOKEN` → Cloud Run 服務帳戶（`GCP_USE_METADATA=1`）→ 本機 `gcloud`。`server/Dockerfile` 可直接 `gcloud run deploy --source server` 部署。測試或公司代理可用 `OPENAI_BASE_URL`、`GEMINI_BASE_URL`、`VERTEX_BASE_URL` 覆寫端點。
+Vertex 的權杖取得順序：`GCP_ACCESS_TOKEN` → Cloud Run 服務帳戶（`GCP_USE_METADATA=1`）→ 本機 `gcloud`。`server/Dockerfile` 可直接 `gcloud run deploy --source server` 部署：映像裡只有 `server/`，所以前後端共用的程式（`reply.ts`、`request.ts`、`prompts.ts`、`personas.ts`、`limits.ts`、`rate-limit.ts`）放在 `server/shared/`，前端從那裡匯入，後端不匯入 `src/`。`npm run test:deploy` 照 Dockerfile 的複製範圍啟動後端並打 `/api/health`。後端只收資料（步驟、夥伴代號、歌曲摘要、提問、歷史），system prompt 與夥伴設定在後端組，並有每來源每分鐘、全服務每日的限流。測試或公司代理可用 `OPENAI_BASE_URL`、`GEMINI_BASE_URL`、`VERTEX_BASE_URL` 覆寫端點。
 
 新增供應商只要實作這個介面，並加進 `server/llm/index.ts` 的 switch。後端不信任模型輸出：`sanitize()` 會截斷長度、過濾未知 action、檢查和弦級數範圍。環境變數見 README。
 

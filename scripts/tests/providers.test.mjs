@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { fetchJson } from '../../src/lib/request.ts'
+import { fetchJson } from '../../server/shared/request.ts'
 import { askMaster } from '../../src/agent/client.ts'
 import { defaultProject } from '../../src/lib/store.ts'
 import { ROLES } from '../../src/agent/roles.ts'
@@ -62,4 +62,18 @@ test('five offline personas and all LLM failures fall back without network', asy
     const result = await askMaster(p, { step: 'idea', question: '下一步' }, { endpoint: 'https://stub' })
     assert.equal(result.source, 'mock'); assert.ok(result.reply.text)
   }
+})
+test('M-02: the browser sends data only — no system prompt, persona by id, history clipped', async (t) => {
+  let sent
+  t.mock.method(globalThis, 'fetch', async (_, init) => { sent = JSON.parse(init.body); return json({ text: '好' }) })
+  const p = defaultProject()
+  const history = Array.from({ length: 12 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: '長'.repeat(5000) }))
+  const { source } = await askMaster(p, { step: 'idea', question: '下一步', personaId: 'lyricist', persona: ROLES.lyricist, history }, { endpoint: 'https://stub' })
+  assert.equal(source, 'llm')
+  assert.ok(!('system' in sent) && !('messages' in sent))
+  assert.equal(sent.persona, 'lyricist')
+  assert.equal(sent.step, 'idea')
+  assert.equal(sent.history.length, 8)
+  assert.ok(sent.history.every((m) => m.content.length <= 1600))
+  assert.ok(!JSON.stringify(sent).includes('聲音說話多於用術語') && !JSON.stringify(sent).includes('安靜、細膩'))
 })

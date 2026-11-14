@@ -77,8 +77,13 @@ VITE_AGENT_URL=http://localhost:8787/api/master npm run dev
 | `GCP_USE_METADATA` | 部署在 Cloud Run 時設為 `1`，改用服務帳戶自動取得權杖（不需要金鑰檔） | — |
 | `GEMINI_API_KEY` | Gemini Developer API 金鑰（`gemini` 必填，適合本機開發） | — |
 | `PORT` | 後端埠號 | `8787` |
-| `ALLOW_ORIGIN` | 允許呼叫後端的前端網址（CORS），多個請用逗號分隔 | `http://localhost:5173` |
+| `ALLOW_ORIGIN` | 允許呼叫後端的前端網址（CORS），多個請用逗號分隔。只擋瀏覽器，擋不了直接呼叫 | `http://localhost:5173` |
+| `RATE_PER_MINUTE` | 每個來源每分鐘最多幾次，超過回 429（前端會退回離線夥伴） | `20` |
+| `RATE_PER_DAY` | 整個服務每 24 小時最多幾次；`0` 代表不限制 | `3000` |
+| `TRUST_PROXY_HOPS` | 前面有幾層自己的代理（Render、Cloud Run 填 `1`），用來從 `X-Forwarded-For` 認出來源；放在代理後面卻沒設，所有人會被算成同一個來源 | `0` |
 | `VITE_AGENT_URL` | **前端**：後端網址；不設定就用離線 mock | — |
+
+後端只收「資料」（工作檯、夥伴代號、歌曲摘要、提問、最近幾則對話）；system prompt 和夥伴設定由後端自己帶，請求裡帶 `system` 或 `messages` 會被擋掉。限流存在程序記憶體裡，重啟或多開幾台就各算各的，所以供應商那邊的預算上限仍要設。
 
 健康檢查：`curl localhost:8787/api/health`。**一步一步的雲端設定（OpenAI、Gemini、Vertex、Netlify／Render／Cloud Run 部署）見 [docs/cloud-setup.md](docs/cloud-setup.md)，給非工程背景的人也能照做。**Prompt 模板見 [docs/agent-prompts.md](docs/agent-prompts.md)。
 

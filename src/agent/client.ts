@@ -1,10 +1,11 @@
 import type { Project } from '../lib/store'
 import { songContext } from './context'
 import { mockReply } from './mock'
-import { MASTER_SYSTEM_PROMPT, buildUserTurn } from './prompts'
+import type { RoleId } from '../../server/shared/personas.ts'
+import { MASTER_LIMITS as L, clip } from '../../server/shared/limits.ts'
 import type { AgentReply } from './types'
-import { sanitizeReply } from './reply'
-import { fetchJson } from '../lib/request'
+import { sanitizeReply } from '../../server/shared/reply.ts'
+import { fetchJson } from '../../server/shared/request.ts'
 
 /** 離線時讓五位夥伴有自己的口吻（只加開場與收尾，不改變「不代寫」的內容） */
 const FLAVOR: Record<string, { open: string[]; close: string; idle: string }> = {
@@ -39,6 +40,8 @@ export const agentMode = (): 'llm' | 'mock' => (ENDPOINT ? 'llm' : 'mock')
 export interface AskInput {
   step: string
   persona?: { name: string; focus: string; voice: string }
+  /** 夥伴代號；後端用它查角色設定，不接受前端自己寫的角色文字 */
+  personaId?: RoleId
   event?: { kind: string; detail: string }
   question?: string
   history?: { role: 'user' | 'assistant'; content: string }[]
@@ -48,12 +51,19 @@ export async function askMaster(p: Project, input: AskInput, options: { endpoint
   const endpoint = options.endpoint ?? ENDPOINT
   if (!endpoint || input.question && /(幫我|替我|直接).*(寫|作|完成)|代寫|寫一首/.test(input.question)) return { reply: flavor(mockReply(p, input), input.persona, input.question), source: 'mock' }
   try {
-    const user = buildUserTurn({ step: input.step, persona: input.persona, songContext: songContext(p), event: input.event, question: input.question })
     const data = await fetchJson(endpoint, {
       signal: options.signal,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system: MASTER_SYSTEM_PROMPT, messages: [...(input.history ?? []).slice(-8), { role: 'user', content: user }] }),
+      // 只送資料；system prompt 和角色設定由後端自己帶。
+      body: JSON.stringify({
+        step: input.step,
+        persona: input.personaId,
+        songContext: clip(songContext(p), L.songContext),
+        event: input.event && { kind: input.event.kind, detail: clip(input.event.detail, L.eventDetail) },
+        question: input.question && clip(input.question, L.question),
+        history: (input.history ?? []).slice(-L.historyTurns).map((m) => ({ role: m.role, content: clip(m.content, L.historyTurn) })),
+      }),
     }, options.timeoutMs ?? 15_000)
     if (data && typeof data === 'object' && ('offline' in data && data.offline || /後端 mock|LLM_PROVIDER|接上真正的 LLM/.test(JSON.stringify(data)))) throw new Error('Use studio coach')
     const reply = sanitizeReply(data)

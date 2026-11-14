@@ -1,6 +1,6 @@
 # 大師 Agent Prompt 模板
 
-> 程式碼中的單一來源：`src/agent/prompts.ts`。這份文件與它同步，修改時請兩邊一起改。
+> 程式碼中的單一來源：`server/shared/prompts.ts`。這份文件與它同步，修改時請兩邊一起改。
 > Provider 無關：同一組 prompt 用於 OpenAI、Vertex AI Gemini、Gemini API；離線時由 `src/agent/mock.ts` 依相同原則產生回覆。
 
 ## 設計原則

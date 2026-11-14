@@ -1,4 +1,17 @@
-import type { AgentAction, AgentReply, AgentSuggestion } from './types'
+// 前後端共用。後端在容器裡只有 server/ 這個資料夾，所以共用的程式放在 server/shared/，import 一律寫 .ts 副檔名。
+export type AgentAction =
+  | { type: 'tryProgression'; part: 'verse' | 'chorus'; degs: number[] }
+  | { type: 'goStep'; step: string }
+  | { type: 'playResult' }
+
+export interface AgentSuggestion { label: string; action?: AgentAction }
+
+export interface AgentReply {
+  text: string
+  learned?: string
+  next?: string
+  suggestions?: AgentSuggestion[]
+}
 
 export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
