@@ -27,7 +27,10 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
   const a = p.arrangement
   const [sel, setSel] = useState<string | null>(a[0]?.id ?? null)
   const [player, setPlayer] = useState<Player | null>(null)
-  const set = (id: string, patch: Partial<ArrSection>) => { update('arrangement', a.map((s) => (s.id === id ? { ...s, ...patch } : s))); notify('arrange.change', '') }
+  // M-15：骨架排好後，要先試聽、再自己動一次（拿掉或加一樣，或按「就這樣」），前進鈕才會出現。進來時已達標（回頭看、讀檔）就不再卡。
+  const [heard, setHeard] = useState(() => arrangementRequirements(p).every((r) => r.ok))
+  const [picked, setPicked] = useState(heard)
+  const set = (id: string, patch: Partial<ArrSection>) => { setPicked(true); update('arrangement', a.map((s) => (s.id === id ? { ...s, ...patch } : s))); notify('arrange.change', '') }
   const add = (kind: SectionKind) => {
     const s: ArrSection = { id: uid(), kind, bars: kind === 'intro' || kind === 'outro' || kind === 'inter' ? 4 : 8, layers: { ...DEFAULT_LAYERS[kind] } }
     update('arrangement', [...a, s])
@@ -44,6 +47,7 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
     player?.stop()
     const { bars, melody } = arrangedAudio(p, s)
     setPlayer(playLoop({ bpm: p.idea.bpm, bars, melody, layers: s.layers, onStep: (x) => x < 0 && setPlayer(null) }))
+    setHeard(true)
     notify('arrange.preview', s.kind)
   }
   const cur = a.find((s) => s.id === sel)
@@ -61,6 +65,8 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
   const ready = arrangementStep.requirements(p).every((r) => r.ok)
   const say = a.length === 0 ? '先排出段落，再決定每一段誰上場。'
     : !ready ? '點一段，決定誰上場。也試試讓主歌和副歌有點不同。'
+    : !heard ? '骨架排好了。先聽一段，再決定誰上場。'
+    : !picked ? '聽完了。挑一段，拿掉一樣或加一樣；覺得剛好就按「就這樣」。'
     : '能量有起伏了。聽聽看。'
   return (
     <>
@@ -89,6 +95,10 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
         <DeskActions primary={{ label: '■ 停', onClick: () => { player.stop(); setPlayer(null) } }} />
       ) : a.length === 0 ? (
         <DeskActions primary={{ label: '排一個常見的骨架', onClick: sketch }} />
+      ) : ready && !(heard && picked) && cur ? (
+        !heard
+          ? <DeskActions primary={{ label: `▶ 試聽${KIND_ZH[cur.kind]}`, onClick: () => preview(cur) }} />
+          : <DeskActions primary={{ label: '就這樣', onClick: () => setPicked(true) }} secondary={{ label: `▶ 再聽${KIND_ZH[cur.kind]}`, onClick: () => preview(cur) }} />
       ) : ready && next ? (
         <DeskActions primary={{ label: <>編好了，去{next.label} →</>, onClick: next.go }} secondary={cur ? { label: `▶ 試聽${KIND_ZH[cur.kind]}`, onClick: () => preview(cur) } : undefined} />
       ) : cur ? (

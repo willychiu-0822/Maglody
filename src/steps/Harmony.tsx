@@ -38,6 +38,10 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
   const [quiz, setQuiz] = useState<Q | null>(null)
   const [quizRes, setQuizRes] = useState<'right' | 'wrong' | null>(null)
   const chords = diatonicChords(h.root, h.mode)
+  // M-15：推薦填滿之後，要先聽過一圈、再自己按一次決定，前進鈕才會出現。進來時已經是完整的和弦（回頭看、讀檔）就不再卡。
+  const filledAtMount = !h.verse.includes(null) && !h.chorus.includes(null)
+  const [heard, setHeard] = useState(filledAtMount)
+  const [chose, setChose] = useState(filledAtMount)
 
   const setKey = (root: number, mode: Mode) => update('harmony', { ...h, root, mode })
   const place = (deg: number) => {
@@ -49,15 +53,30 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
     const ni = target.i + 1
     if (ni < 4) setTarget({ ...target, i: ni })
   }
-  const play = (part: 'verse' | 'chorus') => {
+  const play = (part: 'verse' | 'chorus' | 'both') => {
     player?.stop()
-    const degs = h[part]
+    const degs = part === 'both' ? [...h.verse, ...h.chorus] : h[part]
     if (degs.some((d) => d == null)) return
+    setHeard(true)
     const bars = degs.map((d) => chordVoicing(chords[d!]))
     const pl = playLoop({ bpm: p.idea.bpm, bars, layers: { drums: true, bass: true, keys: true, pad: false, melody: false }, loop: true, onStep: (s) => setStep(s < 0 ? -1 : Math.floor(s / 8) + (part === 'chorus' ? 4 : 0)) })
     setPlayer(pl)
   }
   const stop = () => { player?.stop(); setPlayer(null) }
+  // 「換一個聽聽」：副歌換成下一個常見走法（跳過和現在一樣的），馬上聽
+  const swapChorus = () => {
+    player?.stop()
+    const cur = h.chorus.join(',')
+    const start = TEMPLATES.findIndex((t) => t.degs.join(',') === cur)
+    const t = TEMPLATES[(start + 1) % TEMPLATES.length]
+    update('harmony', { ...h, chorus: [...t.degs] })
+    notify('harmony.progression', 'chorus')
+    setChose(true)
+    setHeard(true)
+    setTarget({ part: 'chorus', i: 0 })
+    const bars = [...h.verse, ...t.degs].map((d) => chordVoicing(chords[d!]))
+    setPlayer(playLoop({ bpm: p.idea.bpm, bars, layers: { drums: true, bass: true, keys: true, pad: false, melody: false }, loop: true, onStep: (x) => setStep(x < 0 ? -1 : Math.floor(x / 8) + 0) }))
+  }
 
   const newQuiz = () => {
     const q = makeQuiz(h.root)
@@ -101,6 +120,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
     ? '點一個和弦聽聽，喜歡就留下。湊滿 4 個，就是一圈。'
     : !full ? `再挑 ${h[part].filter((d) => d == null).length} 個。`
     : part === 'verse' && h.chorus.includes(null) ? '主歌這一圈好了。聽聽看，再換副歌。'
+    : bothFull && !(heard && chose) ? (!heard ? '兩圈都排好了。先從頭聽一遍，再決定留不留。' : '聽完了。喜歡就留下，想換就換一個聽聽。')
     : '一圈好了，循環聽聽看。'
   return (
     <>
@@ -123,6 +143,10 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
 
       {player ? (
         <DeskActions primary={{ label: '■ 停', onClick: stop }} />
+      ) : bothFull && !(heard && chose) ? (
+        !heard
+          ? <DeskActions primary={{ label: '▶ 聽一圈', onClick: () => play('both') }} />
+          : <DeskActions primary={{ label: '就這樣', onClick: () => setChose(true) }} secondary={{ label: '換一個聽聽', onClick: swapChorus }} />
       ) : bothFull && next ? (
         <DeskActions primary={{ label: <>和弦選好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }} />
       ) : full ? (

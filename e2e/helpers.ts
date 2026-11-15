@@ -62,6 +62,10 @@ export async function harmony(page: Page) {
   for (const i of [0,4,5,3]) await page.locator('.chord-grid .chord').nth(i).click()
   await page.getByRole('button', { name: '換副歌 →', exact:true }).click()
   for (const i of [3,4,0,4]) await page.locator('.chord-grid .chord').nth(i).click()
+  // M-15：填滿後要先聽一圈、再按「就這樣」，前進鈕才會出現
+  await page.getByRole('button',{name:'▶ 聽一圈'}).click()
+  await page.getByRole('button',{name:/^■ 停/}).click()
+  await page.getByRole('button',{name:'就這樣',exact:true}).click()
 }
 export async function captureText(page: Page, text: string) {
   await page.getByRole('button', { name: '記一下靈感' }).click()
