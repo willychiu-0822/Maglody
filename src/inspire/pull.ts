@@ -3,7 +3,7 @@
 import { DESK_NAMES } from '../../server/shared/names.ts'
 import { summarizeNotes } from '../lib/pitch'
 import type { Project, Update } from '../lib/store'
-import { KIND_ZH } from '../steps/Lyrics'
+import { KIND_ZH } from '../rules/lyrics'
 import type { Inspiration, InspoApi } from './store'
 import { uid } from '../lib/store'
 

@@ -2,7 +2,7 @@
 import { scheduleSection, withRenderContext, type LoopSpec } from '../lib/audio'
 import type { Project } from '../lib/store'
 import { encodeWav } from '../lib/wav'
-import { arrangedAudio } from './Arrangement'
+import { arrangedAudio } from '../rules/arrangement'
 
 /** 總檢討「從頭聽我的歌」與存成聲音檔共用：有編曲就照編曲，沒有就主歌＋副歌各 4 小節。 */
 export function songSpecs(p: Project): LoopSpec[] {

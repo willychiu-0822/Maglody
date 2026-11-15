@@ -7,15 +7,16 @@ import { useMidiLab } from '../lib/lab'
 import type { Project } from '../lib/store'
 import { downloadMidi } from '../lib/midi'
 import { diatonicChords, keyName } from '../lib/theory'
-import { analyzeSection, KIND_ZH } from './Lyrics'
-import { progressionFeedback } from './Harmony'
-import { melodyFeedback } from './Melody'
-import { arrangementFeedback } from './Arrangement'
+import { analyzeSection, KIND_ZH } from '../rules/lyrics'
+import { progressionFeedback } from '../rules/harmony'
+import { melodyFeedback } from '../rules/melody'
+import { arrangementFeedback } from '../rules/arrangement'
 import { renderSong, songSpecs } from './songFile'
 import { playHum } from './results'
 import { safeFileName, shareOrDownload } from '../lib/share'
-import { mixFeedback } from './Mix'
+import { mixFeedback } from '../rules/mix'
 import type { StepDef, StepProps } from './types'
+import { reviewRequirements } from '../rules/requirements'
 import { DESK_NAMES } from '../../server/shared/names.ts'
 
 const DIMENSIONS: { id: string; q: string; source: (p: Project) => Feedback[] }[] = [
@@ -184,7 +185,5 @@ export const reviewStep: StepDef = {
   subtitle: '聽聽這首歌現在的樣子',
   glyph: '成',
   Component: ReviewStep,
-  requirements: (p) => [
-    { label: '記下你聽完的想法', ok: p.review.verdict.trim().length >= 4 },
-  ],
+  requirements: reviewRequirements,
 }

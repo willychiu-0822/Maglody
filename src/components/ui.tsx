@@ -3,8 +3,8 @@ import { createContext, useContext, useState, type ReactNode } from 'react'
 /** 發想期：零審查。回饋不出現紅燈，只有「可以試試」 */
 export const GentleContext = createContext(false)
 
-export type Level = 'good' | 'warn' | 'bad'
-export interface Feedback { level: Level; text: string; tip?: string }
+import type { Feedback, Level } from '../rules/types'
+export type { Feedback, Level }
 
 const LEVEL_ZH: Record<Level, string> = { good: '很好', warn: '可以更好', bad: '需要調整' }
 

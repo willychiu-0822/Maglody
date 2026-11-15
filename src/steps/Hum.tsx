@@ -6,6 +6,7 @@ import { useMic } from '../lib/mic'
 import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame } from '../lib/pitch'
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
+import { humRequirements } from '../rules/requirements'
 import { DESK_NAMES } from '../../server/shared/names.ts'
 import { ROLES } from '../agent/roles'
 
@@ -227,8 +228,5 @@ export const humStep: StepDef = {
   subtitle: '把腦中的旋律變成看得見的音',
   glyph: '哼',
   Component: HumStep,
-  requirements: (p) => [
-    { label: '先留一段聲音：自己哼、上傳，或聽示範都可以', ok: !!p.hum },
-    { label: '讓我聽見至少 3 個音', ok: (p.hum?.notes.length ?? 0) >= 3 },
-  ],
+  requirements: humRequirements,
 }

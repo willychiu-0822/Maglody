@@ -32,6 +32,7 @@ import { InspirationHub } from './inspire/InspirationHub'
 import { asset } from './lib/asset'
 import { useInspirations } from './inspire/store'
 import type { StepDef } from './steps/types'
+import { deskPrerequisite } from './rules/requirements'
 import type { DeskKey } from '../server/shared/names.ts'
 
 const SAVE_NOTE_KEY = 'maglody-save-note-seen'
@@ -85,12 +86,7 @@ export default function App() {
   const unfinished = requirements.find((r) => !r.ok)
   const ready = !unfinished
   const phase = PHASES.find((ph) => ph.keys.includes(step.key))!
-  // Free visits to polishing desks still need a little sound before listening.
-  const hasWrittenSound = [...p.harmony.verse, ...p.harmony.chorus].some(n => n != null)
-    || [...p.melody.verse, ...p.melody.chorus].some(n => n != null && n >= 0)
-  const missionPrerequisite = step.key === 'mix' && !p.melody.chorus.some(n => n != null && n >= 0)
-    ? '先留一小句副歌旋律，再來混音'
-    : step.key === 'review' && !hasWrittenSound ? '先留下一點聲音：挑幾個和弦，或寫幾個音' : null
+  const missionPrerequisite = deskPrerequisite(step.key, p)
 
   useEffect(() => {
     try { sessionStorage.setItem(DESK_KEY, JSON.stringify({ desk: cur, unlocked: pRef.current.unlocked })) } catch { /* 沒有就算了 */ }

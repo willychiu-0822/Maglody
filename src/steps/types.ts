@@ -5,7 +5,8 @@ import type { Project, Update } from '../lib/store'
 export type Notify = (kind: string, detail: string) => void
 /** next：這一檯的條件達成後，前往下一檯（由 App 提供；未達成時為 null） */
 export interface StepProps { goTo?: (key: string) => void; p: Project; update: Update; notify: Notify; next: { label: string; go: () => void } | null }
-export interface Requirement { label: string; ok: boolean }
+export type { Requirement } from '../rules/types'
+import type { Requirement } from '../rules/types'
 
 export interface StepDef {
   key: string

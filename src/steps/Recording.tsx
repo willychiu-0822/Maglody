@@ -4,6 +4,7 @@ import { ac, click, playNote } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { jianpu, noteNameOct } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
+import { recordingRequirements } from '../rules/requirements'
 import { DESK_NAMES } from '../../server/shared/names.ts'
 import { ROLES } from '../agent/roles'
 
@@ -172,7 +173,5 @@ export const recordingStep: StepDef = {
   subtitle: '測音量、暖嗓、整理環境',
   glyph: '錄',
   Component: RecordingStep,
-  requirements: (p) => [
-    { label: '試過音量，留一點空間（或先跳過）', ok: (p.recording.levelPeakDb != null && p.recording.levelPeakDb > -60 && p.recording.levelPeakDb <= -3) || !!p.recording.checks.nomic },
-  ],
+  requirements: recordingRequirements,
 }

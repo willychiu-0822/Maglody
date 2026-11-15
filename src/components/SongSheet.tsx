@@ -1,8 +1,8 @@
 import type { Project } from '../lib/store'
 import { diatonicChords, keyName } from '../lib/theory'
-import { KIND_ZH, lyricLines } from '../steps/Lyrics'
-import { fmtTime, songSeconds } from '../steps/Arrangement'
-import { MOODS } from '../steps/Ideation'
+import { KIND_ZH, lyricLines } from '../rules/lyrics'
+import { fmtTime, songSeconds } from '../rules/arrangement'
+import { MOODS } from '../rules/ideation'
 
 /** 一路長出來的作品面板：讓學生隨時看見「我的歌」做到哪 */
 export function SongSheet({ p }: { p: Project }) {
