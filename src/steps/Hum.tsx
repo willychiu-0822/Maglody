@@ -3,7 +3,8 @@ import { Coach, StageSketch, DeskActions, FeedbackList, Toolbox, Why, type Feedb
 import { PitchCanvas } from '../components/PitchCanvas'
 import { ac, playNote, tone, trackAudioSource } from '../lib/audio'
 import { useMic } from '../lib/mic'
-import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame } from '../lib/pitch'
+import { analyzeBufferAsync } from '../lib/pitchAsync'
+import { synthDemoHum, toMono, type HumAnalysis, type PitchFrame } from '../lib/pitch'
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
 import type { StepProps } from './types'
 import { DESK_NAMES } from '../../server/shared/names.ts'
@@ -35,8 +36,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
     setAnalysisSource(source)
     rawRef.current = { data, sampleRate }
     setBusy(true)
-    setTimeout(() => {
-      const a = analyzeBuffer(data, sampleRate)
+    void analyzeBufferAsync(data, sampleRate).then((a) => {
       setAna(a)
       setBusy(false)
       const k = a.keys[0]
@@ -54,7 +54,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
       // 把估計結果帶進和聲章節的預設值（學生之後仍可修改）
       update('harmony', (h) => ({ ...h, root: k.root, mode: k.mode }))
       notify('hum.analyzed', `${a.notes.length}`)
-    }, 30)
+    })
   }
 
   const toggleRec = async () => {
