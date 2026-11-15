@@ -3,9 +3,8 @@ import { mixFeedback } from '../rules/mix'
 import { Card, Coach, DeskActions, FeedbackList, Meter, Toolbox, Why, type Level } from '../components/ui'
 import { applyTrack, createMixGraph, playLoop, type MixGraph, type Player, type TrackId, type TrackSettings } from '../lib/audio'
 import { sectionAudio } from '../rules/arrangement'
-import type { StepDef, StepProps } from './types'
+import type { StepProps } from './types'
 import { mixRequirements } from '../rules/requirements'
-import { DESK_NAMES } from '../../server/shared/names.ts'
 
 const TRACKS: { id: TrackId; name: string; role: string }[] = [
   { id: 'melody', name: '主旋律（代替人聲）', role: '像站在前面唱歌的主角' },
@@ -88,7 +87,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
         <DeskActions primary={{label: '先寫一小句旋律', onClick: () => goTo?.('melody')}} />
       ) : player ? (
         <DeskActions primary={{ label: '■ 停', onClick: stop }} secondary={{ label: bypass ? '回到我的混音' : '聽聽沒混之前', onClick: () => { setBypass(!bypass); if (!bypass) notify('mix.ab', '') } }} />
-      ) : mixStep.requirements(p).every((x) => x.ok) && next ? (
+      ) : mixRequirements(p).every((x) => x.ok) && next ? (
         <DeskActions primary={{ label: <>聽清楚了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 再聽一次', onClick: play }} />
       ) : (
         <DeskActions primary={{ label: '▶ 播放副歌', onClick: play }} />
@@ -146,11 +145,4 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
   )
 }
 
-export const mixStep: StepDef = {
-  key: 'mix',
-  title: DESK_NAMES.mix,
-  subtitle: '讓每個聲音都有位置',
-  glyph: '混',
-  Component: MixStep,
-  requirements: mixRequirements,
-}
+export default MixStep

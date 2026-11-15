@@ -4,9 +4,8 @@ import { Coach, DeskActions, FeedbackList, Toolbox, Why } from '../components/ui
 import { playLoop, type Player } from '../lib/audio'
 import { uid, type ArrSection, type LayerId, type SectionKind } from '../lib/store'
 import { KIND_ZH } from '../rules/lyrics'
-import type { StepDef, StepProps } from './types'
+import type { StepProps } from './types'
 import { arrangementRequirements } from '../rules/requirements'
-import { DESK_NAMES } from '../../server/shared/names.ts'
 
 
 const DEFAULT_LAYERS: Record<SectionKind, Record<LayerId, boolean>> = {
@@ -62,7 +61,7 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
     setSel(list[2].id)
     notify('arrange.change', '')
   }
-  const ready = arrangementStep.requirements(p).every((r) => r.ok)
+  const ready = arrangementRequirements(p).every((r) => r.ok)
   const say = a.length === 0 ? '先排出段落，再決定每一段誰上場。'
     : !ready ? '點一段，決定誰上場。也試試讓主歌和副歌有點不同。'
     : !heard ? '骨架排好了。先聽一段，再決定誰上場。'
@@ -133,11 +132,4 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const arrangementStep: StepDef = {
-  key: 'arrange',
-  title: DESK_NAMES.arrange,
-  subtitle: '決定什麼時候加、什麼時候減',
-  glyph: '編',
-  Component: ArrangementStep,
-  requirements: arrangementRequirements,
-}
+export default ArrangementStep

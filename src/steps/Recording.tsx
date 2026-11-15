@@ -3,9 +3,8 @@ import { Card, Coach, StageSketch, DeskActions, FeedbackList, Light, Meter, Tool
 import { ac, click, playNote } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { jianpu, noteNameOct } from '../lib/theory'
-import type { StepDef, StepProps } from './types'
+import type { StepProps } from './types'
 import { recordingRequirements } from '../rules/requirements'
-import { DESK_NAMES } from '../../server/shared/names.ts'
 import { ROLES } from '../agent/roles'
 
 export const REC_CHECKS = [
@@ -95,7 +94,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
 
       {mode === 'level' ? (
         <DeskActions primary={{ label: '■ 唱完了', onClick: endLevel }} />
-      ) : recordingStep.requirements(p).every((x) => x.ok) && next ? (
+      ) : recordingRequirements(p).every((x) => x.ok) && next ? (
         <DeskActions primary={{ label: <>準備好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '再測一次', onClick: startLevel }} />
       ) : (
         <DeskActions primary={{ label: mic.pending ? '等麥克風許可…' : '● 測音量', onClick: startLevel, disabled: mic.pending }} secondary={{ label: '沒有麥克風，先跳過', onClick: () => update('recording', { ...r, checks: { ...r.checks, nomic: true } }) }} />
@@ -167,11 +166,4 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const recordingStep: StepDef = {
-  key: 'record',
-  title: DESK_NAMES.record,
-  subtitle: '測音量、暖嗓、整理環境',
-  glyph: '錄',
-  Component: RecordingStep,
-  requirements: recordingRequirements,
-}
+export default RecordingStep

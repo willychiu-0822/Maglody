@@ -3,9 +3,7 @@ import { MOODS } from '../rules/ideation'
 import { playChord, ac, afterSound, click, stopAll } from '../lib/audio'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, cleanLine, countHits } from '../lib/rhyme'
 import { chordVoicing, diatonicChord, keyName } from '../lib/theory'
-import type { StepDef, StepProps } from './types'
-import { ideationRequirements } from '../rules/requirements'
-import { DESK_NAMES } from '../../server/shared/names.ts'
+import type { StepProps } from './types'
 
 
 function IdeationStep({ p, update, notify, next }: StepProps) {
@@ -97,11 +95,4 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const ideationStep: StepDef = {
-  key: 'idea',
-  title: DESK_NAMES.idea,
-  subtitle: '決定這首歌要說什麼',
-  glyph: '想',
-  Component: IdeationStep,
-  requirements: ideationRequirements,
-}
+export default IdeationStep

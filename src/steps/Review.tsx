@@ -15,9 +15,7 @@ import { renderSong, songSpecs } from './songFile'
 import { playHum } from './results'
 import { safeFileName, shareOrDownload } from '../lib/share'
 import { mixFeedback } from '../rules/mix'
-import type { StepDef, StepProps } from './types'
-import { reviewRequirements } from '../rules/requirements'
-import { DESK_NAMES } from '../../server/shared/names.ts'
+import type { StepProps } from './types'
 
 const DIMENSIONS: { id: string; q: string; source: (p: Project) => Feedback[] }[] = [
   { id: 'story', q: '歌詞有讓我看見畫面嗎？', source: (p) => p.lyrics.flatMap((s) => analyzeSection(s, p.idea.hook).fb) },
@@ -179,11 +177,4 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
   )
 }
 
-export const reviewStep: StepDef = {
-  key: 'review',
-  title: DESK_NAMES.review,
-  subtitle: '聽聽這首歌現在的樣子',
-  glyph: '成',
-  Component: ReviewStep,
-  requirements: reviewRequirements,
-}
+export default ReviewStep

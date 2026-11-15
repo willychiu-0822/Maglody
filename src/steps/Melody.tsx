@@ -6,9 +6,7 @@ import { playLoop, playNote, type Player } from '../lib/audio'
 import { useMidiLab } from '../lib/lab'
 import { useMidiKeyboard } from '../lib/midiInput'
 import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, snapToScale } from '../lib/theory'
-import type { StepDef, StepProps } from './types'
-import { melodyRequirements } from '../rules/requirements'
-import { DESK_NAMES } from '../../server/shared/names.ts'
+import type { StepProps } from './types'
 
 type Part = 'verse' | 'chorus'
 const STEPS = 32
@@ -210,11 +208,4 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const melodyStep: StepDef = {
-  key: 'melody',
-  title: DESK_NAMES.melody,
-  subtitle: '把哼唱整理成可以唱的旋律',
-  glyph: '曲',
-  Component: MelodyStep,
-  requirements: melodyRequirements,
-}
+export default MelodyStep

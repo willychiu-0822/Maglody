@@ -3,7 +3,7 @@ import { ProjectDialog, type ProjectDecision } from './components/ProjectDialog'
 import { Modal } from './components/Modal'
 import { StudioPresence } from './components/StudioPresence'
 import { KnowledgeSpark } from './components/KnowledgeSpark'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useProject } from './lib/store'
 import { useMidiLab } from './lib/lab'
 import { playChord, playLoop, stopAll } from './lib/audio'
@@ -18,20 +18,11 @@ import { DESK_ROLE, ROLES, type RoleId } from './agent/roles'
 import type { AgentAction } from './agent/types'
 import { downloadBackup, parseBackup } from './lib/backup'
 import { agentMode } from './agent/client'
-import { humStep } from './steps/Hum'
-import { ideationStep } from './steps/Ideation'
-import { lyricsStep } from './steps/Lyrics'
-import { harmonyStep } from './steps/Harmony'
-import { melodyStep } from './steps/Melody'
-import { arrangementStep } from './steps/Arrangement'
-import { recordingStep } from './steps/Recording'
-import { mixStep } from './steps/Mix'
-import { reviewStep } from './steps/Review'
+import { STEPS } from './steps/registry'
 import { demoAvailable, playDemo } from './steps/results'
 import { InspirationHub } from './inspire/InspirationHub'
 import { asset } from './lib/asset'
 import { useInspirations } from './inspire/store'
-import type { StepDef } from './steps/types'
 import { deskPrerequisite } from './rules/requirements'
 import type { DeskKey } from '../server/shared/names.ts'
 
@@ -52,7 +43,6 @@ function startDesk(unlocked: number): number {
 }
 
 // 工作室：發想 → 成形 → 打磨。每一檯都能隨時進出，沒有關卡。
-const STEPS: StepDef[] = [humStep, ideationStep, harmonyStep, melodyStep, lyricsStep, arrangementStep, recordingStep, mixStep, reviewStep]
 const PHASES = [
   { name: '發想', note: '找到一顆歌的種子', keys: ['hum', 'idea'] },
   { name: '成形', note: '讓聲音長出形狀', keys: ['harmony', 'melody', 'lyrics', 'arrange'] },
@@ -188,7 +178,7 @@ export default function App() {
         <div className="page-caption"><span>工作室 · {phase.name}篇</span><span>第 {cur + 1} 頁</span></div>
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
-            <Comp goTo={goKey} p={p} update={update} notify={notify} next={next} />
+            <Suspense fallback={<p className="desk-loading" role="status">桌面攤開中……</p>}><Comp goTo={goKey} p={p} update={update} notify={notify} next={next} /></Suspense>
             <KnowledgeSpark step={step.key} p={p} role={role} />
           </GentleContext.Provider>
         </WhisperContext.Provider>

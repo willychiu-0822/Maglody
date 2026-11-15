@@ -4,9 +4,8 @@ import { useState } from 'react'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why } from '../components/ui'
 import { RHYME_GROUPS, cleanLine, lastChar, rhymeOf } from '../lib/rhyme'
 import { uid, type LyricSection, type Project, type SectionKind } from '../lib/store'
-import type { StepDef, StepProps } from './types'
+import type { StepProps } from './types'
 import { lyricsRequirements } from '../rules/requirements'
-import { DESK_NAMES } from '../../server/shared/names.ts'
 
 const LYRIC_KINDS: SectionKind[] = ['verse', 'pre', 'chorus', 'bridge']
 
@@ -38,7 +37,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   const ci = cur ? secs.indexOf(cur) : -1
   const a = cur ? analyzeSection(cur, p.idea.hook) : null
   const target = cur ? melodyOnsets(p, cur.kind === 'chorus' ? 'chorus' : 'verse') : 0
-  const ready = lyricsStep.requirements(p).every((r) => r.ok)
+  const ready = lyricsRequirements(p).every((r) => r.ok)
   const say = hookDrifted ? `最早那句「${p.idea.hook.trim()}」還要留嗎？不急，也可以先往下走。` : !cur ? '' : !cur.text.trim()
     ? cur.kind === 'chorus' ? `副歌。把「${p.idea.hook || '你的一句話'}」放進來。${target ? `大約 ${target} 個字。` : ''}` : `${KIND_ZH[cur.kind]}。先寫你看到的畫面。${target ? `大約 ${target} 個字。` : ''}`
     : '寫下來就好，之後還能改。'
@@ -130,12 +129,5 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const lyricsStep: StepDef = {
-  key: 'lyrics',
-  title: DESK_NAMES.lyrics,
-  subtitle: '用你的話，把心裡的畫面唱出來',
-  glyph: '詞',
-  Component: LyricsStep,
-  requirements: lyricsRequirements,
-}
+export default LyricsStep
 

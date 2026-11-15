@@ -5,8 +5,7 @@ import { ac, playNote, tone, trackAudioSource } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame } from '../lib/pitch'
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
-import type { StepDef, StepProps } from './types'
-import { humRequirements } from '../rules/requirements'
+import type { StepProps } from './types'
 import { DESK_NAMES } from '../../server/shared/names.ts'
 import { ROLES } from '../agent/roles'
 
@@ -222,11 +221,4 @@ function HumStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const humStep: StepDef = {
-  key: 'hum',
-  title: DESK_NAMES.hum,
-  subtitle: '把腦中的旋律變成看得見的音',
-  glyph: '哼',
-  Component: HumStep,
-  requirements: humRequirements,
-}
+export default HumStep
