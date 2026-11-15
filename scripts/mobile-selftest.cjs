@@ -52,11 +52,11 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
     await screen(page, '哼唱 完成')
     await pclick(page, /想一想/); await page.waitForTimeout(600)
     check('角色登場：想一想是大樹（製作）', (await page.locator('.presence-avatar').textContent()) === '製')
-    await screen(page, '構想 首屏')
+    await screen(page, '想一想 首屏')
     await page.locator('.mood').nth(2).click(); await page.waitForTimeout(200)
-    await screen(page, '構想 選了情緒')
+    await screen(page, '想一想 選了情緒')
     await page.locator('input.one-line').fill('鑰匙留在門口'); await page.waitForTimeout(200)
-    await screen(page, '構想 完成')
+    await screen(page, '想一想 完成')
     await pclick(page, /挑和弦/); await page.waitForTimeout(600)
     check('角色登場：挑和弦是阿澄（作曲）',(await page.locator('.presence-avatar').textContent()) === '曲')
     await screen(page, '和聲 首屏')
@@ -110,9 +110,9 @@ const pclick = async (page, re) => { const b = P(page); const t = await b.textCo
     check('混音：調好後出現前進按鈕', /聽一遍/.test(mixPrim), mixPrim)
     if (/聽一遍/.test(mixPrim)) await P(page).click()
     await page.waitForTimeout(600)
-    await screen(page, '總檢討 首屏')
+    await screen(page, '聽一遍 首屏')
     await page.locator('main textarea.one-line').fill('副歌那句我很喜歡，下一版想讓主歌更短。')
-    await screen(page, '總檢討 寫完')
+    await screen(page, '聽一遍 寫完')
   } catch (e) { check('主流程走完', false, e.message.split('\n')[0]) }
 
   // 靈感貼紙：多模態同一則
