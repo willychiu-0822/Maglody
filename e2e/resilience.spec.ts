@@ -110,7 +110,7 @@ test('UAT-17 從靈感開始與拼貼', async ({ page }) => {
   const seed=page.locator('.inspo-card').filter({hasText:'窗外的雨剛停'})
   await seed.locator('.inspo-card-head').click()
   await seed.locator('.primary-action').click()
-  await expect(page.locator('.desk-name')).toContainText('構想')
+  await expect(page.locator('.desk-name')).toContainText('想一想')
   expect((await readProject(page)).idea.title).toBe('窗外的雨剛停')
   await library(page)
   await page.getByRole('button',{name:'拼貼：挑幾則拼成新東西'}).click()
@@ -125,7 +125,7 @@ test('UAT-17 從靈感開始與拼貼', async ({ page }) => {
 
 test('UAT-18 知識先小火花、主動展開收合', async ({ page }) => {
   await setup(page)
-  await go(page,'構想')
+  await go(page,'想一想')
   await expect(page.locator('.why-body')).toHaveCount(0)
   await page.getByRole('button',{name:'溫暖療癒',exact:true}).click()
   await page.locator('.toolbox > summary').click()
@@ -218,7 +218,7 @@ test('UAT-22 Demo 版本保存、還原與重新開始', async ({ page }) => {
   await expect(page.getByRole('dialog',{name:'留住這一版',exact:true})).toContainText('存好了：Demo v1')
   await page.getByRole('button',{name:'好，回到工作室',exact:true}).click()
   await page.getByRole('button',{name:'關閉',exact:true}).click()
-  await go(page,'構想')
+  await go(page,'想一想')
   await page.locator('input.one-line').fill('改過的句子')
   await page.getByRole('button',{name:'打開工作室選單'}).click()
   await page.locator('.menu-more > summary').click()

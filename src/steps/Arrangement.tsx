@@ -5,6 +5,7 @@ import { uid, type ArrSection, type LayerId, type Project, type SectionKind } fr
 import { chordVoicing, diatonicChords } from '../lib/theory'
 import { KIND_ZH } from './Lyrics'
 import type { StepDef, StepProps } from './types'
+import { DESK_NAMES } from '../../server/shared/names.ts'
 
 export const LAYERS: { id: LayerId; name: string; w: number; why: string }[] = [
   { id: 'drums', name: '鼓', w: 3, why: '節奏骨架，加入就像心跳開始' },
@@ -171,7 +172,7 @@ function ArrangementStep({ p, update, notify, next }: StepProps) {
 
 export const arrangementStep: StepDef = {
   key: 'arrange',
-  title: '編曲',
+  title: DESK_NAMES.arrange,
   subtitle: '決定什麼時候加、什麼時候減',
   glyph: '編',
   Component: ArrangementStep,

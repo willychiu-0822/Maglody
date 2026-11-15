@@ -11,7 +11,7 @@ test.beforeEach(async({page})=>{await page.goto('/')})
 test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async({page},info)=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message))
   await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click()
-  await expect(primary(page)).toContainText('構想');await primary(page).click()
+  await expect(primary(page)).toContainText('想一想');await primary(page).click()
   await page.locator('.mood').nth(2).click()
   await page.getByRole('textbox',{name:'這首歌的一句話'}).fill('鑰匙留在門口')
   await primary(page).click()
@@ -34,7 +34,7 @@ test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async(
   await primary(page).click();await primary(page).click()
   await expect(primary(page)).toHaveText('■ 停');await primary(page).click()
   await page.locator('.mix-row').filter({hasText:'主旋律'}).locator('input').fill('1.2')
-  await expect(primary(page)).toContainText('總檢討');await primary(page).click()
+  await expect(primary(page)).toContainText('聽一遍');await primary(page).click()
   await page.getByRole('textbox',{name:'我對這首歌的想法'}).fill('喜歡副歌，下一版讓主歌短一些。')
   await primary(page).click();await expect(primary(page)).toHaveText('■ 停');await primary(page).click()
   const downloaded=page.waitForEvent('download')
@@ -51,7 +51,7 @@ test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async(
   await shot(page,'UAT-40',info.project.name)
 })
 test('UAT-41 存 Demo 版本可還原且名稱不空白',async({page},info)=>{
-  await visit(page,'構想');await page.locator('.mood').first().click();await page.getByRole('textbox',{name:'這首歌的一句話'}).fill('第一版的雨')
+  await visit(page,'想一想');await page.locator('.mood').first().click();await page.getByRole('textbox',{name:'這首歌的一句話'}).fill('第一版的雨')
   await page.getByRole('button',{name:'打開工作室選單'}).click();await page.locator('.menu-more > summary').click()
   await page.getByRole('button',{name:'存成新的一版',exact:true}).click()
   await page.getByRole('textbox',{name:'這一版的說明（選填）'}).fill('想保留的版本')
@@ -104,31 +104,31 @@ test('UAT-43 權限晚回來時不會偷偷開麥',async({page},info)=>{
   })
   await page.getByRole('button',{name:'● 哼一段',exact:true}).click()
   await expect(primary(page)).toBeDisabled()
-  await visit(page,'歌詞')
+  await visit(page,'填詞')
   await page.evaluate(()=>(window as unknown as {release:()=>void}).release())
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {stopped:number}).stopped)).toBe(1)
   await expect(page.locator('.desk-name')).toContainText('歌詞')
   await shot(page,'UAT-43',info.project.name)
 })
 test('UAT-44 長詞句與多段落仍可操作',async({page},info)=>{
-  await visit(page,'歌詞');await page.locator('.toolbox > summary').click()
+  await visit(page,'填詞');await page.locator('.toolbox > summary').click()
   for(let i=0;i<12;i++)await page.getByRole('button',{name:'＋ 橋段',exact:true}).click()
   await page.locator('.lyric-input').fill('averylongunbrokenword'.repeat(15))
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy()
-  await visit(page,'編曲');await page.locator('.toolbox > summary').click()
+  await visit(page,'排段落');await page.locator('.toolbox > summary').click()
   for(let i=0;i<15;i++)await page.getByRole('button',{name:'＋ 主歌',exact:true}).click()
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy()
   await shot(page,'UAT-44',info.project.name)
 })
 test('UAT-45 試聽的是正在編輯的歌詞段落',async({page},info)=>{
   await page.evaluate(()=>{const w=window as unknown as {spoken:string};window.speechSynthesis.speak=(utterance)=>{w.spoken=utterance.text}})
-  await visit(page,'歌詞');await page.locator('.lyric-input').fill('雨落在門前\n燈亮在窗邊')
+  await visit(page,'填詞');await page.locator('.lyric-input').fill('雨落在門前\n燈亮在窗邊')
   await primary(page).click()
   expect(await page.evaluate(()=>(window as unknown as {spoken:string}).spoken)).toBe('雨落在門前，燈亮在窗邊')
   await shot(page,'UAT-45',info.project.name)
 })
 test('UAT-46 情緒第一次和重播使用相同調式',async({page},info)=>{
-  await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click();await expect(primary(page)).toContainText('構想');await primary(page).click()
+  await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click();await expect(primary(page)).toContainText('想一想');await primary(page).click()
   await page.evaluate(()=>{
     const w=window as unknown as {frequencies:number[]};w.frequencies=[]
     const create=AudioContext.prototype.createOscillator
@@ -143,7 +143,7 @@ test('UAT-46 情緒第一次和重播使用相同調式',async({page},info)=>{
   await shot(page,'UAT-46',info.project.name)
 })
 test('UAT-47 靜音不可誤判混好，停止 A/B 後回到自己的混音',async({page},info)=>{
-  await fixture(page);await visit(page,'混音觀念');await primary(page).click()
+  await fixture(page);await visit(page,'調音量');await primary(page).click()
   await page.getByRole('button',{name:'聽聽沒混之前',exact:true}).click()
   await expect(page.getByRole('button',{name:'回到我的混音',exact:true})).toBeVisible()
   await primary(page).click();await page.getByRole('button',{name:'▶ 再聽一次',exact:true}).click()
@@ -207,7 +207,7 @@ test('UAT-50 沒辨識到音符也能播放原始哼唱，換檯會停止',async
   await page.locator('.inspo-card-head').first().click()
   await page.getByRole('button',{name:/原始哼唱/}).click()
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {played:HTMLMediaElement[]}).played.length)).toBe(1)
-  await page.getByRole('button',{name:'關閉',exact:true}).click();await visit(page,'歌詞')
+  await page.getByRole('button',{name:'關閉',exact:true}).click();await visit(page,'填詞')
   expect(await page.evaluate(()=>(window as unknown as {played:HTMLMediaElement[]}).played.every(a=>a.paused))).toBeTruthy()
   await page.evaluate(()=>{
     const w=window as unknown as {startedSources:number;stoppedSources:number};w.startedSources=0;w.stoppedSources=0
@@ -215,10 +215,10 @@ test('UAT-50 沒辨識到音符也能播放原始哼唱，換檯會停止',async
     AudioBufferSourceNode.prototype.start=function(...args:Parameters<typeof start>){w.startedSources++;return start.apply(this,args)}
     AudioBufferSourceNode.prototype.stop=function(...args:Parameters<typeof stop>){w.stoppedSources++;return stop.apply(this,args)}
   })
-  await visit(page,'哼唱解析');await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click()
-  await expect(primary(page)).toContainText('構想');await page.locator('.toolbox > summary').click()
+  await visit(page,'哼一段');await page.getByRole('button',{name:'沒有麥克風？聽示範',exact:true}).click()
+  await expect(primary(page)).toContainText('想一想');await page.locator('.toolbox > summary').click()
   await page.getByRole('button',{name:'▶ 再聽示範',exact:true}).click()
-  await visit(page,'歌詞')
+  await visit(page,'填詞')
   expect(await page.evaluate(()=>(window as unknown as {startedSources:number}).startedSources)).toBe(2)
   expect(await page.evaluate(()=>(window as unknown as {stoppedSources:number}).stoppedSources)).toBe(2)
   await shot(page,'UAT-50',info.project.name)

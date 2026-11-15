@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import type { Project } from '../lib/store'
 import { buildMidi, downloadMidi, midiTrackNames } from '../lib/midi'
 import './ableton.css'
+import { ROLES } from '../agent/roles'
 
 /** 編曲口吻：把 .mid 帶進 Ableton Live 的 Session View。整張卡預設不出現，要實驗開關打開才看得到。 */
 const TRACK_ZH: Record<string, string> = { Melody: '旋律', Chords: '和弦', Bass: '貝斯', Drums: '鼓' }
@@ -32,7 +33,7 @@ export function AbletonGuide({ p }: { p: Project }) {
   return (
     <section className="card ableton-guide" data-testid="ableton-guide">
       <div className="ableton-head">
-        <span className="why-q ableton-q">編曲家</span>
+        <span className="why-q ableton-q">{ROLES.arranger.label}</span>
         <h3 className="why-title ableton-title">帶進 Ableton Live</h3>
       </div>
       <p className="ableton-lead">想在 Live 裡接著玩的話，我把譜包成一個 .mid 給你帶走。</p>

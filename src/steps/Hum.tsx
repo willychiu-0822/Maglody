@@ -6,6 +6,8 @@ import { useMic } from '../lib/mic'
 import { analyzeBuffer, synthDemoHum, toMono, type HumAnalysis, type PitchFrame } from '../lib/pitch'
 import { keyName, noteNameOct, NOTE_NAMES, SCALES, inScale, pc } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
+import { DESK_NAMES } from '../../server/shared/names.ts'
+import { ROLES } from '../agent/roles'
 
 function HumStep({ p, update, notify, next }: StepProps) {
   const [live, setLive] = useState<PitchFrame[]>([])
@@ -130,10 +132,10 @@ function HumStep({ p, update, notify, next }: StepProps) {
     fb.push(n >= 8 ? { level: 'good', text: `聽到 ${n} 個音，夠我們玩了。來聽聽看。` } : n >= 3 ? { level: 'warn', text: `聽到 ${n} 個音，有點少。`, tip: '想多留一點，可以用「嗯～」或「啦～」拖長一點，試試哼超過 8 秒。' } : { level: 'bad', text: '這次沒聽清楚幾個音。', tip: '離麥克風大約一個拳頭，找個安靜的地方，再哼一次看看。' })
     const inK = hum.notes.filter((x) => inScale(x.midi, hum.keyRoot, hum.keyMode)).reduce((s, x) => s + x.dur, 0)
     const ratio = total ? inK / total : 0
-    fb.push(ratio > 0.85 ? { level: 'good', text: `這段有 ${Math.round(ratio * 100)}% 落在 ${keyName(hum.keyRoot, hum.keyMode)} 裡，滿貼的。` } : ratio > 0.65 ? { level: 'warn', text: `這段有 ${Math.round(ratio * 100)}% 落在目前選的調裡。`, tip: '紅色的音說不定正是你要的味道。按「聽聽整理後的音」聽聽。' } : { level: 'bad', text: '這段的調，我還不太確定。', tip: '先哼一小段熟悉的歌暖暖耳朵，再哼你自己的。' })
+    fb.push(ratio > 0.85 ? { level: 'good', text: `這段的音幾乎都落在 ${keyName(hum.keyRoot, hum.keyMode)} 裡，滿貼的。` } : ratio > 0.65 ? { level: 'warn', text: '這段大部分的音落在目前選的調裡，有幾個跑到外面。', tip: '紅色的音說不定正是你要的味道。按「聽聽整理後的音」聽聽。' } : { level: 'bad', text: '這段的調，我還不太確定。', tip: '先哼一小段熟悉的歌暖暖耳朵，再哼你自己的。' })
     const range = hum.rangeHigh - hum.rangeLow
-    fb.push(range <= 12 && range >= 4 ? { level: 'good', text: `這段從 ${noteNameOct(hum.rangeLow)} 到 ${noteNameOct(hum.rangeHigh)}，跨了 ${range} 個半音。` } : range > 12 ? { level: 'warn', text: `這段跨了 ${range} 個半音，超過一個八度。`, tip: '唱起來如果有點吃力，可以試試把某一句放低，聽聽喜不喜歡。' } : { level: 'warn', text: '這段的音都靠得很近，起伏不大。', tip: '想換個感覺，可以讓某一句往上走走看。' })
-    fb.push(hum.confidence > 0.08 ? { level: 'good', text: '這個調跟這段旋律滿貼的。' } : { level: 'warn', text: '有兩個調我聽起來都像。', tip: '可以在下方換個調聽聽，或到「和聲」用耳朵決定。' })
+    fb.push(range <= 12 && range >= 4 ? { level: 'good', text: `這段從 ${noteNameOct(hum.rangeLow)} 唱到 ${noteNameOct(hum.rangeHigh)}，高低差不大，唱起來不吃力。` } : range > 12 ? { level: 'warn', text: '這段最高和最低的音離得很遠，超過一個八度。', tip: '唱起來如果有點吃力，可以試試把某一句放低，聽聽喜不喜歡。' } : { level: 'warn', text: '這段的音都靠得很近，起伏不大。', tip: '想換個感覺，可以讓某一句往上走走看。' })
+    fb.push(hum.confidence > 0.08 ? { level: 'good', text: '這個調跟這段旋律滿貼的。' } : { level: 'warn', text: '有兩個調我聽起來都像。', tip: `可以在下方換個調聽聽，或到「${DESK_NAMES.harmony}」用耳朵決定。` })
   }
 
   const hist = ana?.hist
@@ -148,7 +150,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
         {mic.running && <div className={`big-note ${mic.midi != null ? 'on' : ''}`}>{mic.midi != null ? noteNameOct(mic.midi) : '…'}</div>}
         {(shownFrames.length > 0 || shownNotes.length > 0) ? (
           <PitchCanvas frames={shownFrames} notes={shownNotes} duration={shownDur} keyRoot={hum?.keyRoot} keyMode={hum?.keyMode} playhead={playhead} height={180} />
-        ) : !mic.running && <div className="stage-empty"><StageSketch kind="piano" /><small>作曲家把琴蓋掀開了，等你起個頭。</small></div>}
+        ) : !mic.running && <div className="stage-empty"><StageSketch kind="piano" /><small>{ROLES.composer.name}把琴蓋掀開了，等你起個頭。</small></div>}
         {busy && <p className="muted small center">{analysisSource === 'demo' ? '在聽示範旋律……' : analysisSource === 'file' ? '在聽這段音檔……' : '在聽你剛剛哼的……'}</p>}
         {mic.error && !hasResult && !busy && <p className="error small">{mic.error}</p>}
       </div>
@@ -221,7 +223,7 @@ function HumStep({ p, update, notify, next }: StepProps) {
 
 export const humStep: StepDef = {
   key: 'hum',
-  title: '哼唱解析',
+  title: DESK_NAMES.hum,
   subtitle: '把腦中的旋律變成看得見的音',
   glyph: '哼',
   Component: HumStep,

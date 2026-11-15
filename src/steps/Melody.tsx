@@ -9,6 +9,7 @@ import { cleanLine } from '../lib/rhyme'
 import type { Project } from '../lib/store'
 import { lyricLines } from './Lyrics'
 import type { StepDef, StepProps } from './types'
+import { DESK_NAMES } from '../../server/shared/names.ts'
 
 type Part = 'verse' | 'chorus'
 const STEPS = 32
@@ -56,11 +57,11 @@ export function melodyFeedback(p: Project, part: Part): Feedback[] {
   const chordAt = (i: number) => { const d = prog[Math.floor(i / 8)]; return d != null ? chords[d] : null }
   const fit = strong.filter((n) => chordAt(n.i)?.pcs.includes(pc(n.m))).length
   const r = strong.length ? fit / strong.length : 1
-  fb.push(r >= 0.7 ? { level: 'good', text: `強拍上 ${Math.round(r * 100)}% 是和弦音，旋律和伴奏很「黏」。` } : r >= 0.45 ? { level: 'warn', text: `強拍上只有 ${Math.round(r * 100)}% 是和弦音。`, tip: '紅色格子在強拍上和和弦不太合。可以挪到上下相鄰的綠色格，或放到弱拍當「經過音」，聽聽差別。' } : { level: 'bad', text: '強拍上的音大多不在和弦裡，聽起來會有點飄。', tip: '想踏實一點，可以讓每小節第 1 格先放和弦音（綠色），再用其他音接起來。' })
+  fb.push(r >= 0.7 ? { level: 'good', text: '每一拍開頭的音，大多踩在和弦上，旋律和伴奏很「黏」。' } : r >= 0.45 ? { level: 'warn', text: '每一拍開頭的音，大約只有一半踩在和弦上。', tip: '紅色格子落在拍子開頭，和和弦不太合。可以挪到上下相鄰的綠色格，或放到弱拍當「經過音」，聽聽差別。' } : { level: 'bad', text: '強拍上的音大多不在和弦裡，聽起來會有點飄。', tip: '想踏實一點，可以讓每小節第 1 格先放和弦音（綠色），再用其他音接起來。' })
   // 音域
   const ms = notes.map((n) => n.m)
   const range = Math.max(...ms) - Math.min(...ms)
-  fb.push(range <= 12 ? { level: 'good', text: `這段跨了 ${range} 個半音，在一個八度內。唱唱看，感覺如何？` } : { level: 'warn', text: `這段跨了 ${range} 個半音，超過一個八度。`, tip: '唱唱看；如果有點吃力，可以把最高或最低的音往中間收。' })
+  fb.push(range <= 12 ? { level: 'good', text: '這段最高和最低的音離得不遠，在一個八度內。唱唱看，感覺如何？' } : { level: 'warn', text: '這段最高和最低的音離得很遠，超過一個八度。', tip: '唱唱看；如果有點吃力，可以把最高或最低的音往中間收。' })
   if (p.hum) {
     const hi = Math.max(...ms), lo = Math.min(...ms)
     if (hi > p.hum.rangeHigh + 2 || lo < p.hum.rangeLow - 2) fb.push({ level: 'warn', text: `有些音比剛才哼的範圍（${noteNameOct(p.hum.rangeLow)}–${noteNameOct(p.hum.rangeHigh)}）更高或更低。`, tip: '跟著唱唱看，留意這些音唱起來舒不舒服。' })
@@ -275,13 +276,13 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
           <MidiKeyboardHint status={midi.status} deviceName={midi.deviceName} lastNote={midi.lastNote} onConnect={midi.connect} note={midiSaid} />
         )}
         <div className="row wrap">
-          <button className={`btn small ${penta ? 'on' : ''}`} onClick={() => setPenta(!penta)}>{penta ? '只用五聲音階（安全）' : '用完整音階'}</button>
+          <button className={`btn small ${penta ? 'on' : ''}`} onClick={() => setPenta(!penta)}>{penta ? '只留好搭的音（怎麼排都順）' : '全部的音都給我'}</button>
           <button className={`btn small ${hold ? 'on' : ''}`} onClick={() => setHold(!hold)}>{hold ? '點格子＝拉長前一個音' : '拉長模式'}</button>
           {p.hum && <button className="btn small" onClick={importHum}>重新匯入哼唱</button>}
           {part === 'chorus' && p.melody.verse.some((x) => x != null) && <button className="btn small" onClick={() => setCells(p.melody.verse.map((m) => (m != null && m >= 0 ? (inScale(m + 4, p.harmony.root, p.harmony.mode) ? m + 4 : m + 3) : m)))}>從主歌複製並升高</button>}
           <button className="btn small" onClick={() => setCells(new Array(STEPS).fill(null))}>清空</button>
         </div>
-        {penta && cells.some((m) => m != null && m >= 0 && !rows.includes(m)) && <p className="muted small">有些音不在五聲音階裡，切到「完整音階」才看得到。</p>}
+        {penta && cells.some((m) => m != null && m >= 0 && !rows.includes(m)) && <p className="muted small">有些音不在這幾列裡，按「只留好搭的音」切回全部的音才看得到。</p>}
         <p className="muted small">左邊的數字是簡譜，點一下可以試聽。淡綠底的格子是當下和弦裡的音。</p>
         <FeedbackList items={fb} />
         <Why ready={notes >= 4} title="為什麼綠色的音特別穩？" listen={{ label: '再聽一次', play }}>
@@ -294,7 +295,7 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
 
 export const melodyStep: StepDef = {
   key: 'melody',
-  title: '旋律',
+  title: DESK_NAMES.melody,
   subtitle: '把哼唱整理成可以唱的旋律',
   glyph: '曲',
   Component: MelodyStep,

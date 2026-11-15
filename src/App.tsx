@@ -32,6 +32,7 @@ import { InspirationHub } from './inspire/InspirationHub'
 import { asset } from './lib/asset'
 import { useInspirations } from './inspire/store'
 import type { StepDef } from './steps/types'
+import type { DeskKey } from '../server/shared/names.ts'
 
 const SAVE_NOTE_KEY = 'maglody-save-note-seen'
 const DESK_KEY = 'maglody-current-desk'
@@ -79,7 +80,7 @@ export default function App() {
   const [saveNote, setSaveNote] = useState(false)
   const step = STEPS[cur]
   const [entry, setEntry] = useState(() => ({ step: step.key, messageIds: new Set<string>() }))
-  const role = ROLES[DESK_ROLE[step.key]]
+  const role = ROLES[DESK_ROLE[step.key as DeskKey]]
   const requirements = step.requirements(p)
   const unfinished = requirements.find((r) => !r.ok)
   const ready = !unfinished
@@ -187,7 +188,7 @@ export default function App() {
           <SongMaterials p={p} />
         </div>
         </div>
-        <section className="workpage" aria-label={`${step.title}創作紙頁`}>
+        <section className="workpage" aria-label={`「${step.title}」的紙頁`}>
         <div className="page-caption"><span>工作室 · {phase.name}篇</span><span>第 {cur + 1} 頁</span></div>
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
@@ -212,11 +213,11 @@ export default function App() {
                 <div className="map-stops">
                 {ph.keys.map((k) => {
                   const i = STEPS.findIndex((s) => s.key === k)
-                  const companion = ROLES[DESK_ROLE[k]]
+                  const companion = ROLES[DESK_ROLE[k as DeskKey]]
                   return (
                     <button key={k} className={`menu-desk map-stop ${i === cur ? 'on' : ''}`} aria-current={i === cur ? 'location' : undefined} onClick={() => go(i)}>
                       <img src={asset(`/studio/roles/${companion.id}.webp`)} alt="" width="40" height="48" />
-                      <span className="map-stop-copy"><span>{STEPS[i].title}</span><small>{companion.name}陪你</small></span>
+                      <span className="map-stop-copy"><span>{STEPS[i].title}</span><small>{companion.label}</small></span>
                       <span className="map-stop-mark">{i === cur ? '你在這裡' : p.done[i] ? '留過足跡' : '隨時來坐'}</span>
                     </button>
                   )

@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import { evidenceRoot } from './evidence-root'
 export { expect }
 export type { Page }
-export const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
+export { desks } from './names'
 export const projectKey = 'maglody-project-v2'
 export async function shot(page: Page, info: TestInfo, suffix = '') {
   const id = info.title.match(/UAT-\d+/)![0]

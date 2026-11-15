@@ -4,6 +4,7 @@ import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '.
 import { ABSTRACT_WORDS, CONCRETE_HINTS, RHYME_GROUPS, cleanLine, countHits, lastChar, rhymeOf } from '../lib/rhyme'
 import { uid, type LyricSection, type Project, type SectionKind } from '../lib/store'
 import type { StepDef, StepProps } from './types'
+import { DESK_NAMES } from '../../server/shared/names.ts'
 
 export const KIND_ZH: Record<SectionKind, string> = { intro: '前奏', verse: '主歌', pre: '導歌', chorus: '副歌', bridge: '橋段', inter: '間奏', outro: '尾奏' }
 const LYRIC_KINDS: SectionKind[] = ['verse', 'pre', 'chorus', 'bridge']
@@ -103,7 +104,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
                 <div key={j} className="lyric-meta-row">
                   {n > 0 && <>
                     <span className={`count ${n > 14 ? 'over' : ''}`}>{n}</span>
-                    <span className={`rhyme-tag ${r ? `rh-${r.idx}` : 'rh-none'}`}>{r?.group ?? '?'}</span>
+                    {r && <span className={`rhyme-tag rh-${r.idx}`}>{r.group}</span>}
                   </>}
                 </div>
               )
@@ -166,7 +167,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
 
 export const lyricsStep: StepDef = {
   key: 'lyrics',
-  title: '歌詞',
+  title: DESK_NAMES.lyrics,
   subtitle: '用你的話，把心裡的畫面唱出來',
   glyph: '詞',
   Component: LyricsStep,

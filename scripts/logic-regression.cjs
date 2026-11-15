@@ -23,6 +23,6 @@ check('A-15 MIDI sustains cross a bar and stop at section boundary',()=>{
  const short=midiEvents(buildMidi(p));assert.equal(short.find(e=>e.status===0x80&&e.a===60).t-short.find(e=>e.status===0x90&&e.a===60).t,230)
 })
 ;(async()=>{
- try{const {reply}=await askMaster(defaultProject(),{step:'idea',persona:{name:'編曲',focus:'',voice:''},question:'下一步'});assert.doesNotMatch(reply.text,/我放兩個版本給你比/);console.log('PASS A-08 offline partner never claims nonexistent versions')}catch(e){failed++;console.error('FAIL A-08',e.message)}
+ try{const {reply}=await askMaster(defaultProject(),{step:'idea',persona:{name:'阿凱',focus:'',voice:''},question:'下一步'});assert.doesNotMatch(reply.text,/我放兩個版本給你比/);console.log('PASS A-08 offline partner never claims nonexistent versions')}catch(e){failed++;console.error('FAIL A-08',e.message)}
  if(failed)process.exitCode=1
 })()

@@ -24,7 +24,7 @@ async function open(page: Page, project: unknown = song) {
   await page.route('**/api/master', (r) => r.abort('connectionrefused'))
   await page.addInitScript(({ k, v }) => { if (!localStorage.getItem(k)) localStorage.setItem(k, JSON.stringify(v)) }, { k: KEY, v: project })
   await page.goto('/')
-  await expect(page.locator('.desk-name')).toContainText('總檢討')
+  await expect(page.locator('.desk-name')).toContainText('聽一遍')
 }
 const readFile = async (download: import('@playwright/test').Download) => {
   const path = await download.path()
@@ -79,7 +79,7 @@ test('M-07 備份檔匯得回來：匯出的內容在空白瀏覽器匯入後，
   await page2.locator('.menu-more > summary').click()
   await page2.locator('input[type=file][accept*=json]').setInputFiles(file)
   await page2.getByRole('button', { name: '打開這份備份' }).click()
-  await expect(page2.locator('.desk-name')).toContainText('總檢討')
+  await expect(page2.locator('.desk-name')).toContainText('聽一遍')
   const after = await page2.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY)
   expect(after).toEqual(before)
   await fresh.close()

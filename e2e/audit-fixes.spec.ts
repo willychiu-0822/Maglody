@@ -25,19 +25,19 @@ const activePart = (page: Page) => page.locator('.seg-quiet button.on')
 test.describe('M-08 旋律檯：亮著的分頁、小任務、主按鈕講同一段', () => {
   test('空白進來：停在主歌，小任務和主按鈕都是主歌', async ({ page }) => {
     await open(page)
-    await visit(page, '旋律')
+    await visit(page, '寫旋律')
     await expect(activePart(page)).toHaveText('主歌')
     await expect(mission(page)).toContainText('主歌')
   })
   test('主歌寫好、副歌空的：停在副歌，小任務指副歌', async ({ page }) => {
     await open(page, { melody: { verse: notes(5), chorus: notes(0), reflections: '' } })
-    await visit(page, '旋律')
+    await visit(page, '寫旋律')
     await expect(activePart(page)).toHaveText('副歌')
     await expect(mission(page)).toContainText('副歌')
   })
   test('一段寫好、另一段空的：有一步就能切過去的動作，小任務也換成那一段', async ({ page }) => {
     await open(page, { melody: { verse: notes(0), chorus: notes(5), reflections: '' } })
-    await visit(page, '旋律')
+    await visit(page, '寫旋律')
     // 剛進來停在第一個沒完成的主歌；切去已經寫好的副歌，再用一個動作回主歌
     await page.locator('.seg-quiet button').filter({ hasText: '副歌' }).click()
     await expect(page.getByRole('button', { name: '換主歌 →', exact: true })).toBeVisible()
@@ -48,7 +48,7 @@ test.describe('M-08 旋律檯：亮著的分頁、小任務、主按鈕講同一
   test('有哼唱草稿時，主按鈕直接說倒進哪一段', async ({ page }) => {
     const hum = { notes: [{ midi: 60, start: 0, dur: 0.4 }, { midi: 62, start: 0.5, dur: 0.4 }, { midi: 64, start: 1, dur: 0.4 }, { midi: 67, start: 1.5, dur: 0.4 }], duration: 2, keyRoot: 0, keyMode: 'major', confidence: 0.8, chordHints: ['C'], rangeLow: 60, rangeHigh: 67, source: 'demo' }
     await open(page, { hum })
-    await visit(page, '旋律')
+    await visit(page, '寫旋律')
     await expect(page.locator('main .primary-action')).toHaveText('把哼唱倒進主歌')
     await page.locator('main .primary-action').click()
     await expect(mission(page)).toContainText('副歌')
@@ -58,7 +58,7 @@ test.describe('M-08 旋律檯：亮著的分頁、小任務、主按鈕講同一
 test.describe('M-09 混音檯：小任務只講畫面上看得到的東西', () => {
   test('不打開工具箱，只照小任務推「主旋律」推桿，前進鈕就出現', async ({ page }) => {
     await open(page, { harmony: { root: 0, mode: 'major', verse: [0, 4, 5, 3], chorus: [3, 4, 0, 4], quizRight: 0, quizTotal: 0 }, melody: { verse: notes(5), chorus: notes(5), reflections: '' } })
-    await visit(page, '混音觀念')
+    await visit(page, '調音量')
     await page.locator('main .primary-action').click() // ▶ 播放副歌
     await expect(page.locator('main .primary-action')).toContainText('■ 停')
     await page.locator('main .primary-action').click()
@@ -76,23 +76,23 @@ test.describe('M-14 歌詞檯：最早那句話是問一句，不是關卡', () 
   const base = { idea: { mood: 'warm', vibe: '', theme: '', image: '', story: '', title: '', hook: '雨停了你還沒來', bpm: 90 }, lyrics, harmony: { root: 0, mode: 'major', verse: [0, 4, 5, 3], chorus: [3, 4, 0, 4], quizRight: 0, quizTotal: 0 }, melody: { verse: notes(5), chorus: notes(5), reflections: '' } }
   test('主歌、副歌各兩句，副歌沒有原句：前進鈕照樣出現，夥伴問一句', async ({ page }) => {
     await open(page, base)
-    await visit(page, '歌詞')
+    await visit(page, '填詞')
     await expect(page.getByRole('group', { name: '最早那句還要留嗎' })).toBeVisible()
     await expect(page.locator('main .primary-action')).toContainText('詞有了，去')
     await expect(page.locator('body')).not.toContainText('打勾')
   })
   test('選「放進副歌」：原句進了副歌，問題消失', async ({ page }) => {
     await open(page, base)
-    await visit(page, '歌詞')
+    await visit(page, '填詞')
     await page.getByRole('button', { name: '放進副歌', exact: true }).click()
     await expect(page.getByRole('group', { name: '最早那句還要留嗎' })).toHaveCount(0)
     const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY)
     expect(saved.lyrics.find((s: { kind: string }) => s.kind === 'chorus').text).toContain('雨停了你還沒來')
     expect(saved.idea.hook).toBe('雨停了你還沒來')
   })
-  test('選「我改主意了」：構想檯那句換成副歌第一句，歌詞不動', async ({ page }) => {
+  test('選「我改主意了」：想一想那一檯的句子換成副歌第一句，歌詞不動', async ({ page }) => {
     await open(page, base)
-    await visit(page, '歌詞')
+    await visit(page, '填詞')
     await page.getByRole('button', { name: '我改主意了', exact: true }).click()
     await expect(page.getByRole('group', { name: '最早那句還要留嗎' })).toHaveCount(0)
     const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)!), KEY)
@@ -273,15 +273,15 @@ test.describe('M-22 靈感本子：新使用者不會有一則刪不掉的別人
 
 test.describe('M-23／M-26 重新整理回到同一檯；夥伴的話不會自己消失', () => {
   const finishedSong = { unlocked: 8, done: Array(9).fill(true), idea: { mood: 'warm', vibe: '', theme: '', image: '', story: '', title: '雨停了', hook: '雨停了你還沒來', bpm: 90 }, harmony: { root: 0, mode: 'major', verse: [0, 4, 5, 3], chorus: [3, 4, 0, 4], quizRight: 0, quizTotal: 0 } }
-  test('M-23 從選單回到哼唱解析，重新整理後仍在哼唱解析', async ({ page }) => {
+  test('M-23 從選單回到哼一段，重新整理後仍在哼一段', async ({ page }) => {
     await open(page, finishedSong)
-    await expect(page.locator('.desk-name')).toContainText('總檢討')
-    await visit(page, '哼唱解析')
+    await expect(page.locator('.desk-name')).toContainText('聽一遍')
+    await visit(page, '哼一段')
     await page.reload()
-    await expect(page.locator('.desk-name')).toContainText('哼唱解析')
-    await visit(page, '和聲')
+    await expect(page.locator('.desk-name')).toContainText('哼一段')
+    await visit(page, '挑和弦')
     await page.reload()
-    await expect(page.locator('.desk-name')).toContainText('和聲')
+    await expect(page.locator('.desk-name')).toContainText('挑和弦')
   })
   test('M-26 夥伴對剛才動作的回應，不操作 31 秒後仍看得到', async ({ page }) => {
     test.setTimeout(75_000)
@@ -295,7 +295,7 @@ test.describe('M-23／M-26 重新整理回到同一檯；夥伴的話不會自�
   })
 })
 
-test.describe('M-13 總檢討：不像成績單，也不是一面下載牆', () => {
+test.describe('M-13 聽一遍：不像成績單，也不是一面下載牆', () => {
   const song = { unlocked: 8, idea: { mood: 'warm', vibe: '', theme: '', image: '', story: '', title: '雨停了', hook: '雨停了你還沒來', bpm: 90 }, harmony: { root: 0, mode: 'major', verse: [0, 4, 5, 3], chorus: [3, 4, 0, 4], quizRight: 0, quizTotal: 0 }, melody: { verse: notes(5), chorus: notes(5), reflections: '' }, lyrics: [{ id: 'v', kind: 'verse', text: '雨落在鞋櫃上\n鑰匙安靜發光' }, { id: 'c', kind: 'chorus', text: '雨停了你還沒來\n我一個人等著' }], arrangement: [{ id: 'v', kind: 'verse', bars: 8, layers: { drums: false, bass: true, keys: true, pad: false, melody: true } }, { id: 'c', kind: 'chorus', bars: 8, layers: { drums: true, bass: true, keys: true, pad: true, melody: true } }] }
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
   test('390×844 工具箱全開，整頁不超過 2,000 px；沒有成排的 1–5 分鈕；下載 .mid 只有一顆', async ({ page }) => {
@@ -330,9 +330,9 @@ test.describe('M-07 第一次存檔後，夥伴說一次歌存在哪裡', () => 
     await note.getByRole('button', { name: '好', exact: true }).click()
     await expect(note).toHaveCount(0)
     await page.reload()
-    await visit(page, '哼唱解析')
+    await visit(page, '哼一段')
     await page.locator('main .primary-action').filter({ hasText: '用這段繼續' }).click() // 哼唱結果已存下來，再前進一次
-    await expect(page.locator('.desk-name')).toContainText('構想')
+    await expect(page.locator('.desk-name')).toContainText('想一想')
     await expect(page.getByText('歌是存在這支手機的瀏覽器裡的')).toHaveCount(0)
   })
 })

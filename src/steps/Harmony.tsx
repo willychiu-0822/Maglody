@@ -3,6 +3,7 @@ import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '.
 import { afterSound, playChord, playLoop, type Player } from '../lib/audio'
 import { CHORD_ROLE, chordVoicing, diatonicChord, diatonicChords, keyName, NOTE_NAMES, type Mode } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
+import { DESK_NAMES } from '../../server/shared/names.ts'
 
 const TEMPLATES: { name: string; degs: number[]; note: string }[] = [
   { name: '萬用四和弦', degs: [0, 4, 5, 3], note: 'I–V–vi–IV：無數流行歌都用它，穩定又有起伏。' },
@@ -201,7 +202,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
 
 export const harmonyStep: StepDef = {
   key: 'harmony',
-  title: '和聲',
+  title: DESK_NAMES.harmony,
   subtitle: '選調、排和弦、用耳朵確認',
   glyph: '和',
   Component: HarmonyStep,

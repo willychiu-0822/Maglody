@@ -3,6 +3,7 @@ import { playChord, ac, afterSound, click, stopAll } from '../lib/audio'
 import { ABSTRACT_WORDS, CONCRETE_HINTS, cleanLine, countHits } from '../lib/rhyme'
 import { chordVoicing, diatonicChord, keyName } from '../lib/theory'
 import type { StepDef, StepProps } from './types'
+import { DESK_NAMES } from '../../server/shared/names.ts'
 
 export const MOODS = [
   { id: 'happy', name: '開心雀躍', mode: 'major', bpm: [110, 130], why: '大調 + 快速度：明亮的和弦配上像心跳加速的節奏。' },
@@ -85,7 +86,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
         <label className="field"><span>閉上眼睛看到的畫面</span><input value={idea.image} onChange={(e) => set('image', e.target.value)} /></label>
         <label className="field"><span>故事：誰、在哪、發生什麼</span><textarea rows={3} value={idea.story} onChange={(e) => set('story', e.target.value)} /></label>
         <label className="field">
-          <span>速度：<strong>{idea.bpm}</strong> BPM</span>
+          <span>速度：每分鐘 <strong>{idea.bpm}</strong> 拍</span>
           <input type="range" min={55} max={170} value={idea.bpm} style={{ '--fill': `${((idea.bpm - 55) / 115) * 100}%` } as React.CSSProperties} onChange={(e) => set('bpm', +e.target.value)} />
         </label>
         {mood && <button className="btn small" onClick={() => preview(p.harmony.mode === 'major' ? 'minor' : 'major', idea.bpm)}>▶ 對照：換成{mood.mode === 'major' ? '小' : '大'}調</button>}
@@ -104,7 +105,7 @@ function IdeationStep({ p, update, notify, next }: StepProps) {
 
 export const ideationStep: StepDef = {
   key: 'idea',
-  title: '構想',
+  title: DESK_NAMES.idea,
   subtitle: '決定這首歌要說什麼',
   glyph: '想',
   Component: IdeationStep,

@@ -4,6 +4,7 @@ import { applyTrack, createMixGraph, playLoop, type MixGraph, type Player, type 
 import type { Project } from '../lib/store'
 import { sectionAudio } from './Arrangement'
 import type { StepDef, StepProps } from './types'
+import { DESK_NAMES } from '../../server/shared/names.ts'
 
 const TRACKS: { id: TrackId; name: string; role: string }[] = [
   { id: 'melody', name: '主旋律（代替人聲）', role: '像站在前面唱歌的主角' },
@@ -23,7 +24,7 @@ export function mixFeedback(p: Project, peakDb: number | null): Feedback[] {
   fb.push(Math.abs(t.chords.pan) >= 0.2 ? { level: 'good', text: '和弦往旁邊站了一點，聽聽它跟旋律隔了多遠。' } : { level: 'warn', text: '和弦跟旋律站在差不多的位置。', tip: '往左或右推一點，聽聽空間有沒有變。' })
   fb.push(t.chords.hp && t.melody.hp ? { level: 'good', text: '和弦和旋律都開了低頻切除，下面的位置留給貝斯和鼓。' } : { level: 'warn', text: '和弦或旋律還沒開低頻切除。', tip: '開開看，再關掉比一比，聽聽差在哪。' })
   if (t.bass.hp) fb.push({ level: 'warn', text: '貝斯也開了低頻切除。', tip: '聽聽低音有沒有變薄；比較喜歡原本的聲音，關掉就好。' })
-  if (peakDb != null) fb.push(peakDb > -1 ? { level: 'bad', text: `最大聲的地方到 ${peakDb.toFixed(0)} dB，快破音了。`, tip: '每一軌各自往下拉一點，比把總音量推到底安全。' } : { level: 'good', text: `最大聲的地方到 ${peakDb.toFixed(0)} dB，還有空間。` })
+  if (peakDb != null) fb.push(peakDb > -1 ? { level: 'bad', text: '最大聲的地方太滿了，快破音了。', tip: '每一條推桿各自往左拉一點，比全部推到底安全。' } : { level: 'good', text: '最大聲的地方還留有空間。' })
   return fb
 }
 
@@ -108,7 +109,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
 
       <Toolbox>
         <div className="level-box">
-          <div className="row between small"><span>總輸出</span><span>{player ? `${level.toFixed(0)} dB` : '—'}</span></div>
+          <div className="row between small"><span>全部加起來</span><span>{!player ? '—' : meterLevel === 'bad' ? '太滿' : meterLevel === 'warn' ? '快滿了' : '剛好'}</span></div>
           <Meter value={(level + 48) / 48} level={meterLevel} />
         </div>
       <div className="mixer">
@@ -141,16 +142,16 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
         <FeedbackList items={fb} />
       </Card>
 
-      <Why ready={p.mix.listened} hint="先按播放。" title="想讓旋律靠近一點？" apply="Podcast 對話或影片旁白，也可以試著調整和配樂的距離。">
+      <Why ready={p.mix.listened} title="想讓旋律靠近一點？" apply="Podcast 對話或影片旁白，也可以試著調整和配樂的距離。">
         <p>想讓人聲靠近一點的話，先把它調到喜歡的音量，再慢慢加回其他聲音。聽聽這樣的距離喜不喜歡。</p>
       </Why>
       <Why ready={p.mix.listened} title="聲音要站在哪裡？" apply="戴耳機聽喜歡的歌：鼓、吉他、和聲各在哪個位置？">
         <p>把聲音想成站在舞台上。試著讓樂器分站左右，再聽聽和原來有什麼不同。</p>
       </Why>
-      <Why ready={tracks.chords.hp || tracks.melody.hp} hint="先在任一軌打開「低頻切除」聽聽差別。" title="切掉一些低音，會怎樣？" apply="錄到風聲或冷氣聲時，也可以試試低頻切除。">
+      <Why ready={tracks.chords.hp || tracks.melody.hp} title="切掉一些低音，會怎樣？" apply="錄到風聲或冷氣聲時，也可以試試低頻切除。">
         <p>聲音裡的低頻疊在一起，有時會聽起來比較悶。試著切掉一些，再聽聽你比較喜歡哪一種。</p>
       </Why>
-      <Why ready={p.mix.listened} title="為什麼要 A/B 比較？" apply="修照片、改文章時，也要常常和原稿比較。">
+      <Why ready={p.mix.listened} title="為什麼要回頭聽沒混之前？" apply="修照片、改文章時，也要常常和原稿比較。">
         <p>耳朵會很快「習慣」聲音，調久了就不知道自己變好還是變差。回到原始狀態聽一下，是混音師最常用的校準方法。</p>
       </Why>
       </Toolbox>
@@ -160,7 +161,7 @@ function MixStep({ p, update, notify, next, goTo }: StepProps) {
 
 export const mixStep: StepDef = {
   key: 'mix',
-  title: '混音觀念',
+  title: DESK_NAMES.mix,
   subtitle: '讓每個聲音都有位置',
   glyph: '混',
   Component: MixStep,

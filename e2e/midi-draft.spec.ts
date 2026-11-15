@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
-const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
+import { desks } from './names'
 const banned = ['MiniLab', '還沒在真的', '跟我說']
 
 async function go(page: Page, desk: string) {
@@ -44,8 +44,8 @@ test('預設收起沒驗過的鍵盤和 Ableton，REAPER 的 MIDI 下載還在',
     await expectDraftHidden(page)
   }
 
-  await go(page, '旋律')
-  const beforeGrid = await page.getByRole('region', { name: '旋律創作紙頁' }).evaluate((el) => {
+  await go(page, '寫旋律')
+  const beforeGrid = await page.getByRole('region', { name: '「寫旋律」的紙頁' }).evaluate((el) => {
     const roll = el.querySelector('.roll')
     if (!roll) return 'no-roll'
     const hint = el.querySelector('[data-testid="midi-hint"]')
@@ -59,7 +59,7 @@ test('預設收起沒驗過的鍵盤和 Ableton，REAPER 的 MIDI 下載還在',
   expect(beforeGrid).not.toBe('hint-before-roll')
   expect(beforeGrid).not.toMatch(/MIDI/)
 
-  await go(page, '總檢討')
+  await go(page, '聽一遍')
   await page.locator('main .toolbox > summary').click()
   await expect(page.getByRole('button', { name: '下載 MIDI（帶進 REAPER）' })).toBeVisible()
   await expect(page.getByTestId('ableton-guide')).toHaveCount(0)
@@ -73,14 +73,14 @@ test('不支援 Web MIDI 時，打開開關也不出現鍵盤字樣', async ({ p
   await page.goto('/?lab=midi')
   await expect(page.locator('main .primary-action')).toBeVisible()
   expect(await page.evaluate(() => typeof navigator.requestMIDIAccess)).toBe('undefined')
-  await go(page, '旋律')
+  await go(page, '寫旋律')
   await expect(page.getByTestId('midi-hint')).toHaveCount(0)
   const html = await page.content()
   expect(html).not.toContain('接上 MIDI')
   expect(html).not.toContain('鍵盤訊號')
   expect(html).not.toContain('MIDI 鍵盤')
   for (const phrase of banned) expect(html).not.toContain(phrase)
-  await go(page, '總檢討')
+  await go(page, '聽一遍')
   await page.locator('main .toolbox > summary').click()
   await expect(page.getByTestId('ableton-guide')).toBeVisible()
   await expect(page.getByTestId('ableton-download')).toBeVisible()
@@ -102,7 +102,7 @@ test('?lab=midi 打開後，鍵盤在工具箱裡能寫進格子，Ableton 下�
   await expect(page.locator('main .primary-action')).toBeVisible()
   await expect.poll(() => page.evaluate(() => localStorage.getItem('maglody-lab-midi'))).toBe('1')
 
-  await go(page, '旋律')
+  await go(page, '寫旋律')
   const place = await page.evaluate(() => {
     const hint = document.querySelector('[data-testid="midi-hint"]')
     const roll = document.querySelector('.roll')
@@ -122,7 +122,7 @@ test('?lab=midi 打開後，鍵盤在工具箱裡能寫進格子，Ableton 下�
   await page.evaluate('window.__labMidi.play(60)')
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('maglody-project-v2')!).melody.verse[0])).toBe(60) // M-08：旋律檯預設停在第一個沒完成的主歌
 
-  await go(page, '總檢討')
+  await go(page, '聽一遍')
   await page.locator('main .toolbox > summary').click()
   await expect(page.getByTestId('ableton-note')).toContainText('先讓它響')
   const download = page.waitForEvent('download')
@@ -133,12 +133,12 @@ test('?lab=midi 打開後，鍵盤在工具箱裡能寫進格子，Ableton 下�
   await expect(page.getByRole('button', { name: '下載 MIDI（帶進 REAPER）' })).toBeVisible()
 
   await page.goto('/')
-  await go(page, '總檢討')
+  await go(page, '聽一遍')
   await expect(page.getByTestId('ableton-guide')).toHaveCount(1)
   await page.goto('/?lab=off')
   await expect.poll(() => page.evaluate(() => localStorage.getItem('maglody-lab-midi'))).toBeNull()
-  await go(page, '旋律')
+  await go(page, '寫旋律')
   await expect(page.getByTestId('midi-hint')).toHaveCount(0)
-  await go(page, '總檢討')
+  await go(page, '聽一遍')
   await expect(page.getByTestId('ableton-guide')).toHaveCount(0)
 })

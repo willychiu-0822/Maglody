@@ -5,9 +5,9 @@ test('UAT-53 P0 三位夥伴引用歌曲、角色各異與後端mock不漏工程
   await page.locator('.presence').click()
   const replies:string[]=[]
   for(const [i,role,question,content] of [
-    [0,'作曲家','你覺得這段怎麼樣？','F–G–C–G'],
-    [1,'作詞人','你會怎麼看這一句？','雨落在鞋櫃上'],
-    [2,'錄音師','這版有什麼可以試？','90 BPM'],
+    [0,'阿澄・作曲','你覺得這段怎麼樣？','F–G–C–G'],
+    [1,'小滿・作詞','你會怎麼看這一句？','雨落在鞋櫃上'],
+    [2,'老周・錄音','這版有什麼可以試？','90 BPM'],
   ] as const) {
     await page.route('**/api/master', r=> i===0 ? r.fulfill({json:{text:'（後端 mock）接上真正的 LLM',next:'設定 LLM_PROVIDER'}}) : i===1 ? r.fulfill({json:{offline:true}}) : r.abort())
     await page.getByRole('tab',{name:role,exact:true}).click()
@@ -21,7 +21,7 @@ test('UAT-53 P0 三位夥伴引用歌曲、角色各異與後端mock不漏工程
     replies.push(await reply.innerText())
   }
   expect(new Set(replies).size).toBe(3)
-  await page.getByRole('tab',{name:'作詞人',exact:true}).click()
+  await page.getByRole('tab',{name:'小滿・作詞',exact:true}).click()
   await page.locator('.master-input input').fill('幫我寫一整首歌')
   await page.getByRole('button',{name:'送出',exact:true}).click()
   await expect(page.locator('.msg-master').last()).toContainText('不替你寫完')
@@ -36,7 +36,7 @@ test('UAT-54 P1 歌曲素材齊全可跨主副歌播放、缺項直達',async({p
     OscillatorNode.prototype.start=function(...args:Parameters<OscillatorNode['start']>){nodes.push(this);return start.apply(this,args)}
   })
   await setup(page,{...finished,arrangement:[],idea:{...finished.idea,bpm:170}})
-  await go(page,'總檢討')
+  await go(page,'聽一遍')
   await expect(page.locator('.demo-missing')).toHaveCount(0)
   await expect(primary(page)).toBeEnabled()
   await primary(page).click()
@@ -48,10 +48,10 @@ test('UAT-54 P1 歌曲素材齊全可跨主副歌播放、缺項直達',async({p
   await expect(primary(page)).toContainText('從頭聽')
   await page.evaluate(()=>{const key='maglody-project-v2',p=JSON.parse(localStorage.getItem(key)!);p.harmony.chorus=[null,null,null,null];localStorage.setItem(key,JSON.stringify(p))})
   await page.reload()
-  await go(page,'總檢討')
+  await go(page,'聽一遍')
   await expect(page.locator('.demo-missing')).toContainText('副歌和弦')
   await page.getByRole('button',{name:'去補副歌和弦 →',exact:true}).click()
-  await expect(page.locator('.desk-name')).toContainText('和聲')
+  await expect(page.locator('.desk-name')).toContainText('挑和弦')
 })
 
 test('UAT-55 P1 拒麥後直接聽有聲示範並繼續',async({page},info)=>{
@@ -68,7 +68,7 @@ test('UAT-55 P1 拒麥後直接聽有聲示範並繼續',async({page},info)=>{
   await primary(page).click()
   await expect(page.locator('.error')).toBeVisible()
   await page.getByRole('button',{name:/聽示範/}).click()
-  await expect(primary(page)).toContainText('構想')
+  await expect(primary(page)).toContainText('想一想')
   await expect(page.locator('.whisper')).toContainText('示範')
   await expect(page.locator('.error')).toHaveCount(0)
   expect(await page.evaluate(()=>(window as unknown as {demoPlayed:boolean}).demoPlayed)).toBe(true)
@@ -76,12 +76,12 @@ test('UAT-55 P1 拒麥後直接聽有聲示範並繼續',async({page},info)=>{
   await expect(page.locator('.presence-state')).not.toContainText('你哼了')
   await shot(page,info,'demo')
   await primary(page).click()
-  await expect(page.locator('.desk-name')).toContainText('構想')
+  await expect(page.locator('.desk-name')).toContainText('想一想')
 })
 
 test('UAT-56 R2 推薦入口、寫詞不代筆與唯一主動作',async({page},info)=>{
   await setup(page)
-  await go(page,'構想')
+  await go(page,'想一想')
   await expect(primary(page)).toHaveCount(1)
   await expect(page.locator('.mood[data-recommended]')).toHaveCount(1)
   await primary(page).click()
@@ -89,14 +89,14 @@ test('UAT-56 R2 推薦入口、寫詞不代筆與唯一主動作',async({page},i
   await primary(page).click()
   await expect(page.locator('input.one-line')).toBeFocused()
   await page.locator('input.one-line').fill('窗邊的那杯茶')
-  await expect(primary(page)).toContainText('和聲')
+  await expect(primary(page)).toContainText('挑和弦')
   await primary(page).click()
   await expect(page.locator('.toolbox')).not.toHaveAttribute('open','')
   await expect(page.locator('.chord[data-recommended]')).toHaveCount(1)
   for(let i=0;i<4;i++) await primary(page).click()
   expect((await readProject(page)).harmony.verse).toEqual([0,4,5,3])
   await shot(page,info,'harmony')
-  await go(page,'歌詞')
+  await go(page,'填詞')
   await expect(primary(page)).toHaveCount(1)
   await primary(page).click()
   await expect(page.locator('.lyric-input')).toBeFocused()
@@ -114,7 +114,7 @@ test('UAT-57 R1 R3 R4 核可素材載入預算與離線切換五角色',async({p
   await context.setOffline(true)
   try {
     await page.reload()
-    for(const [desk,role] of [['構想','producer'],['哼唱解析','composer'],['歌詞','lyricist'],['編曲','arranger'],['錄音準備','engineer']]){
+    for(const [desk,role] of [['想一想','producer'],['哼一段','composer'],['填詞','lyricist'],['排段落','arranger'],['試音','engineer']]){
       await go(page,desk)
       const image=page.locator('.studio-character')
       await expect(image).toHaveAttribute('src',`/studio/roles/${role}.webp`)
@@ -127,7 +127,7 @@ test('UAT-57 R1 R3 R4 核可素材載入預算與離線切換五角色',async({p
 
 test('UAT-58 R6 火花先一行、額外觀察一次一則',async({page})=>{
   await setup(page)
-  await go(page,'構想')
+  await go(page,'想一想')
   await expect(page.locator('.knowledge-spark')).toHaveCount(0)
   await primary(page).click()
   const spark=page.locator('.knowledge-spark')
@@ -147,7 +147,7 @@ test('UAT-58 R6 火花先一行、額外觀察一次一則',async({page})=>{
   await expect(page.locator('.fb-list .fb')).toHaveCount(before+1)
 })
 
-test('UAT-59 新手提問後立刻換檯，作詞人不沿用作曲家旁白',async({page})=>{
+test('UAT-59 新手提問後立刻換檯，小滿不沿用阿澄旁白',async({page})=>{
   await setup(page,finished)
   await page.route('**/api/master',async route=>{
     await new Promise(resolve=>setTimeout(resolve,800))
@@ -157,14 +157,14 @@ test('UAT-59 新手提問後立刻換檯，作詞人不沿用作曲家旁白',as
   await page.locator('.master-input input').fill('下一步')
   await page.getByRole('button',{name:'送出',exact:true}).click()
   await page.getByRole('button',{name:'關閉',exact:true}).click()
-  await go(page,'歌詞')
-  await expect(page.locator('.presence-name strong')).toHaveText('作詞人')
-  await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
+  await go(page,'填詞')
+  await expect(page.locator('.presence-name strong')).toHaveText('小滿・作詞')
+  await expect(page.locator('.presence-state')).toHaveText('小滿翻開筆記本。')
   await page.waitForTimeout(1200)
-  await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
+  await expect(page.locator('.presence-state')).toHaveText('小滿翻開筆記本。')
   await page.locator('.presence').click()
   await expect(page.locator('.msg-master').last()).toContainText('鑰匙留在門口')
-  await expect(page.locator('.msg-master .msg-speaker').last()).toHaveText('作曲家')
+  await expect(page.locator('.msg-master .msg-speaker').last()).toHaveText('阿澄')
   await expect(page.locator('.msg-master .msg-avatar img').last()).toHaveAttribute('src', '/studio/roles/composer.webp')
 })
 
