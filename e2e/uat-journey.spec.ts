@@ -18,18 +18,24 @@ test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async(
   for(const i of [0,4,5,3]) await page.locator('.chord').nth(i).click()
   await page.getByRole('button',{name:'換副歌 →',exact:true}).click()
   for(const i of [3,4,0,4]) await page.locator('.chord').nth(i).click()
+  // M-15：先聽一圈、再按「就這樣」，前進鈕才出現
+  await page.getByRole('button',{name:'▶ 聽一圈'}).click()
+  await page.getByRole('button',{name:/^■ 停/}).click()
+  await page.getByRole('button',{name:'就這樣',exact:true}).click()
   await primary(page).click()
   await primary(page).click()
   // M-08：第一下已經把哼唱倒進預設停著的主歌，再切到副歌倒一次
   await page.locator('.seg-quiet button').filter({hasText:'副歌'}).click()
   await expect(primary(page)).toHaveText('把哼唱倒進副歌');await primary(page).click()
-  await expect(primary(page)).toContainText('歌詞');await primary(page).click()
+  await expect(primary(page)).toContainText('填詞');await primary(page).click()
   await page.getByRole('textbox',{name:'主歌歌詞'}).fill('雨落在鞋櫃上\n鑰匙安靜發光')
   await page.locator('.seg-quiet button').filter({hasText:'副歌'}).click()
   await page.getByRole('textbox',{name:'副歌歌詞'}).fill('鑰匙留在門口\n我不敢再回頭')
   await primary(page).click();await primary(page).click()
+  // M-15：編曲骨架先試聽，再自己動一樣，前進鈕才出現
+  await expect(primary(page)).toContainText('試聽');await primary(page).click();await primary(page).click()
   await page.locator('.layer').filter({hasText:'鼓'}).click();await page.locator('.layer').filter({hasText:'貝斯'}).click()
-  await expect(primary(page)).toContainText('錄音');await primary(page).click()
+  await expect(primary(page)).toContainText('試音');await primary(page).click()
   await page.getByRole('button',{name:'沒有麥克風，先跳過',exact:true}).click()
   await primary(page).click();await primary(page).click()
   await expect(primary(page)).toHaveText('■ 停');await primary(page).click()
@@ -40,7 +46,7 @@ test('UAT-40 從示範到自己的第一版 Demo、下載 MIDI 並重整',async(
   const downloaded=page.waitForEvent('download')
   // M-07／M-10：主畫面的次要動作改成「先聽你一開始哼的」，MIDI 下載收在工具箱的「把歌帶走」
   await page.locator('.toolbox > summary').click()
-  await page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true}).click()
+  await page.getByRole('button',{name:'下載旋律檔（.mid，給電腦編曲軟體用）',exact:true}).click()
   const download=await downloaded
   expect(download.suggestedFilename()).toContain('鑰匙留在門口')
   const bytes=await readFile((await download.path())!)
@@ -107,7 +113,7 @@ test('UAT-43 權限晚回來時不會偷偷開麥',async({page},info)=>{
   await visit(page,'填詞')
   await page.evaluate(()=>(window as unknown as {release:()=>void}).release())
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {stopped:number}).stopped)).toBe(1)
-  await expect(page.locator('.desk-name')).toContainText('歌詞')
+  await expect(page.locator('.desk-name')).toContainText('填詞')
   await shot(page,'UAT-43',info.project.name)
 })
 test('UAT-44 長詞句與多段落仍可操作',async({page},info)=>{

@@ -61,7 +61,7 @@ test('預設收起沒驗過的鍵盤和 Ableton，REAPER 的 MIDI 下載還在',
 
   await go(page, '聽一遍')
   await page.locator('main .toolbox > summary').click()
-  await expect(page.getByRole('button', { name: '下載 MIDI（帶進 REAPER）' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '下載旋律檔（.mid，給電腦編曲軟體用）' })).toBeVisible()
   await expect(page.getByTestId('ableton-guide')).toHaveCount(0)
   expect(await page.evaluate(() => (window as unknown as { __midiCalls: () => number }).__midiCalls())).toBe(0)
 })
@@ -84,7 +84,7 @@ test('不支援 Web MIDI 時，打開開關也不出現鍵盤字樣', async ({ p
   await page.locator('main .toolbox > summary').click()
   await expect(page.getByTestId('ableton-guide')).toBeVisible()
   await expect(page.getByTestId('ableton-download')).toBeVisible()
-  await expect(page.getByRole('button', { name: '下載 MIDI（帶進 REAPER）' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '下載旋律檔（.mid，給電腦編曲軟體用）' })).toBeVisible()
 })
 
 test('?lab=midi 打開後，鍵盤在工具箱裡能寫進格子，Ableton 下載也還在', async ({ page }) => {
@@ -130,7 +130,7 @@ test('?lab=midi 打開後，鍵盤在工具箱裡能寫進格子，Ableton 下�
   expect((await download).suggestedFilename()).toBe('maglody-song.mid')
   const html = await page.content()
   for (const phrase of banned) expect(html).not.toContain(phrase)
-  await expect(page.getByRole('button', { name: '下載 MIDI（帶進 REAPER）' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '下載旋律檔（.mid，給電腦編曲軟體用）' })).toBeVisible()
 
   await page.goto('/')
   await go(page, '聽一遍')

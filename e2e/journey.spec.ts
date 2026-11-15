@@ -72,7 +72,7 @@ test('UAT-03 空白哼唱到完成一首歌的九檯完整旅程', async ({ page
   const download=page.waitForEvent('download')
   // M-07／M-10：主畫面的次要動作改成「先聽你一開始哼的」，MIDI 下載收在工具箱的「把歌帶走」
   await page.locator('.toolbox > summary').click()
-  await page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true}).click()
+  await page.getByRole('button',{name:'下載旋律檔（.mid，給電腦編曲軟體用）',exact:true}).click()
   expect((await download).suggestedFilename()).toMatch(/\.mid$/)
   await shot(page,info,'09-review')
   await page.reload()
@@ -194,7 +194,7 @@ test('UAT-12 匯出可使用的 MIDI、歌詞和專案備份', async ({ page }) 
   const midi=page.waitForEvent('download')
   // M-07／M-10：主畫面的次要動作改成「先聽你一開始哼的」，MIDI 下載收在工具箱的「把歌帶走」
   await page.locator('.toolbox > summary').click()
-  await page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true}).click()
+  await page.getByRole('button',{name:'下載旋律檔（.mid，給電腦編曲軟體用）',exact:true}).click()
   const data=await fs.readFile((await (await midi).path())!)
   expect(data.subarray(0,4).toString()).toBe('MThd')
   expect(data.length).toBeGreaterThan(100)

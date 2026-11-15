@@ -167,7 +167,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
         <div className="row wrap">
           <button className="btn small" disabled={!hasScore || saving} onClick={saveSong}>存成聲音檔（.wav）</button>
           <button className="btn small" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
-          <button className="btn small" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
+          <button className="btn small" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載旋律檔（.mid，給電腦編曲軟體用）</button>
         </div>
       </Card>
 

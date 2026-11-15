@@ -116,7 +116,7 @@ test('UAT-36 A-07 空白跳檯仍能先寫旋律、混音與匯出有路徑',asy
   await page.locator('main .primary-action').click()
   await expect(page.locator('.desk-name')).toContainText('旋律')
   await visit(page,'聽一遍')
-  await expect(page.getByRole('button',{name:'下載 MIDI，帶進 REAPER',exact:true})).toHaveCount(0)
+  await expect(page.getByRole('button',{name:'下載旋律檔（.mid，給電腦編曲軟體用）',exact:true})).toHaveCount(0)
   await page.locator('main .primary-action').click()
   await expect(page.locator('.desk-name')).toContainText('挑和弦')
   await visit(page,'寫旋律')
@@ -127,7 +127,7 @@ test('UAT-36 A-07 空白跳檯仍能先寫旋律、混音與匯出有路徑',asy
   await visit(page,'聽一遍')
   await expect(page.locator('.demo-missing')).toContainText('和弦')
   await page.locator('.toolbox > summary').click()
-  await expect(page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true})).toBeEnabled()
+  await expect(page.getByRole('button',{name:'下載旋律檔（.mid，給電腦編曲軟體用）',exact:true})).toBeEnabled()
   await shot(page,'A07',info.project.name)
 })
 test('UAT-37 R5 聊天和選單中可記靈感再回原處',async({page},info)=>{
