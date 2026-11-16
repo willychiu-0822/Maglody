@@ -99,13 +99,6 @@ export function InspirationHub({ api, p, update, step, stepTitle, onGo, onEvent,
   useEffect(() => { if (open !== 'capture') rec.cancelPending() }, [open, rec.cancelPending])
   useEffect(() => { onRecordingChange?.(!!rec.recording) }, [rec.recording]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 快捷鍵：Alt + I 隨時記靈感（桌面）
-  useEffect(() => {
-    const f = (e: KeyboardEvent) => { if (e.altKey && (e.key === 'i' || e.key === 'I')) { e.preventDefault(); setOpen('capture') } }
-    window.addEventListener('keydown', f)
-    return () => window.removeEventListener('keydown', f)
-  }, [setOpen])
-
   const flash = (t: string) => setToast(t)
   const toggleTag = (t: InspoTag) => setDraft((d) => ({ ...d, tags: d.tags.includes(t) ? d.tags.filter((x) => x !== t) : [...d.tags, t] }))
 
