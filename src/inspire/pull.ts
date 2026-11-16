@@ -1,8 +1,9 @@
 // 「拉進創作」：把一則靈感放進目前這一章（或從它開始一首新歌）。
 // 只把學生自己的素材放到他指定的位置，不替他改寫。
+import { DESK_NAMES } from '../../server/shared/names.ts'
 import { summarizeNotes } from '../lib/pitch'
 import type { Project, Update } from '../lib/store'
-import { KIND_ZH } from '../steps/Lyrics'
+import { KIND_ZH } from '../rules/lyrics'
 import type { Inspiration, InspoApi } from './store'
 import { uid } from '../lib/store'
 
@@ -39,7 +40,7 @@ export function pullOptions(x: Inspiration, step: string, p: Project): { here: P
   if (w) {
     if (step === 'idea' || step === 'hum') {
       if (x.tags.includes('title')) idea('title', `設為歌名「${w.slice(0, 12)}」`)
-      idea('vibe', '加進 Vibe 板')
+      idea('vibe', '加進這首歌的「感覺」')
       if (x.tags.includes('image')) idea('image', '設為核心畫面')
       if (x.tags.includes('story')) idea('story', '加進故事')
       idea('hook', '設為這首歌的一句話')
@@ -51,7 +52,7 @@ export function pullOptions(x: Inspiration, step: string, p: Project): { here: P
         apply: (pp, update) => { update('lyrics', pp.lyrics.map((y) => (y.id === s.id ? { ...y, text: appendLine(y.text, w) } : y))); return 'lyrics' },
       }))
     }
-    if (!['idea', 'hum'].includes(step)) idea('vibe', '帶到構想：加進 Vibe 板')
+    if (!['idea', 'hum'].includes(step)) idea('vibe', `帶到「${DESK_NAMES.idea}」：加進這首歌的「感覺」`)
   }
   if (x.hum && x.hum.notes.length) {
     here.unshift({ label: `用這段哼唱（${x.hum.notes.length} 音）當旋律種子`, how: 'hum.seed', apply: (_pp, update) => { humSeed(x, update); return step === 'melody' ? 'melody' : 'hum' } })

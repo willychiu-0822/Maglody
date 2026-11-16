@@ -51,9 +51,10 @@ test('five offline personas and all LLM failures fall back without network', asy
   const p = defaultProject()
   const voices = new Set()
   for (const persona of Object.values(ROLES)) {
-    const { reply, source } = await askMaster(p, { step: 'idea', question: '下一步', persona }, { endpoint: '' })
+    const personaId = persona.id
+    const { reply, source } = await askMaster(p, { step: 'idea', question: '下一步', personaId, persona }, { endpoint: '' })
     assert.equal(source, 'mock'); assert.ok(reply.text); voices.add(reply.text)
-    const refusal = await askMaster(p, { step: 'lyrics', question: '幫我寫一句', persona }, { endpoint: '' })
+    const refusal = await askMaster(p, { step: 'lyrics', question: '幫我寫一句', personaId, persona }, { endpoint: '' })
     assert.match(refusal.reply.text, /不替你寫/)
   }
   assert.equal(voices.size, 5)

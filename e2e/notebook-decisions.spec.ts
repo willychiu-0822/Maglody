@@ -59,7 +59,7 @@ test('UAT-79 採用靈感先看紙頁、取消不改歌，隨手記與失敗重�
   await page.screenshot({ path: `${evidenceRoot}/A-UI-17-adopt-retry-${info.project.name}.png`, animations: 'disabled' })
   await page.evaluate(() => (window as unknown as { __restoreNotebookWrites: () => void }).__restoreNotebookWrites())
   await dialog.getByRole('button', { name: '重試採用', exact: true }).click()
-  await expect(page.locator('.desk-name')).toContainText('構想')
+  await expect(page.locator('.desk-name')).toContainText('想一想')
   const after = await readProject(page)
   expect(after.idea.title).toBe('窗外的雨剛停')
   expect(after.idea.hook).toBe('窗外的雨剛停')

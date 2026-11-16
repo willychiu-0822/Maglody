@@ -3,7 +3,7 @@ import type { Project } from '../lib/store'
 import { askMaster } from './client'
 import type { AgentMessage } from './types'
 import { uid } from '../lib/store'
-import { DESK_ROLE, ROLES, type RoleId } from './roles'
+import { DESK_ROLE, type RoleId } from './roles'
 
 /**
  * 大師 Agent 的對話狀態。
@@ -26,15 +26,14 @@ export function useMaster(getProject: () => Project) {
 
   const run = useCallback(async (step: string, input: { event?: { kind: string; detail: string }; question?: string }, roleId?: RoleId) => {
     const song = generation.current
-    const rid = roleId ?? DESK_ROLE[step] ?? 'producer'
-    const r = ROLES[rid]
+    const rid = roleId ?? DESK_ROLE[step as keyof typeof DESK_ROLE] ?? 'producer'
     const id = uid()
     setPending(xs => [...xs, { id, step, roleId: rid }])
     try {
       // 等一個 tick，讓剛剛的 state 更新寫進專案後再讀
       await new Promise((res) => setTimeout(res, 0))
       if (song !== generation.current) return
-      const { reply, source } = await askMaster(getProject(), { step, ...input, persona: { name: r.name, focus: r.focus, voice: r.voice }, personaId: rid, history: history() })
+      const { reply, source } = await askMaster(getProject(), { step, ...input, personaId: rid, history: history() })
       if (song === generation.current && (reply.text || reply.learned)) push({ id: uid(), role: 'master', role_id: rid, step, text: reply.text, reply, source, at: Date.now() })
     } finally { setPending(xs => xs.filter(request => request.id !== id)) }
   }, [getProject])

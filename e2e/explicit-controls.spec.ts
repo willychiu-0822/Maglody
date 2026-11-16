@@ -93,7 +93,7 @@ test('UAT-74 九檯與彈窗的墨線按鈕至少44px，按下有回饋且只有
 
 test('UAT-75 長頁面記下靈感後，確認按鈕在眼前且保留創作原稿', async ({ page }, info) => {
   await setup(page, finished)
-  await go(page, '歌詞')
+  await go(page, '填詞')
   const lyrics = '窗邊的風，把今晚留給我\n'.repeat(30)
   await page.locator('.lyric-input').fill(lyrics)
   await page.locator('.toolbox > summary').click()

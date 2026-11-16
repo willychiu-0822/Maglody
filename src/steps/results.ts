@@ -2,7 +2,7 @@
 import { ac, afterSound, click, playChord, playLoop, playSequence, tone } from '../lib/audio'
 import type { Project } from '../lib/store'
 import { chordVoicing, diatonicChord, diatonicChords } from '../lib/theory'
-import { arrangedAudio, sectionAudio } from './Arrangement'
+import { arrangedAudio, sectionAudio } from '../rules/arrangement'
 import { speakLyrics } from '../lib/lyricsAudio'
 
 export interface StepResult { label: string; available: (p: Project) => boolean; play: (p: Project) => void }

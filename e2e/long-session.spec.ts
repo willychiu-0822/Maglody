@@ -14,8 +14,8 @@ test('UAT-61 長對話後換檯，場景夥伴仍會回應新問題', async ({ p
     await expect(page.locator('.msg-master').last()).toContainText(`第 ${i} 個想法`)
   }
   await page.getByRole('button', { name: '關閉', exact: true }).click()
-  await go(page, '歌詞')
-  await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
+  await go(page, '填詞')
+  await expect(page.locator('.presence-state')).toHaveText('小滿翻開筆記本。')
   await page.locator('.presence').click()
   await page.locator('.master-input input').fill('我想寫窗外的雨')
   await page.getByRole('button', { name: '送出', exact: true }).click()
@@ -26,7 +26,7 @@ test('UAT-61 長對話後換檯，場景夥伴仍會回應新問題', async ({ p
   await shot(page, info, 'scene-response')
 })
 
-test('UAT-62 等待作曲家時切換角色，不讓作詞人冒充思考中', async ({ page }, info) => {
+test('UAT-62 等待阿澄時切換角色，不讓小滿冒充思考中', async ({ page }, info) => {
   let release!: () => void
   const gate = new Promise<void>(resolve => { release = resolve })
   let requests = 0
@@ -41,31 +41,31 @@ test('UAT-62 等待作曲家時切換角色，不讓作詞人冒充思考中', a
     await page.locator('.master-input input').fill('旋律怎麼留白？')
     await page.getByRole('button', { name: '送出', exact: true }).click()
     await expect(page.locator('.typing')).toBeVisible()
-    await expect(page.locator('.msg-master').last().locator('.msg-speaker')).toHaveText('作曲家')
+    await expect(page.locator('.msg-master').last().locator('.msg-speaker')).toHaveText('阿澄')
     await expect(page.locator('.msg-master').last().locator('.msg-avatar img')).toHaveAttribute('src', '/studio/roles/composer.webp')
-    await page.getByRole('tab', { name: '作詞人', exact: true }).click()
+    await page.getByRole('tab', { name: '小滿・作詞', exact: true }).click()
     await expect(page.locator('.typing')).toHaveCount(0)
     await page.locator('.master-input input').fill('我想寫窗外的雨')
     await expect(page.getByRole('button', { name: '送出', exact: true })).toBeEnabled()
     await page.getByRole('button', { name: '送出', exact: true }).click()
     await expect(page.locator('.msg-master').last()).toContainText('先寫眼前看見的一個畫面')
-    await expect(page.locator('.msg-master').last().locator('.msg-speaker')).toHaveText('作詞人')
+    await expect(page.locator('.msg-master').last().locator('.msg-speaker')).toHaveText('小滿')
     await expect(page.locator('.msg-master').last().locator('.msg-avatar img')).toHaveAttribute('src', '/studio/roles/lyricist.webp')
-    await page.getByRole('tab', { name: '作曲家', exact: true }).click()
+    await page.getByRole('tab', { name: '阿澄・作曲', exact: true }).click()
     await expect(page.locator('.typing')).toBeVisible()
     await page.getByRole('button', { name: '關閉', exact: true }).click()
     await expect(page.locator('.studio-presence')).toHaveAttribute('data-state', 'listening')
-    await go(page, '歌詞')
+    await go(page, '填詞')
     await expect(page.locator('.studio-presence')).toHaveAttribute('data-state', 'idle')
-    await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
+    await expect(page.locator('.presence-state')).toHaveText('小滿翻開筆記本。')
     await shot(page, info, 'while-composer-pending')
     release()
     await page.locator('.presence').click()
     await expect(page.locator('.msg-master').last()).toContainText('讓旋律可以換氣')
-    await expect(page.locator('.msg-master').last().locator('.msg-speaker')).toHaveText('作曲家')
+    await expect(page.locator('.msg-master').last().locator('.msg-speaker')).toHaveText('阿澄')
     await expect(page.locator('.msg-master').last().locator('.msg-avatar img')).toHaveAttribute('src', '/studio/roles/composer.webp')
     await page.getByRole('button', { name: '關閉', exact: true }).click()
-    await expect(page.locator('.presence-state')).toHaveText('作詞人翻開筆記本。')
+    await expect(page.locator('.presence-state')).toHaveText('小滿翻開筆記本。')
   } finally { release() }
 })
 
@@ -93,7 +93,7 @@ test('UAT-63 重新開始新歌，清空舊對話並隔離晚到回覆', async (
     await page.locator('.menu-more > summary').click()
     await page.getByRole('button', { name: '重新開始一首新歌', exact: true }).click()
     await page.getByRole('dialog', { name: '翻開新的一頁', exact: true }).getByRole('button', { name: '開始新的歌', exact: true }).click()
-    await expect(page.locator('.presence-state')).toHaveText('作曲家在琴邊坐下。')
+    await expect(page.locator('.presence-state')).toHaveText('阿澄在琴邊坐下。')
     await page.locator('.presence').click()
     // 空狀態現在是夥伴自己的開場白（.msg.chat-empty）：舊對話要清空，開場白要在。
     await expect.soft(page.locator('.msg:not(.chat-empty)')).toHaveCount(0)

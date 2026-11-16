@@ -3,8 +3,8 @@ import { createContext, useContext, useState, type ReactNode } from 'react'
 /** 發想期：零審查。回饋不出現紅燈，只有「可以試試」 */
 export const GentleContext = createContext(false)
 
-export type Level = 'good' | 'warn' | 'bad'
-export interface Feedback { level: Level; text: string; tip?: string }
+import type { Feedback, Level } from '../rules/types'
+export type { Feedback, Level }
 
 const LEVEL_ZH: Record<Level, string> = { good: '很好', warn: '可以更好', bad: '需要調整' }
 
@@ -46,16 +46,14 @@ export function Toolbox({ children, label = '工具箱' }: { children: ReactNode
  * 「為什麼」卡片：先做再解釋。
  * ready=false 時不顯示；ready 後只出現一行，主動展開才解釋。
  */
-export function Why({ title, children, apply, ready = true, hint, listen }: {
+export function Why({ title, children, apply, ready = true, listen }: {
   title: string
   children: ReactNode
   apply?: ReactNode
   ready?: boolean
-  hint?: string
   listen?: { label: string; play: () => void }
 }) {
   const [open, setOpen] = useState(false)
-  void hint
   // 先做先聽：還沒動手就不出現；動手後只亮一行好奇心的火種，想知道才點開
   if (!ready) return null
   return (
@@ -129,11 +127,6 @@ export function Meter({ value, level }: { value: number; level: Level }) {
       <div className={`meter-fill meter-${level}`} style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} />
     </div>
   )
-}
-
-export function scoreOf(items: Feedback[]) {
-  const g = items.filter((f) => f.level === 'good').length
-  return items.length ? Math.round((g / items.length) * 100) : 0
 }
 
 /** Ink sketch for an idle stage: the companion has set things up and is waiting. */

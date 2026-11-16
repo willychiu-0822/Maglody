@@ -7,15 +7,15 @@ import { useMidiLab } from '../lib/lab'
 import type { Project } from '../lib/store'
 import { downloadMidi } from '../lib/midi'
 import { diatonicChords, keyName } from '../lib/theory'
-import { analyzeSection, KIND_ZH } from './Lyrics'
-import { progressionFeedback } from './Harmony'
-import { melodyFeedback } from './Melody'
-import { arrangementFeedback } from './Arrangement'
+import { analyzeSection, KIND_ZH } from '../rules/lyrics'
+import { progressionFeedback } from '../rules/harmony'
+import { melodyFeedback } from '../rules/melody'
+import { arrangementFeedback } from '../rules/arrangement'
 import { renderSong, songSpecs } from './songFile'
 import { playHum } from './results'
 import { safeFileName, shareOrDownload } from '../lib/share'
-import { mixFeedback } from './Mix'
-import type { StepDef, StepProps } from './types'
+import { mixFeedback } from '../rules/mix'
+import type { StepProps } from './types'
 
 const DIMENSIONS: { id: string; q: string; source: (p: Project) => Feedback[] }[] = [
   { id: 'story', q: '歌詞有讓我看見畫面嗎？', source: (p) => p.lyrics.flatMap((s) => analyzeSection(s, p.idea.hook).fb) },
@@ -167,7 +167,7 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
         <div className="row wrap">
           <button className="btn small" disabled={!hasScore || saving} onClick={saveSong}>存成聲音檔（.wav）</button>
           <button className="btn small" onClick={() => exportText(p)}>下載歌詞＋和弦表（.txt）</button>
-          <button className="btn small" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載 MIDI（帶進 REAPER）</button>
+          <button className="btn small" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載旋律檔（.mid，給電腦編曲軟體用）</button>
         </div>
       </Card>
 
@@ -177,13 +177,4 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
   )
 }
 
-export const reviewStep: StepDef = {
-  key: 'review',
-  title: '總檢討',
-  subtitle: '聽聽這首歌現在的樣子',
-  glyph: '成',
-  Component: ReviewStep,
-  requirements: (p) => [
-    { label: '記下你聽完的想法', ok: p.review.verdict.trim().length >= 4 },
-  ],
-}
+export default ReviewStep

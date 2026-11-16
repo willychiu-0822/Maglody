@@ -2,7 +2,7 @@
 // 這支用自己的最小 fixture（不用 helpers.ts），所以不會往 docs/uat/ 寫截圖。
 import { test, expect } from '@playwright/test'
 
-const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
+import { desks } from './names'
 const viewports = [
   { name: '手機 390×844', width: 390, height: 844, mobile: true },
   { name: '小手機 360×640', width: 360, height: 640, mobile: true },

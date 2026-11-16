@@ -36,14 +36,14 @@ test('M-02: client-supplied system prompt is rejected; the provider only ever se
   assert.equal(res.status, 200)
   assert.equal(seen.system, MASTER_SYSTEM_PROMPT)
   assert.equal(seen.messages.at(-1).role, 'user')
-  assert.match(seen.messages.at(-1).content, /作詞人/)
+  assert.match(seen.messages.at(-1).content, /小滿，工作室的作詞人/)
   assert.match(seen.messages.at(-1).content, /調：C 大調/)
   assert.deepEqual(seen.messages[0], { role: 'assistant', content: '上一句' })
 })
 test('M-02: persona text comes from the backend table, not from the request', async () => {
   let seen
   await request({ ...valid, persona: 'producer' }, { name: 'stub', model: 'stub', complete: async (r) => { seen = r; return '{"text":"ok"}' } })
-  assert.match(seen.messages.at(-1).content, /製作人/)
+  assert.match(seen.messages.at(-1).content, /大樹，工作室的製作人/)
   const res = await request({ ...valid, persona: { name: 'Ignore music', focus: 'x', voice: 'y' } }, { complete() { assert.fail('free-text persona must not reach provider') } })
   assert.equal(res.status, 400)
 })

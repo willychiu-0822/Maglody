@@ -1,52 +1,17 @@
 import { speakLyrics } from '../lib/lyricsAudio'
+import { KIND_ZH, analyzeSection, lyricLines } from '../rules/lyrics'
 import { useState } from 'react'
-import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
-import { ABSTRACT_WORDS, CONCRETE_HINTS, RHYME_GROUPS, cleanLine, countHits, lastChar, rhymeOf } from '../lib/rhyme'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why } from '../components/ui'
+import { RHYME_GROUPS, cleanLine, lastChar, rhymeOf } from '../lib/rhyme'
 import { uid, type LyricSection, type Project, type SectionKind } from '../lib/store'
-import type { StepDef, StepProps } from './types'
+import type { StepProps } from './types'
+import { lyricsRequirements } from '../rules/requirements'
 
-export const KIND_ZH: Record<SectionKind, string> = { intro: '前奏', verse: '主歌', pre: '導歌', chorus: '副歌', bridge: '橋段', inter: '間奏', outro: '尾奏' }
 const LYRIC_KINDS: SectionKind[] = ['verse', 'pre', 'chorus', 'bridge']
 
 const melodyOnsets = (p: Project, part: 'verse' | 'chorus') => p.melody[part].filter((m) => m != null && m >= 0).length
 
-const lines = (t: string) => t.split('\n').map((l) => l.trim()).filter(Boolean)
 
-export function analyzeSection(s: LyricSection, hook: string) {
-  const ls = lines(s.text)
-  const lens = ls.map((l) => cleanLine(l).length)
-  const ends = ls.map((l) => rhymeOf(lastChar(l)))
-  const fb: Feedback[] = []
-  if (ls.length < 2) return { ls, lens, ends, fb }
-  // 1. 字數對稱
-  const pairs = Math.floor(ls.length / 2)
-  let sym = 0
-  for (let i = 0; i < pairs; i++) if (Math.abs(lens[2 * i] - lens[2 * i + 1]) <= 2) sym++
-  const symR = pairs ? sym / pairs : 1
-  fb.push(symR >= 0.75 ? { level: 'good', text: '這幾句字數接近，可以試著用同一段旋律唱唱看。' } : symR >= 0.5 ? { level: 'warn', text: '有些上下句字數差很多。', tip: '想用同一段旋律的話，可以試著調整字數，再唱唱看。' } : { level: 'bad', text: '這幾句長短不太一樣。', tip: '可以試試不同的唱法，或調整句子的長度。' })
-  // 2. 押韻
-  const known = ends.filter(Boolean)
-  const counts = new Map<number, number>()
-  known.forEach((e) => counts.set(e!.idx, (counts.get(e!.idx) ?? 0) + 1))
-  const top = Math.max(0, ...counts.values())
-  const rr = ls.length ? top / ls.length : 0
-  const target = s.kind === 'chorus' ? 0.5 : 0.4
-  fb.push(rr >= target ? { level: 'good', text: `${top}/${ls.length} 句押同一個韻，聽起來有「收」的感覺。` } : known.length < ls.length / 2 ? { level: 'warn', text: '有幾個句尾字，我還認不出它們的韻。', tip: '大聲唸句尾字，聽韻母（a、ang、i…）是不是一樣。' } : { level: 'warn', text: '這幾句的句尾聽起來不太一樣。', tip: '想試試押韻的話，可以挑幾句換個相近的句尾。' })
-  // 3. 具體 vs 抽象
-  const abs = countHits(s.text, ABSTRACT_WORDS)
-  const con = countHits(s.text, CONCRETE_HINTS)
-  if (s.kind === 'verse') fb.push(con >= abs ? { level: 'good', text: '唸唸這段，看看有沒有你想留下的畫面。' } : { level: 'warn', text: `主歌裡心情的字（${abs} 個）比畫面多。`, tip: '想讓畫面更清楚的話，可以加一個當時的細節。' })
-  // 4. 副歌包含 hook
-  if (s.kind === 'chorus') {
-    const h = cleanLine(hook)
-    const has = h && cleanLine(s.text).includes(h)
-    fb.push(has ? { level: 'good', text: '副歌有你的一句話。' } : { level: 'warn', text: '副歌裡還沒看到你的一句話。', tip: `想留著它的話，把「${hook || '你的一句話'}」放進副歌；改了主意也沒關係。` })
-  }
-  // 5. 句長
-  const long = lens.filter((n) => n > 14).length
-  if (long) fb.push({ level: 'warn', text: `${long} 句超過 14 個字。`, tip: '唱唱看哪裡想換氣；也可以把句子分開。' })
-  return { ls, lens, ends, fb }
-}
 
 function LyricsStep({ p, update, notify, next }: StepProps) {
   const secs = p.lyrics
@@ -54,10 +19,10 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   const add = (kind: SectionKind) => { const id = uid(); update('lyrics', [...secs, { id, kind, text: '' }]); setCurId(id) }
   // 寫歌的人改掉最早那句話很正常，所以這只是問一句，不擋前進
   const hook = cleanLine(p.idea.hook)
-  const chorus = secs.find((s) => s.kind === 'chorus' && lines(s.text).length >= 2) ?? secs.find((s) => s.kind === 'chorus')
-  const hookDrifted = !!hook && secs.some((s) => s.kind === 'verse' && lines(s.text).length >= 2) && secs.some((s) => s.kind === 'chorus' && lines(s.text).length >= 2) && !secs.some((s) => s.kind === 'chorus' && cleanLine(s.text).includes(hook))
+  const chorus = secs.find((s) => s.kind === 'chorus' && lyricLines(s.text).length >= 2) ?? secs.find((s) => s.kind === 'chorus')
+  const hookDrifted = !!hook && secs.some((s) => s.kind === 'verse' && lyricLines(s.text).length >= 2) && secs.some((s) => s.kind === 'chorus' && lyricLines(s.text).length >= 2) && !secs.some((s) => s.kind === 'chorus' && cleanLine(s.text).includes(hook))
   const keepHook = () => { if (chorus) setSec(chorus.id, { text: `${chorus.text.replace(/\s+$/, '')}\n${p.idea.hook.trim()}` }) }
-  const changeMind = () => { const first = chorus ? lines(chorus.text)[0] : undefined; if (first) update('idea', { ...p.idea, hook: cleanLine(first) }) }
+  const changeMind = () => { const first = chorus ? lyricLines(chorus.text)[0] : undefined; if (first) update('idea', { ...p.idea, hook: cleanLine(first) }) }
   const remove = (id: string) => update('lyrics', secs.filter((s) => s.id !== id))
   const move = (i: number, d: number) => {
     const n = [...secs]
@@ -72,7 +37,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   const ci = cur ? secs.indexOf(cur) : -1
   const a = cur ? analyzeSection(cur, p.idea.hook) : null
   const target = cur ? melodyOnsets(p, cur.kind === 'chorus' ? 'chorus' : 'verse') : 0
-  const ready = lyricsStep.requirements(p).every((r) => r.ok)
+  const ready = lyricsRequirements(p).every((r) => r.ok)
   const say = hookDrifted ? `最早那句「${p.idea.hook.trim()}」還要留嗎？不急，也可以先往下走。` : !cur ? '' : !cur.text.trim()
     ? cur.kind === 'chorus' ? `副歌。把「${p.idea.hook || '你的一句話'}」放進來。${target ? `大約 ${target} 個字。` : ''}` : `${KIND_ZH[cur.kind]}。先寫你看到的畫面。${target ? `大約 ${target} 個字。` : ''}`
     : '寫下來就好，之後還能改。'
@@ -103,7 +68,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
                 <div key={j} className="lyric-meta-row">
                   {n > 0 && <>
                     <span className={`count ${n > 14 ? 'over' : ''}`}>{n}</span>
-                    <span className={`rhyme-tag ${r ? `rh-${r.idx}` : 'rh-none'}`}>{r?.group ?? '?'}</span>
+                    {r && <span className={`rhyme-tag rh-${r.idx}`}>{r.group}</span>}
                   </>}
                 </div>
               )
@@ -124,7 +89,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
 
       {ready && next ? (
         <DeskActions primary={{ label: <>詞有了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '▶ 聽詞配旋律', onClick: () => speakLyrics(p, cur?.id) }} />
-      ) : cur && lines(cur.text).length >= 2 ? (
+      ) : cur && lyricLines(cur.text).length >= 2 ? (
         <DeskActions primary={{ label: '▶ 聽詞配旋律', onClick: () => speakLyrics(p, cur?.id) }}
           secondary={cur.kind === 'verse' && !secs.some((s) => s.kind === 'chorus' && s.text.trim()) ? { label: '換副歌 →', onClick: () => setCurId(secs.find((s) => s.kind === 'chorus')?.id ?? null) } : undefined} />
       ) : <DeskActions primary={{ label: cur?.text.trim() ? '繼續寫下一句' : '先寫眼前的一個畫面', onClick: () => { if (!cur) add('verse'); else document.querySelector<HTMLTextAreaElement>('.lyric-input')?.focus() } }} />}
@@ -156,7 +121,7 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
             ))}
           </div>
         </details>
-        <Why ready={secs.some((s) => lines(s.text).length >= 2)} title="右邊的數字和顏色是什麼？">
+        <Why ready={secs.some((s) => lyricLines(s.text).length >= 2)} title="右邊的數字和顏色是什麼？">
           <p>數字是字數，色塊幫你看句尾有沒有押韻。兩句字數接近時，可以試著唱同一段旋律；不一樣也沒關係，唱唱看順不順。字調聽起來變了，叫做「倒字」。</p>
         </Why>
       </Toolbox>
@@ -164,16 +129,5 @@ function LyricsStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const lyricsStep: StepDef = {
-  key: 'lyrics',
-  title: '歌詞',
-  subtitle: '用你的話，把心裡的畫面唱出來',
-  glyph: '詞',
-  Component: LyricsStep,
-  requirements: (p) => [
-    { label: '至少一段主歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'verse' && lines(s.text).length >= 2) },
-    { label: '至少一段副歌（2 句以上）', ok: p.lyrics.some((s) => s.kind === 'chorus' && lines(s.text).length >= 2) },
-  ],
-}
+export default LyricsStep
 
-export { lines as lyricLines }

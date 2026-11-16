@@ -21,7 +21,7 @@ test('UAT-78 音檔用真按鈕與鍵盤選取，壞檔按好後可重試且保�
   page.on('dialog', d => { native.push(d.message()); void d.dismiss() })
   await setup(page)
   await page.getByRole('button', { name: '沒有麥克風？聽示範', exact: true }).click()
-  await expect(primary(page)).toContainText('構想')
+  await expect(primary(page)).toContainText('想一想')
   const before = (await readProject(page)).hum
   await page.locator('.toolbox > summary').click()
   const upload = page.getByRole('button', { name: '上傳音檔', exact: true })

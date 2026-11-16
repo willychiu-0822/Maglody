@@ -36,7 +36,7 @@ test('UAT-76 保存、還原與新歌使用紙頁明確確認，取消不改稿'
   await dialog.getByRole('button', { name: '好，回到工作室', exact: true }).click()
   await expect(opener).toBeFocused()
   await page.getByRole('dialog', { name: '工作室', exact: true }).getByRole('button', { name: '關閉', exact: true }).click()
-  await go(page, '構想')
+  await go(page, '想一想')
   await page.locator('.one-line').fill('我改過的新句子')
   await openVersions(page)
   const restore = page.getByRole('button', { name: '回到這版', exact: true })

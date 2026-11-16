@@ -1,6 +1,6 @@
 import { test, expect, type Page } from './helpers'
 import { evidenceRoot } from './evidence-root'
-const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
+import { desks } from './names'
 const visit = async (page: Page, name: string) => { await page.getByRole('button', { name: '打開工作室選單' }).click(); await page.locator('.menu-desk').filter({has: page.locator('span', {hasText: new RegExp(`^${name}$`)})}).click() }
 const shot = async (page: Page, id: string, project: string) => page.screenshot({ path: `${evidenceRoot}/A-${id}-${project}.png`, fullPage: true, animations: 'disabled' })
 test.beforeEach(async ({page}) => { await page.goto('/') })
@@ -11,7 +11,7 @@ test('UAT-28 R1 紙墨在手機與桌面可讀且無溢出', async ({page}, info
   await shot(page,'R1',info.project.name)
 })
 test('UAT-29 R4 五位角色圖與對應檯位', async ({page}, info) => {
-  for (const [desk, role] of [['構想','producer'],['哼唱解析','composer'],['歌詞','lyricist'],['編曲','arranger'],['錄音準備','engineer']]) {
+  for (const [desk, role] of [['想一想','producer'],['哼一段','composer'],['填詞','lyricist'],['排段落','arranger'],['試音','engineer']]) {
     await visit(page, desk)
     const character = page.locator('.studio-character')
     await expect(character).toHaveAttribute('src', `/studio/roles/${role}.webp`)
@@ -21,18 +21,18 @@ test('UAT-29 R4 五位角色圖與對應檯位', async ({page}, info) => {
 })
 test('UAT-30 R3 人物待機、回應與減少動畫', async ({page},info) => {
   await expect(page.locator('.studio-presence')).toContainText('琴邊')
-  await page.getByRole('button',{name:'跟作曲家聊', exact:true}).click()
-  const portraits: Record<string,string> = {製作人:'producer',作曲家:'composer',作詞人:'lyricist',編曲:'arranger',錄音師:'engineer'}
-  for(const name of ['製作人','作曲家','作詞人','編曲','錄音師']) {
+  await page.getByRole('button',{name:'跟阿澄聊', exact:true}).click()
+  const portraits: Record<string,string> = {大樹:'producer',阿澄:'composer',小滿:'lyricist',阿凱:'arranger',老周:'engineer'}
+  for(const name of ['大樹','阿澄','小滿','阿凱','老周']) {
     const before = await page.locator('.msg-master').count()
-    await page.getByRole('tab',{name,exact:true}).click()
-    await page.getByRole('textbox',{name:'跟夥伴說的話'}).fill(name === '作詞人' ? '幫我寫一句' : '下一步')
+    await page.getByRole('tab',{name:new RegExp(`^${name}・`)}).click()
+    await page.getByRole('textbox',{name:'跟夥伴說的話'}).fill(name === '小滿' ? '幫我寫一句' : '下一步')
     await page.getByRole('button',{name:'送出',exact:true}).click()
     await expect(page.locator('.msg-master')).toHaveCount(before+1)
     await expect(page.locator('.msg-master .msg-speaker').last()).toHaveText(name)
     await expect(page.locator('.msg-master .msg-avatar img').last()).toHaveAttribute('src', `/studio/roles/${portraits[name]}.webp`)
     await expect(page.locator('.msg-master').last()).toContainText(/。|？/)
-    if(name==='作詞人') await expect(page.locator('.msg-master').last()).toContainText('不替你寫完')
+    if(name==='小滿') await expect(page.locator('.msg-master').last()).toContainText('不替你寫完')
     await expect(page.locator('.typing')).toHaveCount(0)
   }
   await shot(page,'R3-chat',info.project.name)
@@ -103,7 +103,7 @@ test('UAT-34 A-01 R5 錄音中直接存檔不能遺失聲音',async({page,contex
   await shot(page,'R5-hum-saved',info.project.name)
 })
 test('UAT-35 A-04 歌詞不會打字到一半切換段落',async({page},info)=>{
-  await visit(page,'歌詞')
+  await visit(page,'填詞')
   const text = page.locator('.lyric-input')
   await text.fill('雨落在門前\n燈亮在窗邊')
   await expect(text).toHaveValue('雨落在門前\n燈亮在窗邊')
@@ -111,29 +111,29 @@ test('UAT-35 A-04 歌詞不會打字到一半切換段落',async({page},info)=>{
   await shot(page,'A04',info.project.name)
 })
 test('UAT-36 A-07 空白跳檯仍能先寫旋律、混音與匯出有路徑',async({page},info)=>{
-  await visit(page,'混音觀念')
+  await visit(page,'調音量')
   await expect(page.locator('main .primary-action')).toHaveText('先寫一小句旋律')
   await page.locator('main .primary-action').click()
   await expect(page.locator('.desk-name')).toContainText('旋律')
-  await visit(page,'總檢討')
-  await expect(page.getByRole('button',{name:'下載 MIDI，帶進 REAPER',exact:true})).toHaveCount(0)
+  await visit(page,'聽一遍')
+  await expect(page.getByRole('button',{name:'下載旋律檔（.mid，給電腦編曲軟體用）',exact:true})).toHaveCount(0)
   await page.locator('main .primary-action').click()
-  await expect(page.locator('.desk-name')).toContainText('和聲')
-  await visit(page,'旋律')
+  await expect(page.locator('.desk-name')).toContainText('挑和弦')
+  await visit(page,'寫旋律')
   await page.locator('.cell').first().click()
   await expect(page.locator('main .primary-action')).toBeEnabled()
   await page.locator('main .primary-action').click()
   await expect(page.locator('main .primary-action')).toHaveText('■ 停')
-  await visit(page,'總檢討')
+  await visit(page,'聽一遍')
   await expect(page.locator('.demo-missing')).toContainText('和弦')
   await page.locator('.toolbox > summary').click()
-  await expect(page.getByRole('button',{name:'下載 MIDI（帶進 REAPER）',exact:true})).toBeEnabled()
+  await expect(page.getByRole('button',{name:'下載旋律檔（.mid，給電腦編曲軟體用）',exact:true})).toBeEnabled()
   await shot(page,'A07',info.project.name)
 })
 test('UAT-37 R5 聊天和選單中可記靈感再回原處',async({page},info)=>{
   for(const context of ['chat','menu']) {
-    await page.getByRole('button',{name:context==='chat'?'跟作曲家聊':'打開工作室選單',exact:true}).click()
-    const original = page.getByRole('dialog',{name:context==='chat'?'跟作曲家聊':'工作室',exact:true})
+    await page.getByRole('button',{name:context==='chat'?'跟阿澄聊':'打開工作室選單',exact:true}).click()
+    const original = page.getByRole('dialog',{name:context==='chat'?'跟阿澄聊':'工作室',exact:true})
     await original.getByRole('button',{name:'✎ 記一下',exact:true}).click()
     const capture = page.getByRole('dialog',{name:'靈感',exact:true})
     await capture.getByRole('textbox',{name:'靈感文字'}).fill('突然想起這句話')
@@ -146,7 +146,7 @@ test('UAT-37 R5 聊天和選單中可記靈感再回原處',async({page},info)=>
 test('UAT-38 A-02 儲存失敗時保留草稿並明示未存',async({page},info)=>{
   const originalSetItem = await page.evaluateHandle(() => Storage.prototype.setItem)
   await page.evaluate(()=>{ Storage.prototype.setItem = ()=>{throw new DOMException('full','QuotaExceededError')} })
-  await visit(page,'構想')
+  await visit(page,'想一想')
   await page.locator('.mood').first().click()
   await expect(page.locator('.storage-notice')).toContainText('還沒存')
   await page.getByRole('button',{name:'記一下靈感',exact:true}).click()
@@ -162,12 +162,12 @@ test('UAT-38 A-02 儲存失敗時保留草稿並明示未存',async({page},info)
   await page.getByRole('button',{name:'再存一次',exact:true}).click()
   await expect(page.locator('.storage-notice')).toHaveCount(0)
   await page.reload()
-  await visit(page,'構想')
+  await visit(page,'想一想')
   await expect(page.locator('.mood').first()).toHaveAttribute('aria-pressed','true')
 })
 test('UAT-39 A-05 拒絕麥克風回到可重試且能寫文字',async({page},info)=>{
   await page.evaluate(()=>{navigator.mediaDevices.getUserMedia=()=>Promise.reject(new DOMException('denied','NotAllowedError'))})
-  await visit(page,'錄音準備')
+  await visit(page,'試音')
   await page.getByRole('button',{name:'● 測音量',exact:true}).click()
   await expect(page.locator('.error')).toBeVisible()
   await expect(page.getByRole('button',{name:'● 測音量',exact:true})).toBeVisible()

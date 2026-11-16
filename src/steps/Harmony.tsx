@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Coach, DeskActions, FeedbackList, Toolbox, Why, type Feedback } from '../components/ui'
+import { progressionFeedback } from '../rules/harmony'
+import { Coach, DeskActions, FeedbackList, Toolbox, Why } from '../components/ui'
 import { afterSound, playChord, playLoop, type Player } from '../lib/audio'
 import { CHORD_ROLE, chordVoicing, diatonicChord, diatonicChords, keyName, NOTE_NAMES, type Mode } from '../lib/theory'
-import type { StepDef, StepProps } from './types'
+import type { StepProps } from './types'
 
 const TEMPLATES: { name: string; degs: number[]; note: string }[] = [
   { name: '萬用四和弦', degs: [0, 4, 5, 3], note: 'I–V–vi–IV：無數流行歌都用它，穩定又有起伏。' },
@@ -26,23 +27,6 @@ function makeQuiz(root: number): Q {
   return { kind: 'cadence', answer: endHome ? 'a' : 'b', play: () => { playLoop({ bpm: 120, bars, layers: { drums: false, bass: true, keys: true, pad: false, melody: false } }) } }
 }
 
-export function progressionFeedback(degs: (number | null)[], mode: Mode, label: string): Feedback[] {
-  const d = degs.filter((x): x is number => x != null)
-  const fb: Feedback[] = []
-  if (d.length < degs.length) return [{ level: 'warn', text: `${label}還有 ${degs.length - d.length} 格空著。` }]
-  const tonicLike = mode === 'major' ? [0, 5] : [0, 2]
-  fb.push(tonicLike.includes(d[0]) ? { level: 'good', text: `${label}從穩定的和弦開始，聽眾馬上知道「家」在哪。` } : { level: 'warn', text: `${label}一開頭就帶點懸著的感覺。`, tip: '這種開場很有戲；想先讓人安心的話，也可以試試從 I 或 vi 起頭。' })
-  const last = d[d.length - 1]
-  if (last === 4) fb.push({ level: 'good', text: `${label}停在 V：像一個問號，耳朵會想回到開頭，循環起來很順。` })
-  else if (last === 0) fb.push({ level: 'good', text: `${label}停在 I：像句號，很適合段落或整首歌的結尾。` })
-  else if (last === 3) fb.push({ level: 'good', text: `${label}停在 IV：溫柔、未完待續，回到 I 時很自然。` })
-  else fb.push({ level: 'warn', text: `${label}的結尾比較少見，聽起來有點特別。`, tip: '想讓它接回開頭，可以試試停在 V（問號）或 I（句號）。' })
-  const uniq = new Set(d).size
-  fb.push(uniq >= 3 ? { level: 'good', text: `用了 ${uniq} 種和弦，走起來有起伏。` } : uniq === 2 ? { level: 'warn', text: '現在只有 2 種和弦，聽起來很簡單。', tip: '想多一點變化的話，可以加一個 IV 或 vi 聽聽。' } : { level: 'bad', text: '現在只有一種和弦，像一直停在同一個地方。', tip: '想往前走一步的話，換一格試試別的和弦。' })
-  if (!d.includes(4) && !d.includes(3)) fb.push({ level: 'warn', text: '這一圈還沒用到 IV 或 V。', tip: 'IV（離家）和 V（想回家）會讓歌往前走，想要動感的話可以放一個聽聽。' })
-  if (d.includes(6)) fb.push({ level: 'warn', text: '這裡用了 vii°（減和弦），聽起來有點懸著。', tip: '聽聽看，這是你想要的感覺嗎？' })
-  return fb
-}
 
 function HarmonyStep({ p, update, notify, next }: StepProps) {
   const h = p.harmony
@@ -52,6 +36,10 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
   const [quiz, setQuiz] = useState<Q | null>(null)
   const [quizRes, setQuizRes] = useState<'right' | 'wrong' | null>(null)
   const chords = diatonicChords(h.root, h.mode)
+  // M-15：推薦填滿之後，要先聽過一圈、再自己按一次決定，前進鈕才會出現。進來時已經是完整的和弦（回頭看、讀檔）就不再卡。
+  const filledAtMount = !h.verse.includes(null) && !h.chorus.includes(null)
+  const [heard, setHeard] = useState(filledAtMount)
+  const [chose, setChose] = useState(filledAtMount)
 
   const setKey = (root: number, mode: Mode) => update('harmony', { ...h, root, mode })
   const place = (deg: number) => {
@@ -63,15 +51,30 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
     const ni = target.i + 1
     if (ni < 4) setTarget({ ...target, i: ni })
   }
-  const play = (part: 'verse' | 'chorus') => {
+  const play = (part: 'verse' | 'chorus' | 'both') => {
     player?.stop()
-    const degs = h[part]
+    const degs = part === 'both' ? [...h.verse, ...h.chorus] : h[part]
     if (degs.some((d) => d == null)) return
+    setHeard(true)
     const bars = degs.map((d) => chordVoicing(chords[d!]))
     const pl = playLoop({ bpm: p.idea.bpm, bars, layers: { drums: true, bass: true, keys: true, pad: false, melody: false }, loop: true, onStep: (s) => setStep(s < 0 ? -1 : Math.floor(s / 8) + (part === 'chorus' ? 4 : 0)) })
     setPlayer(pl)
   }
   const stop = () => { player?.stop(); setPlayer(null) }
+  // 「換一個聽聽」：副歌換成下一個常見走法（跳過和現在一樣的），馬上聽
+  const swapChorus = () => {
+    player?.stop()
+    const cur = h.chorus.join(',')
+    const start = TEMPLATES.findIndex((t) => t.degs.join(',') === cur)
+    const t = TEMPLATES[(start + 1) % TEMPLATES.length]
+    update('harmony', { ...h, chorus: [...t.degs] })
+    notify('harmony.progression', 'chorus')
+    setChose(true)
+    setHeard(true)
+    setTarget({ part: 'chorus', i: 0 })
+    const bars = [...h.verse, ...t.degs].map((d) => chordVoicing(chords[d!]))
+    setPlayer(playLoop({ bpm: p.idea.bpm, bars, layers: { drums: true, bass: true, keys: true, pad: false, melody: false }, loop: true, onStep: (x) => setStep(x < 0 ? -1 : Math.floor(x / 8) + 0) }))
+  }
 
   const newQuiz = () => {
     const q = makeQuiz(h.root)
@@ -115,6 +118,7 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
     ? '點一個和弦聽聽，喜歡就留下。湊滿 4 個，就是一圈。'
     : !full ? `再挑 ${h[part].filter((d) => d == null).length} 個。`
     : part === 'verse' && h.chorus.includes(null) ? '主歌這一圈好了。聽聽看，再換副歌。'
+    : bothFull && !(heard && chose) ? (!heard ? '兩圈都排好了。先從頭聽一遍，再決定留不留。' : '聽完了。喜歡就留下，想換就換一個聽聽。')
     : '一圈好了，循環聽聽看。'
   return (
     <>
@@ -137,6 +141,10 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
 
       {player ? (
         <DeskActions primary={{ label: '■ 停', onClick: stop }} />
+      ) : bothFull && !(heard && chose) ? (
+        !heard
+          ? <DeskActions primary={{ label: '▶ 聽一圈', onClick: () => play('both') }} />
+          : <DeskActions primary={{ label: '就這樣', onClick: () => setChose(true) }} secondary={{ label: '換一個聽聽', onClick: swapChorus }} />
       ) : bothFull && next ? (
         <DeskActions primary={{ label: <>和弦選好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: `▶ 循環聽${part === 'verse' ? '主歌' : '副歌'}`, onClick: () => play(part) }} />
       ) : full ? (
@@ -199,14 +207,4 @@ function HarmonyStep({ p, update, notify, next }: StepProps) {
   )
 }
 
-export const harmonyStep: StepDef = {
-  key: 'harmony',
-  title: '和聲',
-  subtitle: '選調、排和弦、用耳朵確認',
-  glyph: '和',
-  Component: HarmonyStep,
-  requirements: (p) => [
-    { label: '主歌 4 個和弦', ok: !p.harmony.verse.includes(null) },
-    { label: '副歌 4 個和弦', ok: !p.harmony.chorus.includes(null) },
-  ],
-}
+export default HarmonyStep

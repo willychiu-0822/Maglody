@@ -3,7 +3,7 @@ import { ProjectDialog, type ProjectDecision } from './components/ProjectDialog'
 import { Modal } from './components/Modal'
 import { StudioPresence } from './components/StudioPresence'
 import { KnowledgeSpark } from './components/KnowledgeSpark'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useProject } from './lib/store'
 import { useMidiLab } from './lib/lab'
 import { playChord, playLoop, stopAll } from './lib/audio'
@@ -18,20 +18,13 @@ import { DESK_ROLE, ROLES, type RoleId } from './agent/roles'
 import type { AgentAction } from './agent/types'
 import { downloadBackup, parseBackup } from './lib/backup'
 import { agentMode } from './agent/client'
-import { humStep } from './steps/Hum'
-import { ideationStep } from './steps/Ideation'
-import { lyricsStep } from './steps/Lyrics'
-import { harmonyStep } from './steps/Harmony'
-import { melodyStep } from './steps/Melody'
-import { arrangementStep } from './steps/Arrangement'
-import { recordingStep } from './steps/Recording'
-import { mixStep } from './steps/Mix'
-import { reviewStep } from './steps/Review'
+import { STEPS } from './steps/registry'
 import { demoAvailable, playDemo } from './steps/results'
 import { InspirationHub } from './inspire/InspirationHub'
 import { asset } from './lib/asset'
 import { useInspirations } from './inspire/store'
-import type { StepDef } from './steps/types'
+import { deskPrerequisite } from './rules/requirements'
+import type { DeskKey } from '../server/shared/names.ts'
 
 const SAVE_NOTE_KEY = 'maglody-save-note-seen'
 const DESK_KEY = 'maglody-current-desk'
@@ -50,7 +43,6 @@ function startDesk(unlocked: number): number {
 }
 
 // 工作室：發想 → 成形 → 打磨。每一檯都能隨時進出，沒有關卡。
-const STEPS: StepDef[] = [humStep, ideationStep, harmonyStep, melodyStep, lyricsStep, arrangementStep, recordingStep, mixStep, reviewStep]
 const PHASES = [
   { name: '發想', note: '找到一顆歌的種子', keys: ['hum', 'idea'] },
   { name: '成形', note: '讓聲音長出形狀', keys: ['harmony', 'melody', 'lyrics', 'arrange'] },
@@ -79,17 +71,12 @@ export default function App() {
   const [saveNote, setSaveNote] = useState(false)
   const step = STEPS[cur]
   const [entry, setEntry] = useState(() => ({ step: step.key, messageIds: new Set<string>() }))
-  const role = ROLES[DESK_ROLE[step.key]]
+  const role = ROLES[DESK_ROLE[step.key as DeskKey]]
   const requirements = step.requirements(p)
   const unfinished = requirements.find((r) => !r.ok)
   const ready = !unfinished
   const phase = PHASES.find((ph) => ph.keys.includes(step.key))!
-  // Free visits to polishing desks still need a little sound before listening.
-  const hasWrittenSound = [...p.harmony.verse, ...p.harmony.chorus].some(n => n != null)
-    || [...p.melody.verse, ...p.melody.chorus].some(n => n != null && n >= 0)
-  const missionPrerequisite = step.key === 'mix' && !p.melody.chorus.some(n => n != null && n >= 0)
-    ? '先留一小句副歌旋律，再來混音'
-    : step.key === 'review' && !hasWrittenSound ? '先留下一點聲音：挑幾個和弦，或寫幾個音' : null
+  const missionPrerequisite = deskPrerequisite(step.key, p)
 
   useEffect(() => {
     try { sessionStorage.setItem(DESK_KEY, JSON.stringify({ desk: cur, unlocked: pRef.current.unlocked })) } catch { /* 沒有就算了 */ }
@@ -187,11 +174,11 @@ export default function App() {
           <SongMaterials p={p} />
         </div>
         </div>
-        <section className="workpage" aria-label={`${step.title}創作紙頁`}>
+        <section className="workpage" aria-label={`「${step.title}」的紙頁`}>
         <div className="page-caption"><span>工作室 · {phase.name}篇</span><span>第 {cur + 1} 頁</span></div>
         <WhisperContext.Provider value={whisper}>
           <GentleContext.Provider value={phase.name === '發想'}>
-            <Comp goTo={goKey} p={p} update={update} notify={notify} next={next} />
+            <Suspense fallback={<p className="desk-loading" role="status">桌面攤開中……</p>}><Comp goTo={goKey} p={p} update={update} notify={notify} next={next} /></Suspense>
             <KnowledgeSpark step={step.key} p={p} role={role} />
           </GentleContext.Provider>
         </WhisperContext.Provider>
@@ -212,11 +199,11 @@ export default function App() {
                 <div className="map-stops">
                 {ph.keys.map((k) => {
                   const i = STEPS.findIndex((s) => s.key === k)
-                  const companion = ROLES[DESK_ROLE[k]]
+                  const companion = ROLES[DESK_ROLE[k as DeskKey]]
                   return (
                     <button key={k} className={`menu-desk map-stop ${i === cur ? 'on' : ''}`} aria-current={i === cur ? 'location' : undefined} onClick={() => go(i)}>
                       <img src={asset(`/studio/roles/${companion.id}.webp`)} alt="" width="40" height="48" />
-                      <span className="map-stop-copy"><span>{STEPS[i].title}</span><small>{companion.name}陪你</small></span>
+                      <span className="map-stop-copy"><span>{STEPS[i].title}</span><small>{companion.label}</small></span>
                       <span className="map-stop-mark">{i === cur ? '你在這裡' : p.done[i] ? '留過足跡' : '隨時來坐'}</span>
                     </button>
                   )

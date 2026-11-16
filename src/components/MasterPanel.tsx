@@ -34,7 +34,7 @@ export function MasterPanel({ p, open, roleId, setRoleId, onClose, onCapture, me
         <div className="row between chat-toolbar">
           <div className="role-switch" role="tablist" aria-label="選擇夥伴">
             {ROLE_ORDER.map((id) => (
-              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].name} aria-label={ROLES[id].name}><img src={asset(`/studio/roles/${id}.webp`)} width="40" height="40" alt="" /></button>
+              <button key={id} role="tab" aria-selected={id === roleId} className={`role-dot ${id === roleId ? 'on' : ''}`} onClick={() => setRoleId(id)} title={ROLES[id].label} aria-label={ROLES[id].label}><img src={asset(`/studio/roles/${id}.webp`)} width="40" height="40" alt="" /></button>
             ))}
           </div>
           <button className="link-btn modal-capture" onClick={onCapture}>✎ 記一下</button>
@@ -43,7 +43,7 @@ export function MasterPanel({ p, open, roleId, setRoleId, onClose, onCapture, me
         <div className="chat-identity">
           <img className="chat-room" src={asset('/studio/room.webp')} width="1000" height="563" alt="" />
           <img data-character-portrait src={asset(`/studio/roles/${role.id}.webp`)} width="84" height="112" alt={`${role.name}，工作室夥伴`} />
-          <div className="chat-companion-note"><span>工作室裡，慢慢聊</span><strong>{role.name}</strong><p>{role.focus}</p></div>
+          <div className="chat-companion-note"><span>工作室裡，慢慢聊</span><strong>{role.label}</strong><p>{role.focus}</p></div>
         </div>
 
         <div className="master-list" ref={listRef}>

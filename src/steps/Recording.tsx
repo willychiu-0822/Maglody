@@ -3,7 +3,9 @@ import { Card, Coach, StageSketch, DeskActions, FeedbackList, Light, Meter, Tool
 import { ac, click, playNote } from '../lib/audio'
 import { useMic } from '../lib/mic'
 import { jianpu, noteNameOct } from '../lib/theory'
-import type { StepDef, StepProps } from './types'
+import type { StepProps } from './types'
+import { recordingRequirements } from '../rules/requirements'
+import { ROLES } from '../agent/roles'
 
 export const REC_CHECKS = [
   { id: 'room', label: '找個安靜的角落', why: '聽聽有沒有風扇或冷氣聲；方便的話，錄音時先關掉。' },
@@ -70,7 +72,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
   const fb: Feedback[] = []
   if (r.levelPeakDb != null) {
     const pk = r.levelPeakDb
-    fb.push(pk > -3 ? { level: 'bad', text: `峰值 ${pk} dB，快頂到上限了。`, tip: '把增益調小一點，或往後退一步，再唱一次，聲音就不容易破。' } : pk >= -18 ? { level: 'good', text: `峰值 ${pk} dB，這次還留有空間。` } : { level: 'warn', text: `峰值 ${pk} dB，聲音有點小。`, tip: '可以把增益調大一點，或靠近麥克風一些。聲音太小的話，之後放大雜音也會跟著出來。' })
+    fb.push(pk > -3 ? { level: 'bad', text: '最大聲的那一下太滿了，快破音了。', tip: '往後退一步，或唱小聲一點，再試一次，聲音就不容易破。' } : pk >= -18 ? { level: 'good', text: '最大聲的那一下剛剛好，還留有空間。' } : { level: 'warn', text: '這次聲音有點小。', tip: '靠近麥克風一些再試。聲音太小的話，之後放大，雜音也會跟著出來。' })
   }
   const nChecked = REC_CHECKS.filter((c) => r.checks[c.id]).length
   fb.push(nChecked >= 6 ? { level: 'good', text: `錄音前的小準備，勾了 ${nChecked}/${REC_CHECKS.length} 項。` } : { level: 'warn', text: `錄音前的小準備，勾了 ${nChecked}/${REC_CHECKS.length} 項。` })
@@ -78,7 +80,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
 
   return (
     <>
-      <Coach short={mode === 'level' ? '唱唱看歌裡最大聲的那一句。' : r.levelPeakDb != null ? (r.levelPeakDb <= -60 ? '還沒收到聲音，靠近麥克風再試；也可以先跳過。' : r.levelPeakDb > -3 ? `最大聲到 ${r.levelPeakDb} dB，太滿了，退後一點再試。` : `最大聲 ${r.levelPeakDb} dB，還留有空間。`) : '錄之前，先來試試音量。'} />
+      <Coach short={mode === 'level' ? '唱唱看歌裡最大聲的那一句。' : r.levelPeakDb != null ? (r.levelPeakDb <= -60 ? '還沒收到聲音，靠近麥克風再試；也可以先跳過。' : r.levelPeakDb > -3 ? '剛剛最大聲那一下太滿了，退後一點再試。' : r.levelPeakDb < -18 ? '收到了，聲音有點小；靠近一點再試，或就這樣往下走。' : '音量剛好，還留有空間。') : '錄之前，先來試試音量。'} />
 
       <div className="stage">
         {mode === 'level' ? (
@@ -86,13 +88,13 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
             <Meter value={(mic.levelDb + 60) / 60} level={lvl} />
             <div className="meter-scale small muted"><span>小聲</span><span>剛好</span><span>太滿</span></div>
           </div>
-        ) : <div className="stage-empty"><StageSketch kind="mic" /><small>錄音師把麥克風架好了，等你開口。</small></div>}
+        ) : <div className="stage-empty"><StageSketch kind="mic" /><small>{ROLES.engineer.name}把麥克風架好了，等你開口。</small></div>}
         {mic.error && <p className="error small">{mic.error}</p>}
       </div>
 
       {mode === 'level' ? (
         <DeskActions primary={{ label: '■ 唱完了', onClick: endLevel }} />
-      ) : recordingStep.requirements(p).every((x) => x.ok) && next ? (
+      ) : recordingRequirements(p).every((x) => x.ok) && next ? (
         <DeskActions primary={{ label: <>準備好了，去{next.label} →</>, onClick: next.go }} secondary={{ label: '再測一次', onClick: startLevel }} />
       ) : (
         <DeskActions primary={{ label: mic.pending ? '等麥克風許可…' : '● 測音量', onClick: startLevel, disabled: mic.pending }} secondary={{ label: '沒有麥克風，先跳過', onClick: () => update('recording', { ...r, checks: { ...r.checks, nomic: true } }) }} />
@@ -117,7 +119,7 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
             </div>
             <div className="row between small">
               <span>偏低</span>
-              <span>{cents == null ? '來，唱唱看…' : `${cents > 0 ? '+' : ''}${cents} 音分 ${pitchLevel === 'good' ? '準！撐住' : cents > 0 ? '稍微放低' : '稍微抬高'}`}</span>
+              <span>{cents == null ? '來，唱唱看…' : pitchLevel === 'good' ? '準！撐住' : cents > 0 ? '高了一點，稍微放低' : '低了一點，稍微抬高'}</span>
               <span>偏高</span>
             </div>
             <p className="small">本次命中：{hits}</p>
@@ -143,34 +145,25 @@ function RecordingStep({ p, update, notify, next }: StepProps) {
 
       <Card title="節拍器（你的歌速度）">
         <div className="row">
-          {metro == null ? <button className="btn" onClick={() => setMetro(Date.now())}>▶ {p.idea.bpm} BPM</button> : <button className="btn btn-danger" onClick={() => setMetro(null)}>■ 停止</button>}
+          {metro == null ? <button className="btn" onClick={() => setMetro(Date.now())}>▶ 每分鐘 {p.idea.bpm} 拍</button> : <button className="btn btn-danger" onClick={() => setMetro(null)}>■ 停止</button>}
           <span className="muted small">錄音時戴耳機聽它，人聲才會跟伴奏對齊。</span>
         </div>
       </Card>
 
       <Card title="一起看看">
         <FeedbackList items={fb} />
-        <div className="legend small muted"><Light level="good" /> -24～-6 dB 留有空間 <Light level="warn" /> 太小或接近上限 <Light level="bad" /> -3 dB 以上接近上限</div>
+        <div className="legend small muted"><Light level="good" /> 剛好，留有空間 <Light level="warn" /> 太小，或快滿了 <Light level="bad" /> 太滿，會破音</div>
       </Card>
 
-      <Why ready={r.levelPeakDb != null || !!r.checks.nomic} hint="先做音量測試。" title="為什麼峰值要留在 -6 dB 以下？" apply="直播、Podcast、錄 Vlog 旁白都用同樣標準。">
-        <p>數位錄音到了 0 dB 的上限，聲音可能會削波、聽起來破破的。先留約 6 dB 的空間，就算唱得更大聲，也比較不容易碰到上限。</p>
+      <Why ready={r.levelPeakDb != null || !!r.checks.nomic} title="為什麼要留一點空間？" apply="直播、Podcast、錄 Vlog 旁白都用同樣標準。">
+        <p>錄音有一個上限，聲音一碰到它就會破掉，事後救不回來。先留一點空間，就算唱得更激動，也不容易碰到。（錄音的人會說：最大聲的地方留在 -6 dB 以下。你剛剛那次是 {r.levelPeakDb ?? '—'} dB。）</p>
       </Why>
-      <Why ready={hits > 0 || r.pitchHits > 0} hint="先跟唱一個音。" listen={target != null ? { label: '再聽一次目標音', play: () => playNote(target, 1.2, { type: 'sine', gain: 0.3 }) } : undefined} title="音分（cent）是什麼？" apply="調樂器、用修音軟體、看調音器時都會看到它。">
-        <p>一個半音分成 100 音分。一般人耳對 ±10–25 音分的偏差不太敏感，超過 50 音分（半個半音）就會明顯「走音」。</p>
+      <Why ready={hits > 0 || r.pitchHits > 0} listen={target != null ? { label: '再聽一次目標音', play: () => playNote(target, 1.2, { type: 'sine', gain: 0.3 }) } : undefined} title="偏多少才算走音？" apply="調樂器、用修音軟體、看調音器時都會看到它。">
+        <p>指針在中間綠色那一格，大多數人聽不出偏差；跑到最外面，就會聽得出「走音」。（調音器上的單位叫「音分」：鋼琴上相鄰兩個鍵差 100 音分，綠色那一格是正負 25。{cents != null ? `你現在是 ${cents > 0 ? '+' : ''}${cents}。` : ''}）</p>
       </Why>
       </Toolbox>
     </>
   )
 }
 
-export const recordingStep: StepDef = {
-  key: 'record',
-  title: '錄音準備',
-  subtitle: '測音量、暖嗓、整理環境',
-  glyph: '錄',
-  Component: RecordingStep,
-  requirements: (p) => [
-    { label: '試過音量，留一點空間（或先跳過）', ok: (p.recording.levelPeakDb != null && p.recording.levelPeakDb > -60 && p.recording.levelPeakDb <= -3) || !!p.recording.checks.nomic },
-  ],
-}
+export default RecordingStep

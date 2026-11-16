@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { join, basename } from 'node:path'
 
-const desks = ['哼唱解析', '構想', '和聲', '旋律', '歌詞', '編曲', '錄音準備', '混音觀念', '總檢討']
+import { desks } from './names'
 
 test('部署伺服器為圖片、音訊和字型提供正確的 MIME 類型', async ({ request }) => {
   const directory = await mkdtemp(join(process.cwd(), 'dist', 'mime-test-'))

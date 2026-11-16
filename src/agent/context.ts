@@ -1,6 +1,6 @@
 import type { Project } from '../lib/store'
 import { diatonicChords, keyName, noteNameOct } from '../lib/theory'
-import { KIND_ZH } from '../steps/Lyrics'
+import { KIND_ZH } from '../rules/lyrics'
 
 /** 把專案壓成一段精簡文字，給 LLM 或 mock 當「學生的歌目前狀態」 */
 export function songContext(p: Project): string {

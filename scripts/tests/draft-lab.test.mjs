@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { midiLabState, MIDI_LAB_KEY } from '../../src/lib/lab.ts'
-import { ABLETON_NOTE, ABLETON_STEPS } from '../../src/components/AbletonGuide.tsx'
+import { ABLETON_NOTE, ABLETON_STEPS } from '../../src/rules/ableton.ts'
 
 const BANNED = ['MiniLab', '還沒在真的', '跟我說']
 
