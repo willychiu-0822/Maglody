@@ -1,6 +1,5 @@
 import type { Project } from '../lib/store'
 import { songContext } from './context'
-import { mockReply, NOT_SURE } from './mock'
 import type { RoleId } from '../../server/shared/personas.ts'
 import { deskRef } from '../../server/shared/names.ts'
 import { MASTER_LIMITS as L, clip } from '../../server/shared/limits.ts'
@@ -16,13 +15,19 @@ const FLAVOR: Record<RoleId, { open: string[]; close: string }> = {
   arranger: { open: ['先想像兩種排法的差別：', '從誰先上場來看，', '直接說重點：'], close: `可以到${deskRef('arrange')}一段一段試聽，比較你喜歡哪一種。` },
   engineer: { open: ['一步一步來。', '先確認一件事：', '這個不難：'], close: '一次只改一個地方。' },
 }
-function flavor(reply: AgentReply, persona?: RoleId): AgentReply {
+function flavor(reply: AgentReply, persona: RoleId | undefined, NOT_SURE: string): AgentReply {
   const f = persona && FLAVOR[persona]
   if (!f) return reply
   // 拒絕代寫的句子保持乾淨，不加口吻前綴
   if (/不替你寫完|我不替你寫/.test(reply.text) || reply.text.endsWith(NOT_SURE)) return reply
   const open = f.open[(reply.text.length + persona!.length) % f.open.length]
   return { ...reply, text: `${open}${reply.text}`, next: reply.next ?? f.close }
+}
+
+/** 離線規則回覆：用到才載入 mock（縮小首包） */
+async function mockAnswer(p: Project, input: AskInput): Promise<AgentReply> {
+  const { mockReply, NOT_SURE } = await import('./mock')
+  return flavor(mockReply(p, input), input.personaId, NOT_SURE)
 }
 
 /**
@@ -47,7 +52,7 @@ export interface AskInput {
 
 export async function askMaster(p: Project, input: AskInput, options: { endpoint?: string; signal?: AbortSignal; timeoutMs?: number } = {}): Promise<{ reply: AgentReply; source: 'mock' | 'llm' }> {
   const endpoint = options.endpoint ?? ENDPOINT
-  if (!endpoint || input.question && /(幫我|替我|直接).*(寫|作|完成)|代寫|寫一首/.test(input.question)) return { reply: flavor(mockReply(p, input), input.personaId), source: 'mock' }
+  if (!endpoint || input.question && /(幫我|替我|直接).*(寫|作|完成)|代寫|寫一首/.test(input.question)) return { reply: await mockAnswer(p, input), source: 'mock' }
   try {
     const data = await fetchJson(endpoint, {
       signal: options.signal,
@@ -69,6 +74,6 @@ export async function askMaster(p: Project, input: AskInput, options: { endpoint
   } catch (e) {
     if (options.signal?.aborted) throw e
     console.warn('[master] LLM 失敗，改用離線模式')
-    return { reply: flavor(mockReply(p, input), input.personaId), source: 'mock' }
+    return { reply: await mockAnswer(p, input), source: 'mock' }
   }
 }

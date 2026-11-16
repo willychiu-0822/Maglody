@@ -1,17 +1,14 @@
 import { SongMaterials } from './components/SongMaterials'
-import { ProjectDialog, type ProjectDecision } from './components/ProjectDialog'
+import type { ProjectDecision } from './components/ProjectDialog'
 import { Modal } from './components/Modal'
 import { StudioPresence } from './components/StudioPresence'
 import { KnowledgeSpark } from './components/KnowledgeSpark'
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useProject } from './lib/store'
 import { useMidiLab } from './lib/lab'
 import { playChord, playLoop, stopAll } from './lib/audio'
 import { chordVoicing, diatonicChords } from './lib/theory'
 import { useVersions } from './lib/versions'
-import { SongSheet } from './components/SongSheet'
-import { ReaperGuide } from './components/ReaperGuide'
-import { MasterPanel } from './components/MasterPanel'
 import { GentleContext, WhisperContext } from './components/ui'
 import { useMaster } from './agent/useMaster'
 import { DESK_ROLE, ROLES, type RoleId } from './agent/roles'
@@ -19,8 +16,14 @@ import type { AgentAction } from './agent/types'
 import { downloadBackup, parseBackup } from './lib/backup'
 import { agentMode } from './agent/client'
 import { STEPS } from './steps/registry'
+
+// 少用的面板：用到才下載，縮小首包
+const InspirationHub = lazy(() => import('./inspire/InspirationHub').then(m => ({ default: m.InspirationHub })))
+const ProjectDialog = lazy(() => import('./components/ProjectDialog').then(m => ({ default: m.ProjectDialog })))
+const SongSheet = lazy(() => import('./components/SongSheet').then(m => ({ default: m.SongSheet })))
+const ReaperGuide = lazy(() => import('./components/ReaperGuide').then(m => ({ default: m.ReaperGuide })))
+const MasterPanel = lazy(() => import('./components/MasterPanel').then(m => ({ default: m.MasterPanel })))
 import { demoAvailable, playDemo } from './steps/results'
-import { InspirationHub } from './inspire/InspirationHub'
 import { asset } from './lib/asset'
 import { useInspirations } from './inspire/store'
 import { deskPrerequisite } from './rules/requirements'
@@ -57,7 +60,17 @@ export default function App() {
   const [menu, setMenu] = useState(false)
   const [chat, setChat] = useState<RoleId | null>(null)
   const [chatRole, setChatRole] = useState<RoleId>('producer')
+  const [chatSeen, setChatSeen] = useState(false)
+  const [inspoSeen, setInspoSeen] = useState(false)
+  if (chat && !chatSeen) setChatSeen(true)
   const [inspoOpen, setInspoOpen] = useState<null | 'capture' | 'library'>(null)
+  if (inspoOpen && !inspoSeen) setInspoSeen(true)
+  // 快捷鍵：Alt + I 隨時記靈感（桌面）；靈感面板第一次打開才下載，所以快捷鍵放在這裡
+  useEffect(() => {
+    const f = (e: KeyboardEvent) => { if (e.altKey && (e.key === 'i' || e.key === 'I')) { e.preventDefault(); setInspoOpen('capture') } }
+    window.addEventListener('keydown', f)
+    return () => window.removeEventListener('keydown', f)
+  }, [])
   const [inspoRec, setInspoRec] = useState(false)
   const pRef = useRef(p)
   pRef.current = p
@@ -149,10 +162,10 @@ export default function App() {
       </button>
       </header>
 
-      <InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
+      {inspoSeen && <Suspense fallback={null}><InspirationHub api={inspo} p={p} update={update} step={step.key} stepTitle={step.title}
         onGo={(k) => { const i = STEPS.findIndex((s) => s.key === k); if (i >= 0 && i !== cur) go(i) }}
         onEvent={(kind, detail) => master.notify(step.key, kind, detail)}
-        open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} />
+        open={inspoOpen} setOpen={setInspoOpen} onRecordingChange={setInspoRec} /></Suspense>}
 
       {storageError && <div className="storage-notice" role="status"><span>這首歌還沒存好，先別離開這頁。騰出瀏覽器的儲存空間，再按「再存一次」。</span><button className="btn" onClick={() => setProject({ ...p })}>再存一次</button></div>}
       {saveNote && !storageError && <div className="toast" role="status"><span>{role.name}：歌是存在這支手機的瀏覽器裡的。換手機或清掉瀏覽資料就沒了，想保險的話，到選單「更多」存一份備份。</span><button className="btn notice-ack" onClick={() => { try { localStorage.setItem(SAVE_NOTE_KEY, '1') } catch { /* 存不進去，下次再說一次也無妨 */ } setSaveNote(false) }}>好</button></div>}
@@ -220,7 +233,7 @@ export default function App() {
               <button className="menu-desk" onClick={() => { setMenu(false); openChat(role.id) }}><span>跟夥伴聊聊</span></button>
               <details className="menu-more">
                 <summary>更多</summary>
-                <SongSheet p={p} />
+                <Suspense fallback={null}><SongSheet p={p} /></Suspense>
                 <div className="versions">
                   <div className="row wrap">
                     <button className="btn small" onClick={() => downloadBackup(p)}>存一份備份</button>
@@ -246,7 +259,7 @@ export default function App() {
                   <p>用「說」記靈感時，是請瀏覽器的語音辨識幫忙打成字，聲音可能會經過瀏覽器供應商的語音服務。想完全留在手機裡，選「只錄音」就好。</p>
                   <p>{agentMode() === 'llm' ? '這個版本接了線上夥伴：跟夥伴聊天時，歌的文字摘要（和弦、旋律、你寫的詞和問的話）會送到夥伴的伺服器和模型供應商；錄音和照片不會。' : '夥伴現在是離線的，聊天內容不會送到任何地方。'}</p>
                 </details>
-                <ReaperGuide step={['arrange', 'record', 'mix'].includes(step.key) ? step.key : 'arrange'} p={p} />
+                <Suspense fallback={null}><ReaperGuide step={['arrange', 'record', 'mix'].includes(step.key) ? step.key : 'arrange'} p={p} /></Suspense>
                 <button className="btn btn-ghost small" onClick={() => setProjectDecision({ kind: 'reset' })}>重新開始一首新歌</button>
               </details>
             </div>
@@ -255,14 +268,14 @@ export default function App() {
 
 
 
-      {projectDecision && <ProjectDialog decision={projectDecision} project={p} full={versions.list.length >= 20 ? versions.list[versions.list.length - 1].name : null} onRemove={v => versions.remove(v.id)} onSave={note => versions.save(p, note)}
+      {projectDecision && <Suspense fallback={null}><ProjectDialog decision={projectDecision} project={p} full={versions.list.length >= 20 ? versions.list[versions.list.length - 1].name : null} onRemove={v => versions.remove(v.id)} onSave={note => versions.save(p, note)}
         onRestore={v => { stopAll(); master.clear(); setProject(structuredClone(v.project)) }}
         onReset={() => { stopAll(); master.clear(); reset(); setCur(0); setMenu(false) }}
         onImport={imported => { versions.save(p, '打開備份前'); stopAll(); master.clear(); setProject(imported); setCur(Math.min(imported.unlocked, STEPS.length - 1)); setMenu(false) }}
-        onCapture={() => setInspoOpen('capture')} onClose={() => setProjectDecision(null)} />}
+        onCapture={() => setInspoOpen('capture')} onClose={() => setProjectDecision(null)} /></Suspense>}
 
-      <MasterPanel key={master.session} p={p} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
-        messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} />
+      {chatSeen && <Suspense fallback={null}><MasterPanel key={master.session} p={p} open={!!chat} roleId={chatRole} setRoleId={setChatRole} onCapture={() => setInspoOpen('capture')} onClose={() => setChat(null)} step={step.key}
+        messages={master.messages} busy={master.isBusy(step.key, chatRole)} onAsk={(q, r) => master.ask(step.key, q, r)} onAction={onAction} /></Suspense>}
     </div>
   )
 }
