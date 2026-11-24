@@ -88,19 +88,9 @@ p.error.small::before { content: '✎ '; opacity: .75; }
 .ok-text { color: var(--good); }
 .err-text { color: var(--bad); }
 
-/* ---------- header / journey ---------- */
-.top { background: var(--ink); color: #fff; padding: 12px 16px 6px; position: sticky; top: 0; z-index: 20; }
-@media (prefers-color-scheme: dark) { .top { background: #0d1017; border-bottom: 1px solid var(--line); } }
-.brand { display: flex; align-items: center; gap: 10px; max-width: 1200px; margin: 0 auto; }
-
-/* ---------- layout ---------- */
-.main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
-
 /* ---------- cards ---------- */
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); min-width: 0; }
 .card-title { margin: 0 0 10px; font-size: 1.02rem; }
-
-.coach { display: flex; gap: 12px; align-items: flex-start; }
 
 .why { border: 1px dashed var(--grid-strong); border-radius: var(--radius); background: transparent; }
 .why-head { width: 100%; display: flex; gap: 10px; align-items: center; background: none; border: 0; padding: 12px 14px; cursor: pointer; text-align: left; }
@@ -265,8 +255,6 @@ textarea { resize: vertical; }
 
 /* ---------- review ---------- */
 .dim { padding: 12px 0; border-bottom: 1px solid var(--line); }
-.star { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); cursor: pointer; font-weight: 700; }
-.star.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 /* ---------- song sheet ---------- */
 .sheet { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-top: 10px; background-image: repeating-linear-gradient(transparent 0 27px, var(--grid) 27px 28px); }
@@ -274,9 +262,6 @@ textarea { resize: vertical; }
 .sheet dl { display: grid; grid-template-columns: 72px 1fr; gap: 2px 8px; margin: 0; font-size: .88rem; }
 .sheet dt { color: var(--muted); }
 .sheet dd { margin: 0; overflow-wrap: anywhere; }
-
-/* ---------- footer ---------- */
-.tick { font-weight: 800; width: 18px; }
 
 @media (max-width: 520px) {
   h1 { font-size: 1.4rem; }
@@ -288,8 +273,6 @@ textarea { resize: vertical; }
 
 /* ---------- master agent ---------- */
 .app { padding-bottom: 96px; }
-.master { position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; display: flex; justify-content: center; padding: 0 12px calc(10px + env(safe-area-inset-bottom)); pointer-events: none; }
-.master > * { pointer-events: auto; }
 .msg-avatar { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-weight: 800; font-size: .9rem; }
 @media (prefers-color-scheme: dark) { .msg-avatar { background: var(--accent); color: #fff; } }
 .master-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 2px; min-height: 120px; }
@@ -307,10 +290,6 @@ textarea { resize: vertical; }
 .master-input { display: flex; gap: 8px; }
 .master-input input { flex: 1; }
 
-/* ---------- journey / footer additions ---------- */
-.notice { background: var(--warn-bg); border-radius: 12px; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .92rem; }
-.why.locked { opacity: .75; }
-.why.locked .why-q { background: var(--grid-strong); color: var(--muted); }
 .why-listen { margin-bottom: 8px; }
 
 /* ---------- mobile-first touch ergonomics ---------- */
@@ -331,12 +310,9 @@ input, textarea, select { font-size: 16px; } /* iOS：小於 16px 會在聚焦�
   .chip { min-height: 44px; padding: 6px 14px; }
   .icon-btn { width: 44px; height: 44px; }
   .cell { height: 38px; }
-  .star { width: 48px; height: 48px; }
   input[type=range] { height: 32px; }
 }
 @media (max-width: 640px) {
-  .top { padding: 8px 12px 4px; }
-  .master { padding: 0 8px calc(8px + env(safe-area-inset-bottom)); }
   .mixer { grid-template-columns: 1fr; }
   .tpl { flex-direction: column; align-items: flex-start; }
 }
@@ -378,10 +354,6 @@ body {
 h1, .card-title, .sheet-title, .result-big, .chord-name, .inspo-text { font-family: var(--font-title); font-weight: 600; }
 h1 { font-size: 1.85rem; letter-spacing: .08em; }
 
-/* 頁首：紙上的一行目錄，而不是深色工具列 */
-.top { background: color-mix(in srgb, var(--bg) 92%, transparent); color: var(--ink); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
-.top, .top * { color: var(--ink); }
-
 /* 卡片：一張張放在桌上的紙 */
 .card { border-color: var(--line); background: var(--paper); }
 .card-title { font-size: 1.08rem; letter-spacing: .06em; }
@@ -402,7 +374,6 @@ h1 { font-size: 1.85rem; letter-spacing: .08em; }
 .seg button.on { background: var(--ink); color: var(--paper); }
 .why { border-color: var(--grid-strong); }
 .why-q { background: transparent; color: var(--accent); border: 1px solid var(--accent); font-weight: 500; }
-.notice { background: var(--wash-ochre); }
 
 /* 回饋：用淡彩，不用警示燈 */
 .fb { border-radius: 12px 16px 12px 14px; }
@@ -424,13 +395,7 @@ h1 { font-size: 1.85rem; letter-spacing: .08em; }
 .inspo-card { background: transparent; border: none; border-bottom: 1px solid var(--line); border-radius: 0; padding: 14px 2px; }
 .toast { background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); }
 
-/* 手機：頁首不黏住，把畫面留給內容；底部帶負責導覽 */
-@media (max-width: 640px) {
-  .top { position: static; }
-}
-
 /* ---------- 第二輪：去掉產品感，換成手感 ---------- */
-.top { backdrop-filter: none; background: var(--bg); }
 /* 主要行動：淡彩底＋墨線，低對比、輕柔，不搶畫面 */
 .btn-primary { background: var(--accent-soft); color: var(--ink); border-color: var(--ink); }
 @media (prefers-color-scheme: dark) { .btn-primary { color: var(--ink); } }
@@ -480,9 +445,6 @@ h1 { font-size: 1.85rem; letter-spacing: .08em; }
 .why-title { font-weight: 400; }
 .why-apply summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
 .inspo-card .pick { min-height: 44px; }
-details.quiet summary { cursor: pointer; color: var(--accent); text-decoration: underline dotted; text-underline-offset: 4px; font-size: .9rem; min-height: 44px; display: flex; align-items: center; list-style: none; }
-details.quiet summary::-webkit-details-marker { display: none; }
-.spark { font-size: 1.05rem; }
 @media (pointer: coarse) { .link-btn { min-height: 44px; } .inspo-card .pick input { width: 26px; height: 26px; } }
 
 /* =========================================================
