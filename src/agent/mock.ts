@@ -1,6 +1,6 @@
 // 離線版夥伴：規則式旁白。沒有設定 LLM 端點時使用，也是 LLM 失敗時的備援。
 // 原則與 LLM 版相同：引用學生剛做的具體內容 → 命名理論 → 說為什麼好聽 → 給下一步，不代寫。
-import type { Feedback } from '../components/ui'
+import type { Feedback } from '../rules/types'
 import type { Project } from '../lib/store'
 import { CHORD_ROLE, diatonicChords, keyName, NOTE_NAMES, noteNameOct } from '../lib/theory'
 import { RHYME_GROUPS, lastChar, rhymeOf } from '../lib/rhyme'
