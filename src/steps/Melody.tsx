@@ -1,10 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { melodyRows, isAvoid, soundingAt, cellLevel, melodyFeedback, HOLD } from '../rules/melody'
 import { Coach, DeskActions, FeedbackList, Toolbox, Why } from '../components/ui'
-import { MidiKeyboardHint } from '../components/MidiKeyboardHint'
 import { playLoop, playNote, type Player } from '../lib/audio'
-import { useMidiLab } from '../lib/lab'
-import { useMidiKeyboard } from '../lib/midiInput'
 import { chordVoicing, diatonicChords, inScale, jianpu, noteNameOct, pc, snapToScale } from '../lib/theory'
 import type { StepProps } from './types'
 
@@ -60,26 +57,6 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
     }
     setCells(n)
   }
-
-  // MIDI 鍵盤：彈一個音＝接在最後一個音後面的空格放音（和點格子寫進同一份資料）。
-  // 不在目前格子列上的音、或格子已經排到最後一格，就只發聲不寫。
-  const cellsRef = useRef(cells)
-  cellsRef.current = cells
-  const [midiSaid, setMidiSaid] = useState('')
-  const lab = useMidiLab()
-  const midi = useMidiKeyboard((m) => {
-    playNote(m, 0.3, { type: 'square', gain: 0.15 })
-    if (!rows.includes(m)) { setMidiSaid('這個音不在現在的格子裡，我先聽著，沒寫進去。'); return }
-    const n = [...cellsRef.current]
-    let at = STEPS
-    while (at > 0 && n[at - 1] == null) at--
-    if (at >= STEPS) { setMidiSaid('格子排到最後了，這個音我先聽著。想改哪一格，直接點它。'); return }
-    n[at] = m
-    cellsRef.current = n
-    setCells(n)
-    setPage(Math.floor(at / 8))
-    setMidiSaid('')
-  }, undefined, lab)
 
   const play = () => {
     player?.stop()
@@ -187,9 +164,6 @@ function MelodyStep({ p, update, notify, next }: StepProps) {
       )}
 
       <Toolbox>
-        {lab && midi.status !== 'unsupported' && (
-          <MidiKeyboardHint status={midi.status} deviceName={midi.deviceName} lastNote={midi.lastNote} onConnect={midi.connect} note={midiSaid} />
-        )}
         <div className="row wrap">
           <button className={`btn small ${penta ? 'on' : ''}`} onClick={() => setPenta(!penta)}>{penta ? '只留好搭的音（怎麼排都順）' : '全部的音都給我'}</button>
           <button className={`btn small ${hold ? 'on' : ''}`} onClick={() => setHold(!hold)}>{hold ? '點格子＝拉長前一個音' : '拉長模式'}</button>

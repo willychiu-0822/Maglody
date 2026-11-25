@@ -7,7 +7,7 @@ test('UAT-53 P0 三位夥伴引用歌曲、角色各異與後端mock不漏工程
   for(const [i,role,question,content] of [
     [0,'阿澄・作曲','你覺得這段怎麼樣？','F–G–C–G'],
     [1,'小滿・作詞','你會怎麼看這一句？','雨落在鞋櫃上'],
-    [2,'老周・錄音','這版有什麼可以試？','90 BPM'],
+    [2,'老周・錄音','這版有什麼可以試？','每分鐘 90 拍'],
   ] as const) {
     await page.route('**/api/master', r=> i===0 ? r.fulfill({json:{text:'（後端 mock）接上真正的 LLM',next:'設定 LLM_PROVIDER'}}) : i===1 ? r.fulfill({json:{offline:true}}) : r.abort())
     await page.getByRole('tab',{name:role,exact:true}).click()
