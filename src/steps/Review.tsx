@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Card, Coach, DeskActions, FeedbackList, Toolbox, type Feedback } from '../components/ui'
 import { SongSheet } from '../components/SongSheet'
-import { AbletonGuide } from '../components/AbletonGuide'
 import { afterSound, playSequence, stopAll, type Player } from '../lib/audio'
-import { useMidiLab } from '../lib/lab'
 import type { Project } from '../lib/store'
 import { downloadMidi } from '../lib/midi'
 import { diatonicChords, keyName } from '../lib/theory'
@@ -64,7 +62,6 @@ function download(name: string, content: string, type: string) {
 
 function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
   void next
-  const lab = useMidiLab()
   const r = p.review
   const hasScore = [...p.harmony.verse, ...p.harmony.chorus].some(d=>d!=null) || [...p.melody.verse, ...p.melody.chorus].some(m=>m!=null && m>=0)
   const missing = [
@@ -170,8 +167,6 @@ function ReviewStep({ p, update, notify, next, goTo }: StepProps) {
           <button className="btn small" disabled={!hasScore} onClick={() => downloadMidi(p)}>下載旋律檔（.mid，給電腦編曲軟體用）</button>
         </div>
       </Card>
-
-      {lab && <AbletonGuide p={p} />}
       </Toolbox>
     </>
   )
